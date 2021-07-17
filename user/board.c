@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <board_init.h>
 #include <elog.h>
 
@@ -18,6 +19,10 @@ void test_elog(void)
 
 void my_elog_init(void)
 {
+    /* 关闭行缓冲 */
+    setvbuf(stdout, NULL, _IONBF, 0);
+    setvbuf(stdin, NULL, _IONBF, 0);
+
     /* initialize EasyLogger */
     elog_init();
     /* set EasyLogger log format */
@@ -27,6 +32,11 @@ void my_elog_init(void)
     elog_set_fmt(ELOG_LVL_INFO, ELOG_FMT_LVL | ELOG_FMT_TAG | ELOG_FMT_TIME);
     elog_set_fmt(ELOG_LVL_DEBUG, ELOG_FMT_ALL & ~(ELOG_FMT_FUNC | ELOG_FMT_T_INFO | ELOG_FMT_P_INFO));
     elog_set_fmt(ELOG_LVL_VERBOSE, ELOG_FMT_ALL & ~(ELOG_FMT_FUNC | ELOG_FMT_T_INFO | ELOG_FMT_P_INFO));
+
+#ifdef ELOG_COLOR_ENABLE
+    elog_set_text_color_enabled(true);
+#endif
+
     /* start EasyLogger */
     elog_start();
 }
