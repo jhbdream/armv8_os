@@ -49,4 +49,21 @@
 #define readl(c)	({ uint32_t __v = __arch_getl(c); __iormb(); __v; })
 #define readq(c)	({ uint64_t __v = __arch_getq(c); __iormb(); __v; })
 
+/*
+ * Relaxed I/O memory access primitives. These follow the Device memory
+ * ordering rules but do not guarantee any ordering relative to Normal memory
+ * accesses.
+ */
+#define readb_relaxed(c)	({ uint8_t  __r = __raw_readb(c); __r; })
+#define readw_relaxed(c)	({ uint16_t __r = __raw_readw(c); __r; })
+#define readl_relaxed(c)	({ uint32_t __r = __raw_readl(c); __r; })
+#define readq_relaxed(c)	({ uint64_t __r = __raw_readq(c); __r; })
+
+#define writeb_relaxed(v, c)	((void)__raw_writeb((v), (c)))
+#define writew_relaxed(v, c)	((void)__raw_writew((v), (c)))
+#define writel_relaxed(v, c)	((void)__raw_writel((v), (c)))
+#define writeq_relaxed(v, c)	((void)__raw_writeq((v), (c)))
+
+#define __iomem
+
 #endif	/* __ASM_ARM_IO_H */
