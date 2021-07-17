@@ -23,6 +23,9 @@ OD = $(CROSS_COMPILE)objdump
 COMMIT=$(shell git rev-parse --short HEAD)
 PACK_DATA=$(shell date +'%m%d_%H%M')
 
+export SRC_DIR
+export INCLUDES
+
 OBJ_DIR := obj
 SRC_DIR := libcpu/aarch64
 INCLUDES :=
@@ -32,6 +35,9 @@ INCLUDES += -Iinclude
 SRC_DIR += 	user	\
 			common/libc	\
 			driver/uart
+
+include common/EasyLogger/libEasyLogger.mk
+
 define EOL =
 
 endef
