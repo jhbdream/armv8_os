@@ -147,6 +147,7 @@ SECTIONS
         . = ALIGN(64);
         . = . + STACK_SIZE;
         __el1_stack = .;
+        __stack_top = .;
     } > ram
 
 

@@ -27,10 +27,11 @@ OBJ_DIR := obj
 SRC_DIR := libcpu/aarch64
 INCLUDES :=
 
-INCLUDES +=
-SRC_DIR += 	user	\
-			common
+INCLUDES += -Iinclude
 
+SRC_DIR += 	user	\
+			common/libc	\
+			driver/uart
 define EOL =
 
 endef
@@ -43,7 +44,7 @@ DEPEND_FLAGS = -MD -MF $@.d
 CPPFLAGS = $(DEFINES) $(INCLUDES) $(DEPEND_FLAGS) $(CPPFLAGS_EXTRA)
 CFLAGS = $(DEBUG_FLAGS) -O$(OPT_LEVEL)
 ASFLAGS = $(DEBUG_FLAGS)
-LDFLAGS = -Tgcc.ld -Wl,--build-id=none -nostartfiles $(LDFLAGS_EXTRA)
+LDFLAGS = -Tgcc.ld -Wl,--build-id=none -nostartfiles -ffreestanding -fno-common $(LDFLAGS_EXTRA)
 TARGET_ARCH = -march=$(ARCH)
 
 #mkdir 创建输出文件目录

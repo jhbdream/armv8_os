@@ -5,20 +5,34 @@
     .type _startup, "function"
 
 _startup:
+	/* check CPU ID = 0x0, or jump to hang */
+	mrs	x0, mpidr_el1
+	and	x0, x0, #3
+	cmp	x0, #0
+	bne	hang
 
-	ldr	x4, =0x09000000		// UART base
-	mov	w5, #0x10		    // IBRD
-	str	w5, [x4, #0x24]
-	mov	w5, #0xc300
-	orr	w5, w5, #0x0001		// CR
-	str	w5, [x4, #0x30]
+    /* Enable FP/SIMD at EL1
+     * libc printf use float reg, if not enable fp will exception
+     */
+    mov x0, #(3<<20)
+    msr cpacr_el1, x0
 
-    mov w0, 'a'
-    ldr x1, =0x09000000
-    str w0, [x1]
+    ldr x0, =__stack_top
+    mov sp, x0
 
-    b main
+    // Zero the bss
+    ldr x0, =__bss_start__ // Start of block
+    ldr x1, =__bss_end__   // End of block
 
-_exit:
-    wfi
-    b exit
+memset_loop:
+    str wzr, [x0], #4
+    cmp x0, x1
+    b.lt memset_loop
+
+    bl main
+
+    b exit // Will not return
+
+hang:
+	wfi
+	b	hang
