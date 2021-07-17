@@ -87,9 +87,6 @@ pack:
 	@git archive --format tar.gz --output FT2004_Baremetal_$(PACK_DATA)_$(COMMIT).tar.gz master
 
 qemu: $(APP)
-	@qemu-system-aarch64 -M ? | grep virt >/dev/null || exit
-	@echo "Press Ctrl-A and then X to exit QEMU"
-	@echo
 	qemu-system-aarch64 -machine virt -cpu cortex-a53 -smp 1 -m 1024 -nographic -serial mon:stdio -kernel $(APP)
 
 $(X_OUTPUT_DIRS):
