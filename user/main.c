@@ -1,13 +1,19 @@
 #include <stdio.h>
 #include <elog.h>
 #include <board_init.h>
+#include <config.h>
 
 int main()
 {
-    printf("hello world\n");
-    printf("I am armv8 os!\n");
-
     my_elog_init();
+
+    interrupt_init();
+    arch_timer_test();
+
+    while (1)
+    {
+        /* code */
+    }
 
     return 0;
 }

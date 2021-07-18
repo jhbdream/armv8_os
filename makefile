@@ -30,11 +30,16 @@ OBJ_DIR := obj
 SRC_DIR := libcpu/aarch64
 INCLUDES :=
 
-INCLUDES += -Iinclude
+INCLUDES += -Iinclude 	\
+			-Ilibcpu/aarch64/include
 
 SRC_DIR += 	user	\
 			common/libc	\
-			driver/uart
+			common/time	\
+			common/interrupt	\
+			driver/uart	\
+			driver/irq	\
+			driver/irq/gicv3
 
 include common/EasyLogger/libEasyLogger.mk
 
@@ -87,7 +92,7 @@ pack:
 	@git archive --format tar.gz --output FT2004_Baremetal_$(PACK_DATA)_$(COMMIT).tar.gz master
 
 qemu: $(APP)
-	qemu-system-aarch64 -machine virt -cpu cortex-a53 -smp 1 -m 1024 -nographic -serial mon:stdio -kernel $(APP)
+	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 1024 -nographic -serial mon:stdio -kernel $(APP)
 
 $(X_OUTPUT_DIRS):
 	@mkdir -p $@
