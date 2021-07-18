@@ -1,7 +1,7 @@
 #include <driver/uart.h>
 #include <io.h>
 
-#define QEMU_UART_DR (0x09000000)
+#define QEMU_UART_DR ((void __iomem *)(0x09000000))
 
 uint8_t uart_getchar_polled(void)
 {
