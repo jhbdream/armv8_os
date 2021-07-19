@@ -1,6 +1,13 @@
+#include <stringify.h>
+#define LOG_TAG __stringify(__FILE__)
+
 #include <stdio.h>
 #include <board_init.h>
 #include <elog.h>
+#include <config.h>
+#include <driver/gic.h>
+#include <arch_timer.h>
+#include <common/interrupt.h>
 
 /**
  * EasyLogger demo
@@ -39,4 +46,40 @@ void my_elog_init(void)
 
     /* start EasyLogger */
     elog_start();
+}
+
+int interrupt_init(void)
+{
+    gic_init();
+    local_irq_enable();
+}
+
+void irq_test(int a)
+{
+
+    log_i("enter irq! a = %d\n", a);
+    while (1)
+    {
+        /* code */
+    }
+}
+
+void timer_handler(struct irq_desc *desc)
+{
+    arch_timer_compare(arch_timer_frequecy());
+    log_i("arch timer_handler!");
+}
+
+void arch_timer_test(void)
+{
+    if(request_irq(30, timer_handler, 0, "arch_timer", NULL) < 0)
+    {
+        log_e("request_irq failed!");
+        return;
+    }
+
+    arch_timer_interrupt_disable();
+    arch_timer_start();
+    arch_timer_compare(arch_timer_frequecy());
+    arch_timer_interrupt_enable();
 }

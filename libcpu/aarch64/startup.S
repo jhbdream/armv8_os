@@ -17,6 +17,11 @@ _startup:
     mov x0, #(3<<20)
     msr cpacr_el1, x0
 
+    /* disable all exception */
+    msr daifset, 0xf
+    ldr x0, =vectors
+	msr	vbar_el1, x0
+
     ldr x0, =__stack_top
     mov sp, x0
 
