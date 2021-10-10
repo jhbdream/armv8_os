@@ -1,6 +1,6 @@
 #include <kernel/task.h>
 #include <stdio.h>
-
+#include <common/delay.h>
 /**
  * @brief taska
  *
@@ -13,6 +13,7 @@ void taska_fun(void)
     while (1)
     {
         printf("i am taska run!\n");
+        mdelay(1000);
     }
 }
 
@@ -28,9 +29,14 @@ void taskb_fun(void)
     while (1)
     {
         printf("i am taskb run!\n");
+        mdelay(1000);
     }
 }
 
+/**
+ * @brief init create task and switch to taska
+ *
+ */
 void my_task_init(void)
 {
     task_init(&taska, taska_stack + sizeof(taska_stack), taska_fun);

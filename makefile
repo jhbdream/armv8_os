@@ -93,7 +93,10 @@ pack:
 	@git archive --format tar.gz --output FT2004_Baremetal_$(PACK_DATA)_$(COMMIT).tar.gz master
 
 qemu: $(APP)
-	qemu-system-aarch64 -S -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 1024 -nographic -serial mon:stdio -kernel $(APP)
+	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 1024 -nographic -serial mon:stdio -kernel $(APP)
+
+qemu_gdb: $(APP)
+	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 1024 -nographic -serial mon:stdio -kernel $(APP) -S -gdb tcp::1234
 
 $(X_OUTPUT_DIRS):
 	@mkdir -p $@
