@@ -7,6 +7,7 @@
  */
 struct task taska;
 char taska_stack[4096];
+extern struct task taskb;
 
 void taska_fun(void)
 {
@@ -14,6 +15,7 @@ void taska_fun(void)
     {
         printf("i am taska run!\n");
         mdelay(1000);
+        task_switch_to(&taskb);
     }
 }
 

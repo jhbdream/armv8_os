@@ -2,9 +2,14 @@
 
 struct task
 {
-    void *pc;
-    void *sp;
-    unsigned long regs[32];
+    void *sp;               // sp
+    unsigned long spsr;     //程序状态寄存器
+    unsigned long elr;      //异常返回寄存器
+
+#if 0
+    unsigned long regs[30]; //通用寄存器 x0-x29
+    void *pc;               // x30
+#endif
 };
 
 typedef struct task * task_t;
