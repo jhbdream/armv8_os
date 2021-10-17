@@ -11,7 +11,7 @@
 int task_init(struct task *t, void *sp_addr, void *pc_addr)
 {
 
-    t->sp = sp_addr - 31 * 8;
+    t->sp = sp_addr;
     t->elr = (unsigned long)pc_addr;    //eret run addr
     t->spsr = 0x345;    //ebable irq run in el1
 

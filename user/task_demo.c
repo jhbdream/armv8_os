@@ -1,21 +1,25 @@
 #include <kernel/task.h>
 #include <stdio.h>
 #include <common/delay.h>
+
+extern struct task taska;
+extern struct task taskb;
+
+
 /**
  * @brief taska
  *
  */
 struct task taska;
 char taska_stack[4096];
-extern struct task taskb;
 
 void taska_fun(void)
 {
     while (1)
     {
-        printf("i am taska run!\n");
-        mdelay(1000);
-        task_switch_to(&taskb);
+        printf("i am taska run! line: %d\n", __LINE__);
+        task_switch_from_to(&taska, &taskb);
+        printf("i am taska run! line: %d\n", __LINE__);
     }
 }
 
@@ -30,8 +34,9 @@ void taskb_fun(void)
 {
     while (1)
     {
-        printf("i am taskb run!\n");
-        mdelay(1000);
+        printf("i am taskb run! line: %d\n", __LINE__);
+        task_switch_from_to(&taskb, &taska);
+        printf("i am taskb run! line: %d\n", __LINE__);
     }
 }
 
