@@ -11,15 +11,16 @@ extern struct task taskb;
  *
  */
 struct task taska;
-char taska_stack[4096];
+char taska_stack[4096 * 8];
 
 void taska_fun(void)
 {
     while (1)
     {
         printf("i am taska run! line: %d\n", __LINE__);
-        task_switch_from_to(&taska, &taskb);
+        //task_switch_from_to(&taska, &taskb);
         printf("i am taska run! line: %d\n", __LINE__);
+        mdelay(500);
     }
 }
 
@@ -28,15 +29,16 @@ void taska_fun(void)
  *
  */
 struct task taskb;
-char taskb_stack[4096];
+char taskb_stack[4096 * 8];
 
 void taskb_fun(void)
 {
     while (1)
     {
         printf("i am taskb run! line: %d\n", __LINE__);
-        task_switch_from_to(&taskb, &taska);
+        //task_switch_from_to(&taskb, &taska);
         printf("i am taskb run! line: %d\n", __LINE__);
+        mdelay(500);
     }
 }
 

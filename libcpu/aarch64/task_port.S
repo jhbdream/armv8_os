@@ -4,22 +4,27 @@
 //根据C语言和汇编语言的调用过程，第一个参数存放在x0寄存器中
 //我们函数传递的是任务结构体指针
 task_switch_to:
-    // 恢复状态寄存器
+
+    //1 恢复任务的堆栈寄存器
+    mov x1, x0
+    add x1, x1, #8 * 0
+    ldr x2, [x1]
+    mov sp, x2
+
+
+    //2.恢复任务的状态寄存器
     mov x1, x0
     add x1, x1, #8 * 1
     ldr x2, [x1]
     msr spsr_el1, x2
 
-    // 恢复异常返回地址
+    //3.恢任务的复异常返回地址
     mov x1, x0
     add x1, x1, #8 * 2
     ldr x2, [x1]
     msr elr_el1, x2
 
-    //恢复通用寄存器现场
-    ldr x1, [x0]
-    mov sp, x1
-
+    //4. 恢复任务的通用寄存器
     ldp x0, x1, [sp, #16 * 0]
     ldp x2, x3, [sp, #16 * 1]
     ldp x4, x5, [sp, #16 * 2]
@@ -39,6 +44,7 @@ task_switch_to:
 
     //数据从堆栈取出之后，堆栈指针移动
     sub sp, sp, #30 * 8
+
     //异常返回
     //1 cpsr = spsr
     //2 pc = elr_el1
@@ -147,3 +153,28 @@ task_switch_from_to:
     // 2. 把elr_el1 寄存器中的数据作为下一条指令的地址，跳转执行
     // 3. 所以通过该指令可以跳转到目标任务中
     eret
+
+
+.global task_interrupt_from_thread;
+.global task_interrupt_to_thread;
+.global task_thread_switch_interrupt_flag;
+
+    .global interrupt_task_switch_from_to
+    .type interrupt_task_switch_from_to, "function"
+// x0: from
+// x1: to
+//设置切换标志为1，通过全局变量传递from和to任务信息
+interrupt_task_switch_from_to:
+    adr x2, task_thread_switch_interrupt_flag
+    mov x3, #1
+    str x3, [x2]
+
+    adr x2, task_interrupt_from_thread
+    mov x3, x0
+    str x3, [x2]
+
+    adr x2, task_interrupt_to_thread
+    mov x3, x1
+    str x3, [x2]
+
+    ret

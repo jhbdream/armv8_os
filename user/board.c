@@ -1,6 +1,3 @@
-#include <stringify.h>
-#define LOG_TAG __stringify(__FILE__)
-
 #include <stdio.h>
 #include <board_init.h>
 #include <elog.h>
@@ -36,7 +33,7 @@ void my_elog_init(void)
     elog_set_fmt(ELOG_LVL_ASSERT, ELOG_FMT_ALL);
     elog_set_fmt(ELOG_LVL_ERROR, ELOG_FMT_LVL | ELOG_FMT_TAG | ELOG_FMT_TIME);
     elog_set_fmt(ELOG_LVL_WARN, ELOG_FMT_LVL | ELOG_FMT_TAG | ELOG_FMT_TIME);
-    elog_set_fmt(ELOG_LVL_INFO, ELOG_FMT_LVL | ELOG_FMT_TAG | ELOG_FMT_TIME);
+    elog_set_fmt(ELOG_LVL_INFO, ELOG_FMT_TIME);
     elog_set_fmt(ELOG_LVL_DEBUG, ELOG_FMT_ALL & ~(ELOG_FMT_FUNC | ELOG_FMT_T_INFO | ELOG_FMT_P_INFO));
     elog_set_fmt(ELOG_LVL_VERBOSE, ELOG_FMT_ALL & ~(ELOG_FMT_FUNC | ELOG_FMT_T_INFO | ELOG_FMT_P_INFO));
 
@@ -50,8 +47,8 @@ void my_elog_init(void)
 
 int interrupt_init(void)
 {
+    local_irq_disable();
     gic_init();
-    local_irq_enable();
 }
 
 void irq_test(int a)
@@ -64,14 +61,34 @@ void irq_test(int a)
     }
 }
 
+int count = 0;
+
+extern struct task taska;
+extern struct task taskb;
+extern void interrupt_task_switch_from_to(struct task *task_from, struct task *task_to);
+
 void timer_handler(struct irq_desc *desc)
 {
     arch_timer_compare(arch_timer_frequecy());
     log_i("arch timer_handler!");
+
+    if((count++) % 2 == 0)
+    {
+        log_i("switch to taskb!");
+        interrupt_task_switch_from_to(&taska, &taskb);
+    }
+    else
+    {
+        log_i("switch to taska!");
+        interrupt_task_switch_from_to(&taskb, &taska);
+    }
 }
 
 void arch_timer_test(void)
 {
+    local_irq_disable();
+    gic_init();
+
     if(request_irq(30, timer_handler, 0, "arch_timer", NULL) < 0)
     {
         log_e("request_irq failed!");

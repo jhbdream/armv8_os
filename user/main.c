@@ -7,14 +7,10 @@ extern void my_task_init(void);
 
 int main()
 {
-#if 0
+   printf("run in main!\n");
+
     my_elog_init();
-
-    interrupt_init();
     arch_timer_test();
-#endif
-
-    printf("run in main!\n");
 
     my_task_init();
 

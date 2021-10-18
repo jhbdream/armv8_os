@@ -1,11 +1,12 @@
-#include <stringify.h>
-#define LOG_TAG __stringify(__FILE__)
-
 #include <common/interrupt.h>
 #include <errno.h>
 #include <elog.h>
 #include <compiler_types.h>
 #include <driver/gic.h>
+
+unsigned long task_interrupt_from_thread;
+unsigned long task_interrupt_to_thread;
+unsigned long task_thread_switch_interrupt_flag;
 
 static inline void ack_bad_irq(unsigned int irq)
 {
