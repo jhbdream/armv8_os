@@ -44,20 +44,32 @@ sudo apt-get install qemu-system-arm
 
  一般需要下载 x86_64 Linux hosted cross compilers版本，就是说主机是X86_64架构，目标是aarch64架构，交叉编译工具链配置过程如下：
 
-```shell
 step1:
-	下载gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz
+	下载 **gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz** 文件
+	
 step2:
-	1、创建/usr/local/arm路径，sudo mkdir /usr/local/arm
-	2、解压压缩包到/usr/local/arm，sudo tar -vxf gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz
-	3、解压后可删除tar压缩包，sudo rm gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz
+	1. 创建/usr/local/arm路径 
+	`sudo mkdir /usr/local/arm`
+	
+	2. 解压压缩包到目录 /usr/local/arm
+	`cd /usr/local/arm`
+	`sudo tar -vxf path/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz`
+	> 注意：path/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz 是指实际文件所在目录
+	
+	3. 解压后可删除tar压缩包
+	`sudo rm gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz`
+	
 step3:
-	1、添加环境变量，sudo gedit /etc/profile，在最后一行添加：
-	export PATH=$PATH:/usr/local/arm/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/bin
-	2、重启虚拟机或者执行. /etc/profile
-```
+	1. 执行下面的命令添加环境变量
+	`sudo gedit /etc/profile`
+	
+	2. 在最后一行添加：
+	`export PATH=$PATH:/usr/local/arm/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/bin`
+	
+	2. 重启虚拟机或者执行命令`source /etc/profile` 
 
-配置好交叉编译工具链,输入`aarch64-none-elf-gcc -v`命令出现如下提示表示工具链配置成功（若提示找不到aarch64-none-elf-gcc，可在命令行执行export PATH=$PATH:/usr/local/arm/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/bin后重试）
+
+配置好交叉编译工具链,输入`aarch64-none-elf-gcc -v`命令出现如下提示表示工具链配置成功（若提示找不到aarch64-none-elf-gcc，可在命令行执行`export PATH=$PATH:/usr/local/arm/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/bin`后重试）
 
  ```shell
 aarch64-none-elf-gcc -v
