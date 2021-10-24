@@ -5,30 +5,32 @@
 > 基于armv8处理器架构，学习操作系统
 
 ## 1. 简介
-​		1、希望可以通过自己动手编写一个极简的操作系统，来进行操作系统学习
 
-​		2、基于armv8处理器架构，使用qemu模拟器模拟硬件，做到不依赖开发板，随时随地都可以编写运行程序，测试验证，简化开发流程，重点关注操作系统逻辑开发
-
-​		3、需要在ubuntu系统环境下进行软件代码的开发和编译测试
+		1、希望可以通过自己动手编写一个极简的操作系统，来进行操作系统学习
+	
+		2、基于armv8处理器架构，使用qemu模拟器模拟硬件，做到不依赖开发板，随时随地都可以编写运行程序，测试验证，简化开发流程，重点关注操作系统逻辑开发
+	
+		3、需要在ubuntu系统环境下进行软件代码的开发和编译测试
 
 目前已经完成基础环境搭建和基本代码编写，支持aarch64架构汇编启动、中断和异常处理、串口输入输出，在此基础上进行操作系统相关学习并完成以下内容
 
 希望可以一步步完成一个操作系统的最小系统，窥探其实现原理，并逐渐去添砖加瓦，丰富完善，做到从功能到性能
 
 - 基础组件
-    - [x] 中断 GICV3
-    - [x] 定时器
-    - [ ] MMU
-    - [x] qemu仿真
-    - [x] 串口输入输出
+  - [x] 中断 GICV3
+  - [x] 定时器
+  - [ ] MMU
+  - [x] qemu仿真
+  - [x] 串口输入输出
 
 - 操作系统功能
-    - [ ] 任务切换
-    - [ ] 内存管理
-    - [ ] 任务同步机制
-    - [ ] 任务通信机制
+  - [ ] 任务切换
+  - [ ] 内存管理
+  - [ ] 任务同步机制
+  - [ ] 任务通信机制
 
 ## 2. 使用教程
+
     本项目在ubuntu系统下运行，需要依赖qemu模拟硬件和aarch64交叉编译工具链编译代码
 
 > A.搭建环境
@@ -36,21 +38,62 @@
 安装qemu工具，建议使用ubuntu18及以上系统进行安装，否则qemu版本太低，可能无法模拟arm64架构处理器
 
 ```shell
-sudo apt-get install system-qemu-arm
+sudo apt-get install qemu-system-arm
 ```
+
 安装交叉编译工具链，用于编译程序,工具链下载地址:
 
  https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
 
- 一般需要下载 x86_64 Linux hosted cross compilers版本，就是说主机是X86_64架构，目标是aarch64架构，下载之后配置好交叉编译工具链,输入`aarch64-none-elf-gcc -v`命令出现如下提示表示工具链配置成功
+ 一般需要下载 x86_64 Linux hosted cross compilers版本，就是说主机是X86_64架构，目标是aarch64架构，交叉编译工具链配置过程如下：
+
+1. 下载交叉编译工具链:
+
+- 下载 **gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz** 文件
+
+2. 配置工具链:
+
+- 创建/usr/local/arm路径 
+
+  `sudo mkdir /usr/local/arm`
+
+- 解压压缩包到目录 
+
+  `/usr/local/arm`
+
+  `cd /usr/local/arm`
+
+  `sudo tar -vxf path/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz`
+
+> 注意：path/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz 是指实际文件所在目录
+
+- 解压后可删除tar压缩包
+
+  `sudo rm gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz`
+  
+  
+
+3. 配置环境变量:
+
+- 执行下面的命令添加环境变量
+  `sudo gedit /etc/profile`
+
+- 在文件的最后一行添加：
+  `export PATH=$PATH:/usr/local/arm/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/bin`
+
+- 重启虚拟机或者执行命令`source /etc/profile` 
+
+  
+
+
+配置好交叉编译工具链,输入`aarch64-none-elf-gcc -v`命令出现如下提示表示工具链配置成功（若提示找不到aarch64-none-elf-gcc，可在命令行执行`export PATH=$PATH:/usr/local/arm/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/bin`后重试）
 
  ```shell
 aarch64-none-elf-gcc -v
 
 gcc version 10.3.1 20210621 (GNU Toolchain for the A-profile Architecture 10.3-2021.07 (arm-10.29))
+
  ```
-
-
 
 
 > B.下载代码
@@ -76,6 +119,7 @@ make
 
 make qemu
 ```
+
 如果环境正常的话，运行正常会有如下打印信息
 
 ```c
