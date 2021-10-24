@@ -36,21 +36,35 @@
 安装qemu工具，建议使用ubuntu18及以上系统进行安装，否则qemu版本太低，可能无法模拟arm64架构处理器
 
 ```shell
-sudo apt-get install system-qemu-arm
+sudo apt-get install qemu-system-arm
 ```
 安装交叉编译工具链，用于编译程序,工具链下载地址:
 
  https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
 
- 一般需要下载 x86_64 Linux hosted cross compilers版本，就是说主机是X86_64架构，目标是aarch64架构，下载之后配置好交叉编译工具链,输入`aarch64-none-elf-gcc -v`命令出现如下提示表示工具链配置成功
+ 一般需要下载 x86_64 Linux hosted cross compilers版本，就是说主机是X86_64架构，目标是aarch64架构，交叉编译工具链配置过程如下：
+
+```shell
+step1:
+	下载gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz
+step2:
+	1、创建/usr/local/arm路径，sudo mkdir /usr/local/arm
+	2、解压压缩包到/usr/local/arm，sudo tar -vxf gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz
+	3、解压后可删除tar压缩包，sudo rm gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz
+step3:
+	1、添加环境变量，sudo gedit /etc/profile，在最后一行添加：
+	export PATH=$PATH:/usr/local/arm/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/bin
+	2、重启虚拟机或者执行. /etc/profile
+```
+
+配置好交叉编译工具链,输入`aarch64-none-elf-gcc -v`命令出现如下提示表示工具链配置成功（若提示找不到aarch64-none-elf-gcc，可在命令行执行export PATH=$PATH:/usr/local/arm/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/bin后重试）
 
  ```shell
 aarch64-none-elf-gcc -v
 
 gcc version 10.3.1 20210621 (GNU Toolchain for the A-profile Architecture 10.3-2021.07 (arm-10.29))
+
  ```
-
-
 
 
 > B.下载代码
