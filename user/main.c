@@ -4,14 +4,14 @@
 #include <config.h>
 
 extern void my_task_init(void);
+extern void timer_init(void);
 
 int main()
 {
-   printf("run in main!\n");
-
+    printf("run in main!\n");
+    interrupt_init();
     my_elog_init();
-    arch_timer_test();
-
+    timer_init();
     my_task_init();
 
     while (1)

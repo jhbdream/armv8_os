@@ -1,6 +1,7 @@
 #include <kernel/task.h>
 #include <stdio.h>
 #include <common/delay.h>
+#include <elog.h>
 
 extern struct task taska;
 extern struct task taskb;
@@ -17,9 +18,8 @@ void taska_fun(void)
 {
     while (1)
     {
-        printf("i am taska run! line: %d\n", __LINE__);
-        //task_switch_from_to(&taska, &taskb);
-        printf("i am taska run! line: %d\n", __LINE__);
+        log_v("i am taska run! line: %d", __LINE__);
+        log_v("i am taska run! line: %d", __LINE__);
         mdelay(500);
     }
 }
@@ -35,9 +35,8 @@ void taskb_fun(void)
 {
     while (1)
     {
-        printf("i am taskb run! line: %d\n", __LINE__);
-        //task_switch_from_to(&taskb, &taska);
-        printf("i am taskb run! line: %d\n", __LINE__);
+        log_v("i am taskb run! line: %d", __LINE__);
+        log_v("i am taskb run! line: %d", __LINE__);
         mdelay(500);
     }
 }

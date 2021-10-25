@@ -21,6 +21,10 @@ void test_elog(void)
     elog_raw("Hello EasyLogger!\n");
 }
 
+/**
+ * @brief 初始化elog 日志库
+ *
+ */
 void my_elog_init(void)
 {
     /* 关闭行缓冲 */
@@ -35,7 +39,7 @@ void my_elog_init(void)
     elog_set_fmt(ELOG_LVL_WARN, ELOG_FMT_LVL | ELOG_FMT_TAG | ELOG_FMT_TIME);
     elog_set_fmt(ELOG_LVL_INFO, ELOG_FMT_TIME);
     elog_set_fmt(ELOG_LVL_DEBUG, ELOG_FMT_ALL & ~(ELOG_FMT_FUNC | ELOG_FMT_T_INFO | ELOG_FMT_P_INFO));
-    elog_set_fmt(ELOG_LVL_VERBOSE, ELOG_FMT_ALL & ~(ELOG_FMT_FUNC | ELOG_FMT_T_INFO | ELOG_FMT_P_INFO));
+    elog_set_fmt(ELOG_LVL_VERBOSE, ELOG_FMT_TIME);
 
 #ifdef ELOG_COLOR_ENABLE
     elog_set_text_color_enabled(true);
@@ -53,50 +57,9 @@ int interrupt_init(void)
 
 void irq_test(int a)
 {
-
-    log_i("enter irq! a = %d\n", a);
+    log_e("enter irq! a = %d\n", a);
     while (1)
     {
         /* code */
     }
-}
-
-int count = 0;
-
-extern struct task taska;
-extern struct task taskb;
-extern void interrupt_task_switch_from_to(struct task *task_from, struct task *task_to);
-
-void timer_handler(struct irq_desc *desc)
-{
-    arch_timer_compare(arch_timer_frequecy());
-    log_i("arch timer_handler!");
-
-    if((count++) % 2 == 0)
-    {
-        log_i("switch to taskb!");
-        interrupt_task_switch_from_to(&taska, &taskb);
-    }
-    else
-    {
-        log_i("switch to taska!");
-        interrupt_task_switch_from_to(&taskb, &taska);
-    }
-}
-
-void arch_timer_test(void)
-{
-    local_irq_disable();
-    gic_init();
-
-    if(request_irq(30, timer_handler, 0, "arch_timer", NULL) < 0)
-    {
-        log_e("request_irq failed!");
-        return;
-    }
-
-    arch_timer_interrupt_disable();
-    arch_timer_start();
-    arch_timer_compare(arch_timer_frequecy());
-    arch_timer_interrupt_enable();
 }
