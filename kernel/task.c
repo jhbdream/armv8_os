@@ -9,6 +9,12 @@
 struct task g_task[G_TASK_NUMBER];
 
 /**
+ * @brief 保存与记录当前正在执行的任务
+ *
+ */
+struct task *g_current_task = NULL;
+
+/**
  * @brief 创建一个任务
  *
  * @param t 任务结构体变量指针
@@ -23,39 +29,6 @@ int task_init(struct task *t, void *sp_addr, void *pc_addr)
     t->elr = (unsigned long)pc_addr;    //eret run addr
     t->spsr = 0x345;    //ebable irq run in el1
 
-#if 0
-    t->regs[0] = 0x1234abcd;
-    t->regs[1] = 0x1234abcd;
-    t->regs[2] = 0x1234abcd;
-    t->regs[3] = 0x1234abcd;
-    t->regs[4] = 0x1234abcd;
-    t->regs[5] = 0x1234abcd;
-    t->regs[6] = 0x1234abcd;
-    t->regs[7] = 0x1234abcd;
-    t->regs[8] = 0x1234abcd;
-    t->regs[9] = 0x1234abcd;
-    t->regs[10] = 0x1234abcd;
-    t->regs[11] = 0x1234abcd;
-    t->regs[12] = 0x1234abcd;
-    t->regs[13] = 0x1234abcd;
-    t->regs[14] = 0x1234abcd;
-    t->regs[15] = 0x1234abcd;
-    t->regs[16] = 0x1234abcd;
-    t->regs[17] = 0x1234abcd;
-    t->regs[18] = 0x1234abcd;
-    t->regs[19] = 0x1234abcd;
-    t->regs[20] = 0x1234abcd;
-    t->regs[21] = 0x1234abcd;
-    t->regs[22] = 0x1234abcd;
-    t->regs[23] = 0x1234abcd;
-    t->regs[24] = 0x1234abcd;
-    t->regs[25] = 0x1234abcd;
-    t->regs[26] = 0x1234abcd;
-    t->regs[27] = 0x1234abcd;
-    t->regs[28] = 0x1234abcd;
-    t->regs[29] = 0x1234abcd;
-#endif
-
     return 0;
 }
 
@@ -64,11 +37,11 @@ int task_init(struct task *t, void *sp_addr, void *pc_addr)
  *
  * @return struct task* 申请到的任务
  */
-struct task *requset_task()
+static struct task *requset_task()
 {
     for(int i = 0; i < G_TASK_NUMBER; i++)
     {
-        if(g_task[i].pid > 0)
+        if(g_task[i].pid >= 0)
         {
             //只要保证各个任务的pid非负并且不重复就可以
             g_task[i].pid = i;
@@ -85,12 +58,29 @@ struct task *requset_task()
  * @param free
  * @return long
  */
-long free_task(struct task *free)
+static long free_task(struct task *free)
 {
     long pid = free->pid;
     free->pid = -1;
 
     return pid;
+}
+
+/**
+ * @brief 初始化全部任务为无效任务
+ *
+ * @return int 支持的任务数量
+ */
+int global_task_config(void)
+{
+    int i = 0;
+
+    for(i; i < G_TASK_NUMBER; i++)
+    {
+        free_task(&g_task[i]);
+    }
+
+    return i;
 }
 
 /**
@@ -112,24 +102,38 @@ long task_create(void *sp_addr, void *pc_addr)
     }
     else
     {
-        log_e("error: can not get task!\n");
+        log_e("error: can not get task!");
         return -1;
     }
 }
 
-/**
- * @brief 初始化全部任务为无效任务
- *
- * @return int 支持的任务数量
- */
-int global_task_config(void)
+struct task *task_schedule_alog()
 {
-    int i = 0;
-
-    for(i; i < G_TASK_NUMBER; i++)
+    // 获取下一个任务
+    struct task *next_task;
+    if(g_current_task == &g_task[G_TASK_NUMBER - 1])
     {
-        free_task(&g_task[i]);
+        next_task = &g_task[0];
+    }
+    else
+    {
+        next_task = g_current_task + 1;
     }
 
-    return i;
+    for(int i = 0; i < G_TASK_NUMBER; i++)
+    {
+        if(next_task->pid >= 0)
+        {
+            //找到一个有效任务 返回任务
+            return next_task;
+        }
+        else if (next_task == &g_task[G_TASK_NUMBER - 1])
+        {
+            //如果遍历到了末尾，回到头部
+            next_task = &g_task[0];
+        }
+    }
+
+    //目前没有就绪任务，返回空 后续可以考虑添加空闲idel任务
+    return NULL;
 }

@@ -47,7 +47,9 @@ void taskb_fun(void)
  */
 void my_task_init(void)
 {
-    task_init(&taska, taska_stack + sizeof(taska_stack), taska_fun);
-    task_init(&taskb, taskb_stack + sizeof(taskb_stack), taskb_fun);
+    global_task_config();
+    task_create(taska_stack + sizeof(taska_stack), taska_fun);
+    task_create(taskb_stack + sizeof(taskb_stack), taskb_fun);
+
     task_switch_to(&taska);
 }
