@@ -18,8 +18,7 @@ void taska_fun(void)
 {
     while (1)
     {
-        log_v("i am taska run! line: %d", __LINE__);
-        log_v("i am taska run! line: %d", __LINE__);
+        log_v("i am %s run! line:[%d]!", __func__, __LINE__);
         mdelay(500);
     }
 }
@@ -35,8 +34,17 @@ void taskb_fun(void)
 {
     while (1)
     {
-        log_v("i am taskb run! line: %d", __LINE__);
-        log_v("i am taskb run! line: %d", __LINE__);
+        log_v("i am %s run! line:[%d]!", __func__, __LINE__);
+        mdelay(500);
+    }
+}
+
+char taskc_stack[4096 * 8];
+void taskc_fun(void)
+{
+    while (1)
+    {
+        log_v("i am %s run! line:[%d]!", __func__, __LINE__);
         mdelay(500);
     }
 }
@@ -47,9 +55,15 @@ void taskb_fun(void)
  */
 void my_task_init(void)
 {
-    global_task_config();
-    task_create(taska_stack + sizeof(taska_stack), taska_fun);
-    task_create(taskb_stack + sizeof(taskb_stack), taskb_fun);
+    struct task *taska_p;
+    struct task *taskb_p;
+    struct task *taskc_p;
 
-    task_switch_to(&taska);
+    global_task_config();
+
+    taska_p = task_create(taska_stack + sizeof(taska_stack), taska_fun);
+    taskb_p = task_create(taskb_stack + sizeof(taskb_stack), taskb_fun);
+    taskc_p = task_create(taskc_stack + sizeof(taskc_stack), taskc_fun);
+
+    task_switch_to(taska_p);
 }

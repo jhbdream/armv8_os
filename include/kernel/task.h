@@ -18,7 +18,7 @@ int task_switch_from_to(struct task *task_from, struct task *task_to);
 void interrupt_task_switch_from_to(struct task *task_from, struct task *task_to);
 
 int global_task_config(void);
-long task_create(void *sp_addr, void *pc_addr);
+struct task *task_create(void *sp_addr, void *pc_addr);
 struct task *task_schedule_alog();
 
 #define G_TASK_NUMBER 64
