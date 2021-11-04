@@ -59,11 +59,11 @@ void my_task_init(void)
     struct task *taskb_p;
     struct task *taskc_p;
 
-    global_task_config();
+    kernel_task_init();
 
-    taska_p = task_create(taska_stack + sizeof(taska_stack), taska_fun);
-    taskb_p = task_create(taskb_stack + sizeof(taskb_stack), taskb_fun);
-    taskc_p = task_create(taskc_stack + sizeof(taskc_stack), taskc_fun);
+    taska_p = task_create(taska_stack + sizeof(taska_stack), taska_fun, 10);
+    taskb_p = task_create(taskb_stack + sizeof(taskb_stack), taskb_fun, 20);
+    taskc_p = task_create(taskc_stack + sizeof(taskc_stack), taskc_fun, 30);
 
     task_switch_to(taska_p);
 }

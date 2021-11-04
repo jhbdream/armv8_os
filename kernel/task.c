@@ -15,24 +15,6 @@ struct task g_task[G_TASK_NUMBER];
 struct task *g_current_task = NULL;
 
 /**
- * @brief 创建一个任务
- *
- * @param t 任务结构体变量指针
- * @param sp_addr 该任务的堆栈地址
- * @param pc_addr 该任务的起始地址
- * @return int
- */
-int task_init(struct task *t, void *sp_addr, void *pc_addr)
-{
-
-    t->sp = sp_addr;
-    t->elr = (unsigned long)pc_addr;    //eret run addr
-    t->spsr = 0x345;    //ebable irq run in el1
-
-    return 0;
-}
-
-/**
  * @brief 请求获取一个空闲任务结构体
  *
  * @return struct task* 申请到的任务
@@ -62,7 +44,9 @@ static struct task *requset_task()
 static long free_task(struct task *free)
 {
     long pid = free->pid;
+
     free->pid = -1;
+    free->priority = -1;
 
     return pid;
 }
@@ -85,20 +69,40 @@ int global_task_config(void)
 }
 
 /**
+ * @brief 创建一个任务
+ *
+ * @param t 任务结构体变量指针
+ * @param sp_addr 该任务的堆栈地址
+ * @param pc_addr 该任务的起始地址
+ * @return int
+ */
+int task_init(struct task *t, void *sp_addr, void *pc_addr, long priority)
+{
+    ELOG_ASSERT(priority < G_TASK_MAX_PRIORITY);
+
+    t->sp = sp_addr;
+    t->elr = (unsigned long)pc_addr;    //eret run addr
+    t->spsr = 0x345;    //ebable irq run in el1
+
+    t->priority = priority;
+    return 0;
+}
+
+/**
  * @brief 从全局任务信息中创建一个任务，返回任务块信息
  *
  * @param sp_addr
  * @param pc_addr
  * @return long
  */
-struct task *task_create(void *sp_addr, void *pc_addr)
+struct task *task_create(void *sp_addr, void *pc_addr, long priority)
 {
     struct task *new_task;
 
     new_task = requset_task();
     if(new_task != NULL)
     {
-        task_init(new_task, sp_addr, pc_addr);
+        task_init(new_task, sp_addr, pc_addr, priority);
         return new_task;
     }
     else
@@ -108,7 +112,14 @@ struct task *task_create(void *sp_addr, void *pc_addr)
     }
 }
 
-struct task *task_schedule_alog()
+/**
+ * @brief 平均模式任务调度器
+ *        遍历任务列表，查找下一个有效任务
+ *        如果找不到，返回NULL
+ *
+ * @return struct task*
+ */
+struct task *task_schedule_alog_average()
 {
     // 获取下一个任务
     struct task *next_task;
@@ -144,4 +155,56 @@ struct task *task_schedule_alog()
 
     //目前没有就绪任务，返回空 后续可以考虑添加空闲idel任务
     return NULL;
+}
+
+/**
+ * @brief 优先级模式任务调度器，返回比当前任务更高优先级任务
+ *
+ * @return struct task*
+ */
+struct task *task_schedule_alog_priority()
+{
+    // 获取下一个任务
+    struct task *next_task;
+    struct task *priority_max_task;
+
+    priority_max_task = g_current_task;
+
+    if (g_current_task == &g_task[G_TASK_NUMBER - 1])
+    {
+        //如果现在任务是在任务快末尾，从任务快开头遍历
+        next_task = &g_task[0];
+    }
+    else
+    {
+        next_task = g_current_task + 1;
+    }
+
+    for (int i = 0; i < G_TASK_NUMBER; i++)
+    {
+
+        if (next_task->priority > g_current_task->priority && next_task->priority >= 0)
+        {
+            //比较有效任务的优先级 找到更高优先级任务
+            priority_max_task = next_task;
+        }
+
+        if (next_task == &g_task[G_TASK_NUMBER - 1])
+        {
+            //如果遍历到了末尾，回到头部
+            next_task = &g_task[0];
+        }
+        else
+        {
+            //遍历下一个任务块
+            next_task = next_task + 1;
+        }
+    }
+
+    return priority_max_task;
+}
+
+void kernel_task_init(void)
+{
+    global_task_config();
 }

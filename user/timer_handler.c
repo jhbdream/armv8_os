@@ -20,10 +20,11 @@ void timer_handler(struct irq_desc *desc)
     arch_timer_compare(arch_timer_frequecy());
 
     from = g_current_task;
-    to = task_schedule_alog();
+    to = task_schedule_alog_priority();
 
     log_i("switch from pid:[%d]!", from->pid);
     log_i("switch to pid:[%d]!", to->pid);
+
     interrupt_task_switch_from_to(from, to);
 }
 
