@@ -11,7 +11,13 @@ struct task
     long pid;               //任务id,非负数时表示有效任务
     long priority;          //任务优先级，数字越大表示优先级越高 优先级范围 [0 - (G_TASK_MAX_PRIORITY - 1)]
                             //定义最低的优先级为 idle 空闲任务(G_TASK_MAX_PRIORITY - 1)
+    int task_flag;
+    unsigned long sleep_timeout;
 };
+
+#define TASK_FLAG_NONE (0)
+#define TASK_FLAG_RUN (1 << 0)
+#define TASK_FLAG_SLEEP (1 << 1)
 
 typedef struct task *task_t;
 
@@ -26,6 +32,8 @@ int task_init(struct task *t, void *sp_addr, void *pc_addr, long priority);
 
 struct task *task_schedule_alog_average();
 struct task *task_schedule_alog_priority();
+void schedle_interrupt(void);
+void schedle(void);
 
 void kernel_task_init(void);
 

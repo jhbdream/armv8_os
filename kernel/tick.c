@@ -1,0 +1,53 @@
+#include <kernel/tick.h>
+#include <kernel/task.h>
+#include <common/interrupt.h>
+
+volatile uint64_t g_tick = 0;
+
+/**
+ * @brief 将tick转换为ms单位
+ *
+ * @param tick
+ * @return uint64_t
+ */
+uint64_t tick_to_ms(uint64_t tick)
+{
+    return g_tick * (1000u / TICK_PER_SECOND);
+}
+
+/**
+ * @brief 将ms时间转换为tick
+ *
+ * @param tick
+ * @return uint64_t
+ */
+uint64_t ms_to_tick(uint64_t ms)
+{
+    uint64_t tick;
+    tick = TICK_PER_SECOND * (ms / 1000);
+    tick += (TICK_PER_SECOND * (ms % 1000) + 999) / 1000;
+
+    return tick;
+}
+
+/**
+ * @brief 使当前任务让出处理器，休眠指定的时间之后在执行
+ *
+ * @param ms
+ * @return int
+ */
+int task_sleep_ms(uint64_t ms)
+{
+
+    local_irq_disable();
+    struct task *t = g_current_task;
+
+    // 设置睡眠任务的状态
+    t->task_flag = TASK_FLAG_SLEEP;
+
+    t->sleep_timeout = g_tick + ms_to_tick(ms);
+    local_irq_enable();
+
+    schedle();
+    return 0;
+}

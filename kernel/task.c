@@ -1,4 +1,5 @@
 #include <kernel/task.h>
+#include <kernel/tick.h>
 #include <stdio.h>
 #include <elog.h>
 
@@ -48,6 +49,8 @@ static long free_task(struct task *free)
     free->pid = -1;
     free->priority = -1;
 
+    free->task_flag = TASK_FLAG_NONE;
+
     return pid;
 }
 
@@ -85,6 +88,8 @@ int task_init(struct task *t, void *sp_addr, void *pc_addr, long priority)
     t->spsr = 0x345;    //ebable irq run in el1
 
     t->priority = priority;
+    t->task_flag = TASK_FLAG_RUN;
+
     return 0;
 }
 
@@ -165,43 +170,67 @@ struct task *task_schedule_alog_average()
 struct task *task_schedule_alog_priority()
 {
     // 获取下一个任务
-    struct task *next_task;
-    struct task *priority_max_task;
+    struct task *t;
+    struct task *priority_max_task = NULL;
 
-    priority_max_task = g_current_task;
-
-    if (g_current_task == &g_task[G_TASK_NUMBER - 1])
-    {
-        //如果现在任务是在任务快末尾，从任务快开头遍历
-        next_task = &g_task[0];
-    }
-    else
-    {
-        next_task = g_current_task + 1;
-    }
-
+    // 直接使用循环遍历全部任务
     for (int i = 0; i < G_TASK_NUMBER; i++)
     {
+        t = &g_task[i];
 
-        if (next_task->priority > g_current_task->priority && next_task->priority >= 0)
+        //如果是处于睡眠状态的任务 判断tick是否超时
+        //如果睡眠tick超时 就把任务状态修改为 run
+        if(t->task_flag == TASK_FLAG_SLEEP)
+        {
+            if(g_tick >= t->sleep_timeout)
+            {
+                t->task_flag = TASK_FLAG_RUN;
+            }
+        }
+
+        //为了找到任务 零时处理
+        if (t->task_flag == TASK_FLAG_RUN && priority_max_task == NULL)
+        {
+            priority_max_task = t;
+        }
+
+        // 找到正在运行且优先级最高的任务 作为to任务
+        if (t->task_flag == TASK_FLAG_RUN && t->priority > priority_max_task->priority)
         {
             //比较有效任务的优先级 找到更高优先级任务
-            priority_max_task = next_task;
-        }
-
-        if (next_task == &g_task[G_TASK_NUMBER - 1])
-        {
-            //如果遍历到了末尾，回到头部
-            next_task = &g_task[0];
-        }
-        else
-        {
-            //遍历下一个任务块
-            next_task = next_task + 1;
+            priority_max_task = t;
         }
     }
 
     return priority_max_task;
+}
+
+void schedle_interrupt(void)
+{
+    static struct task *from;
+    static struct task *to;
+
+    from = g_current_task;
+    to = task_schedule_alog_priority();
+
+    log_i("switch from pid:[%02d]", from->pid);
+    log_i("switch to pid:  [%02d]", to->pid);
+
+    interrupt_task_switch_from_to(from, to);
+}
+
+void schedle(void)
+{
+    static struct task *from;
+    static struct task *to;
+
+    from = g_current_task;
+    to = task_schedule_alog_priority();
+
+    log_i("switch from pid:[%02d]", from->pid);
+    log_i("switch to pid:  [%02d]", to->pid);
+
+    task_switch_from_to(from, to);
 }
 
 void kernel_task_init(void)

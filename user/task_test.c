@@ -1,4 +1,6 @@
 #include <kernel/task.h>
+#include <kernel/tick.h>
+
 #include <stdio.h>
 #include <common/delay.h>
 #include <elog.h>
@@ -19,7 +21,7 @@ void taska_fun(void)
     while (1)
     {
         log_v("i am %s run! line:[%d]!", __func__, __LINE__);
-        mdelay(500);
+        mdelay(50);
     }
 }
 
@@ -35,7 +37,7 @@ void taskb_fun(void)
     while (1)
     {
         log_v("i am %s run! line:[%d]!", __func__, __LINE__);
-        mdelay(500);
+        task_sleep_ms(500);
     }
 }
 
@@ -45,7 +47,7 @@ void taskc_fun(void)
     while (1)
     {
         log_v("i am %s run! line:[%d]!", __func__, __LINE__);
-        mdelay(500);
+        task_sleep_ms(500);
     }
 }
 

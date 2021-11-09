@@ -38,7 +38,7 @@ struct irq_desc irq_desc[NR_IRQS] = {
  */
 void irq_enter(void)
 {
-	log_i("%s", __func__);
+
 }
 
 /*
@@ -46,7 +46,7 @@ void irq_enter(void)
  */
 void irq_exit(void)
 {
-	log_i("%s", __func__);
+
 }
 
 struct irq_desc *irq_to_desc(unsigned int irq)
@@ -85,7 +85,6 @@ void handle_domain_irq(struct pt_regs *regs)
 	irq_enter();
 	irqnr = irq_read_iar();
 
-	log_i("handle_domain_irq: [%d]", irqnr);
 	generic_handle_irq(irqnr);
 
 	irq_eoi(irqnr);
