@@ -47,7 +47,7 @@ static void free_task(struct task *free)
 
     free->pid = -1;
     free->priority = -1;
-    free->task_flag = TASK_FLAG_NONE;
+    free->task_state = TASK_STATE_NONE;
 }
 
 /**
@@ -84,7 +84,7 @@ void kernel_task_init(void)
  * @param pc_addr 该任务的函数地址
  * @return int
  */
-int task_init(struct task *t, void *sp_addr, void *pc_addr, long priority)
+static void task_init(struct task *t, void *sp_addr, void *pc_addr, long priority)
 {
     ELOG_ASSERT(priority < G_TASK_MAX_PRIORITY);
     ELOG_ASSERT(t != NULL);
@@ -94,9 +94,7 @@ int task_init(struct task *t, void *sp_addr, void *pc_addr, long priority)
     t->spsr = 0x345;                    //在aarch64架构下 设置切换到el1 并且使能全局中断
 
     t->priority = priority;
-    t->task_flag = TASK_FLAG_RUN;
-
-    return 0;
+    t->task_state = TASK_STATE_READY;
 }
 
 /**
@@ -147,7 +145,7 @@ struct task *task_schedule_alog_average(void)
 
     for(int i = 0; i < G_TASK_NUMBER; i++)
     {
-        if(next_task->pid >= 0)
+        if(next_task->task_state & TASK_STATE_READY)
         {
             //找到一个有效任务 返回任务
             return next_task;
@@ -186,22 +184,22 @@ struct task *task_schedule_alog_priority(void)
 
         //如果是处于睡眠状态的任务 判断tick是否超时
         //如果睡眠tick超时 就把任务状态修改为 run
-        if(t->task_flag == TASK_FLAG_SLEEP)
+        if(t->task_state == TASK_STATE_SLEEP)
         {
             if(g_systic >= t->sleep_timeout)
             {
-                t->task_flag = TASK_FLAG_RUN;
+                t->task_state = TASK_STATE_READY;
             }
         }
 
         //为了找到任务 零时处理
-        if (t->task_flag == TASK_FLAG_RUN && priority_max_task == NULL)
+        if (t->task_state & TASK_STATE_READY && priority_max_task == NULL)
         {
             priority_max_task = t;
         }
 
         // 找到正在运行且优先级最高的任务 作为to任务
-        if (t->task_flag == TASK_FLAG_RUN && t->priority > priority_max_task->priority)
+        if (t->task_state & TASK_STATE_READY && t->priority > priority_max_task->priority)
         {
             //比较有效任务的优先级 找到更高优先级任务
             priority_max_task = t;

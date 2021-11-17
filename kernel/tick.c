@@ -42,7 +42,7 @@ void task_sleep_ms(uint64_t ms)
 
     //设置睡眠任务的状态
     struct task *t = g_current_task;
-    t->task_flag = TASK_FLAG_SLEEP;
+    t->task_state = TASK_STATE_SLEEP;
 
     //设置任务的唤醒时间
     t->sleep_timeout = g_systic + ms_to_tick(ms);
