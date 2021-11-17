@@ -55,7 +55,7 @@ void taskc_fun(void)
  * @brief init create task and switch to taska
  *
  */
-void my_task_init(void)
+void user_task_init(void)
 {
     struct task *taska_p;
     struct task *taskb_p;

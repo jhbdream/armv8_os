@@ -3,21 +3,16 @@
 #include <board_init.h>
 #include <config.h>
 
-extern void my_task_init(void);
-extern void timer_init(void);
-
 int main()
 {
-    printf("run in main!\n");
+    printf("start run in main!\n");
+    elog_lib_init();
+
     interrupt_init();
-    my_elog_init();
-    timer_init();
-    my_task_init();
+    systic_timer_init();
+    user_task_init();
 
-    while (1)
-    {
-        /* code */
-    }
-
+    /* will not run here! */
+    printf("will not run here!!!\n");
     return 0;
 }

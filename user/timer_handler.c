@@ -29,7 +29,7 @@ void timer_handler(struct irq_desc *desc)
  *  申请中断处理函数
  *
  */
-void timer_init(void)
+void systic_timer_init(void)
 {
     if(request_irq(30, timer_handler, 0, "arch_timer", NULL) < 0)
     {

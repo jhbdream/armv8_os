@@ -124,7 +124,7 @@ SynchronousInterruptHandler:
 	saveregister
 
 	mov x0, 2
-	bl	irq_test
+	bl unexpected_exception
 
     restoreregister
 	eret
@@ -270,7 +270,7 @@ exit_irq_with_task_switch:
 FIQInterruptHandler:
 	saveregister
 
-    bl irq_test
+    bl unexpected_exception
 
     restoreregister
 	eret
@@ -279,7 +279,7 @@ SErrorInterruptHandler:
 	saveregister
 
 	mov x0, sp
-	bl irq_test
+	bl unexpected_exception
 
 	restoreregister
 	eret
@@ -288,7 +288,7 @@ invalid_exception:
 	saveregister
 
 	mov x0, 1
-	bl irq_test
+	bl unexpected_exception
 
 	restoreregister
 	eret

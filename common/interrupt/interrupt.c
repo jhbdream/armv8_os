@@ -8,6 +8,20 @@ unsigned long task_interrupt_from_thread;
 unsigned long task_interrupt_to_thread;
 unsigned long task_thread_switch_interrupt_flag;
 
+/**
+ * @brief 无效中断入口
+ *
+ * @param val
+ */
+void unexpected_exception(int val)
+{
+    log_e("unexpected exception! val = %d\n", val);
+    while (1)
+    {
+        /* code */
+    }
+}
+
 static inline void ack_bad_irq(unsigned int irq)
 {
 	log_e("unexpected IRQ trap at vector %02x", irq);
@@ -112,6 +126,7 @@ int request_irq(unsigned int irq, irq_handler_t handler, unsigned long flags,
 	/* Reset broken irq detection when installing new handler */
 	desc->irq_count = 0;
 
+	/* 申请中断意味着会取消中断控制器的屏蔽 */
 	irq_unmask(irq);
 
 	return 0;

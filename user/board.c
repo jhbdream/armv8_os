@@ -7,25 +7,10 @@
 #include <common/interrupt.h>
 
 /**
- * EasyLogger demo
- */
-void test_elog(void)
-{
-    /* test log output for all level */
-    log_a("Hello EasyLogger!");
-    log_e("Hello EasyLogger!");
-    log_w("Hello EasyLogger!");
-    log_i("Hello EasyLogger!");
-    log_d("Hello EasyLogger!");
-    log_v("Hello EasyLogger!");
-    elog_raw("Hello EasyLogger!\n");
-}
-
-/**
  * @brief 初始化elog 日志库
  *
  */
-void my_elog_init(void)
+void elog_lib_init(void)
 {
     /* 关闭行缓冲 */
     setvbuf(stdout, NULL, _IONBF, 0);
@@ -49,17 +34,29 @@ void my_elog_init(void)
     elog_start();
 }
 
+/**
+ * EasyLogger demo
+ */
+void test_elog(void)
+{
+    /* test log output for all level */
+    log_a("Hello EasyLogger!");
+    log_e("Hello EasyLogger!");
+    log_w("Hello EasyLogger!");
+    log_i("Hello EasyLogger!");
+    log_d("Hello EasyLogger!");
+    log_v("Hello EasyLogger!");
+    elog_raw("Hello EasyLogger!\n");
+}
+
+/**
+ * @brief 关闭全局中断
+ *        初始化中断控制器(GIC V3)
+ *
+ * @return int
+ */
 int interrupt_init(void)
 {
     local_irq_disable();
     gic_init();
-}
-
-void irq_test(int a)
-{
-    log_e("enter irq! a = %d\n", a);
-    while (1)
-    {
-        /* code */
-    }
 }
