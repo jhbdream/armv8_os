@@ -16,7 +16,7 @@ struct task g_task[G_TASK_NUMBER];
 struct task *g_current_task = NULL;
 
 /**
- * @brief 请求获取一个空闲任务结构体
+ * @brief 从全局的任务信息数组中申请分配一个任务
  *
  * @return struct task* 申请到的任务
  */
@@ -32,7 +32,6 @@ static struct task *requset_task()
             return &g_task[i];
         }
     }
-
     return NULL;
 }
 
@@ -40,18 +39,15 @@ static struct task *requset_task()
  * @brief 将指定的任务释放掉，变为空闲状态
  *
  * @param free
- * @return long 返回被释放任务的pid
+ * @return uint32_t 返回被释放任务的pid
  */
-static long free_task(struct task *free)
+static void free_task(struct task *free)
 {
-    long pid = free->pid;
+    uint32_t pid = free->pid;
 
     free->pid = -1;
     free->priority = -1;
-
     free->task_flag = TASK_FLAG_NONE;
-
-    return pid;
 }
 
 /**
@@ -59,7 +55,7 @@ static long free_task(struct task *free)
  *
  * @return int 支持的任务数量
  */
-int global_task_config(void)
+static int task_deinit(void)
 {
     int i = 0;
 
@@ -72,20 +68,30 @@ int global_task_config(void)
 }
 
 /**
- * @brief 创建一个任务
+ * @brief 对外的内核任务初始化接口
+ *
+ */
+void kernel_task_init(void)
+{
+    task_deinit();
+}
+
+/**
+ * @brief 初始化一个静态的任务
  *
  * @param t 任务结构体变量指针
  * @param sp_addr 该任务的堆栈地址
- * @param pc_addr 该任务的起始地址
+ * @param pc_addr 该任务的函数地址
  * @return int
  */
 int task_init(struct task *t, void *sp_addr, void *pc_addr, long priority)
 {
     ELOG_ASSERT(priority < G_TASK_MAX_PRIORITY);
+    ELOG_ASSERT(t != NULL);
 
     t->sp = sp_addr;
-    t->elr = (unsigned long)pc_addr;    //eret run addr
-    t->spsr = 0x345;    //ebable irq run in el1
+    t->elr = (unsigned long)pc_addr;    //任务的入口地址
+    t->spsr = 0x345;                    //在aarch64架构下 设置切换到el1 并且使能全局中断
 
     t->priority = priority;
     t->task_flag = TASK_FLAG_RUN;
@@ -94,7 +100,7 @@ int task_init(struct task *t, void *sp_addr, void *pc_addr, long priority)
 }
 
 /**
- * @brief 从全局任务信息中创建一个任务，返回任务块信息
+ * @brief 动态获取一个任务，并且完成任务的初始化
  *
  * @param sp_addr
  * @param pc_addr
@@ -124,7 +130,7 @@ struct task *task_create(void *sp_addr, void *pc_addr, long priority)
  *
  * @return struct task*
  */
-struct task *task_schedule_alog_average()
+struct task *task_schedule_alog_average(void)
 {
     // 获取下一个任务
     struct task *next_task;
@@ -167,7 +173,7 @@ struct task *task_schedule_alog_average()
  *
  * @return struct task*
  */
-struct task *task_schedule_alog_priority()
+struct task *task_schedule_alog_priority(void)
 {
     // 获取下一个任务
     struct task *t;
@@ -205,6 +211,10 @@ struct task *task_schedule_alog_priority()
     return priority_max_task;
 }
 
+/**
+ * @brief 在中断环境下进行任务切换
+ *
+ */
 void schedle_interrupt(void)
 {
     static struct task *from;
@@ -213,12 +223,14 @@ void schedle_interrupt(void)
     from = g_current_task;
     to = task_schedule_alog_priority();
 
-    log_i("switch from pid:[%02d]", from->pid);
-    log_i("switch to pid:  [%02d]", to->pid);
-
+    log_i("schedle_interrupt: [%02d] >> [%02d]", from->pid, to->pid);
     interrupt_task_switch_from_to(from, to);
 }
 
+/**
+ * @brief 在非中断环境下进行任务切换
+ *
+ */
 void schedle(void)
 {
     static struct task *from;
@@ -227,13 +239,16 @@ void schedle(void)
     from = g_current_task;
     to = task_schedule_alog_priority();
 
-    log_i("switch from pid:[%02d]", from->pid);
-    log_i("switch to pid:  [%02d]", to->pid);
-
+    log_i("schedle: [%02d] >> [%02d]", from->pid, to->pid);
     task_switch_from_to(from, to);
 }
 
-void kernel_task_init(void)
+/**
+ * @brief 获取当前任务的pid
+ *
+ * @return uint32_t
+ */
+uint32_t getpid(void)
 {
-    global_task_config();
+    return g_current_task->pid;
 }
