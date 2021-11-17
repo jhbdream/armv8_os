@@ -20,7 +20,7 @@ void timer_handler(struct irq_desc *desc)
     arch_timer_compare(period);
 
     //每次进入到中断时 系统定时tick增加
-    g_tick = g_tick + 1;
+    g_systic = g_systic + 1;
     schedle_interrupt();
 }
 

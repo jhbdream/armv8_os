@@ -2,7 +2,7 @@
 #include <kernel/task.h>
 #include <common/interrupt.h>
 
-volatile uint64_t g_tick = 0;
+volatile uint64_t g_systic = 0;
 
 /**
  * @brief 将tick转换为ms单位
@@ -12,7 +12,7 @@ volatile uint64_t g_tick = 0;
  */
 uint64_t tick_to_ms(uint64_t tick)
 {
-    return g_tick * (1000u / TICK_PER_SECOND);
+    return g_systic * (1000u / TICK_PER_SECOND);
 }
 
 /**
@@ -36,18 +36,18 @@ uint64_t ms_to_tick(uint64_t ms)
  * @param ms
  * @return int
  */
-int task_sleep_ms(uint64_t ms)
+void task_sleep_ms(uint64_t ms)
 {
-
     local_irq_disable();
-    struct task *t = g_current_task;
 
-    // 设置睡眠任务的状态
+    //设置睡眠任务的状态
+    struct task *t = g_current_task;
     t->task_flag = TASK_FLAG_SLEEP;
 
-    t->sleep_timeout = g_tick + ms_to_tick(ms);
+    //设置任务的唤醒时间
+    t->sleep_timeout = g_systic + ms_to_tick(ms);
     local_irq_enable();
 
+    //发起调度，切出任务
     schedle();
-    return 0;
 }

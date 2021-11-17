@@ -188,7 +188,7 @@ struct task *task_schedule_alog_priority(void)
         //如果睡眠tick超时 就把任务状态修改为 run
         if(t->task_flag == TASK_FLAG_SLEEP)
         {
-            if(g_tick >= t->sleep_timeout)
+            if(g_systic >= t->sleep_timeout)
             {
                 t->task_flag = TASK_FLAG_RUN;
             }
