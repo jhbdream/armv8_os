@@ -2,6 +2,8 @@
 #include <elog.h>
 #include <board_init.h>
 #include <config.h>
+#include <shell_port.h>
+#include <kernel/task.h>
 
 int main()
 {
@@ -10,6 +12,9 @@ int main()
 
     interrupt_init();
     systic_timer_init();
+    kernel_task_init();
+
+    lettel_shell_init();
     user_task_init();
 
     /* will not run here! */

@@ -1,7 +1,7 @@
 APP ?= app
 
 QUIET ?=@
-OPT_LEVEL ?= 2
+OPT_LEVEL ?= 0
 
 # Other switches the user should not normally need to change:
 ARCH = armv8-a
@@ -41,7 +41,9 @@ SRC_DIR += 	user	\
 			driver/irq/gicv3	\
 			kernel
 
+
 include common/EasyLogger/libEasyLogger.mk
+include common/letter-shell/liblettelshell.mk
 
 define EOL =
 

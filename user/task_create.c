@@ -65,11 +65,9 @@ void user_task_init(void)
     struct task *taskb_p;
     struct task *taskc_p;
 
-    kernel_task_init();
-
-    taska_p = task_create(taska_stack + sizeof(taska_stack), taska_fun, 10);
-    taskb_p = task_create(taskb_stack + sizeof(taskb_stack), taskb_fun, 20);
-    taskc_p = task_create(taskc_stack + sizeof(taskc_stack), taskc_fun, 30);
+    taska_p = task_create(taska_stack + sizeof(taska_stack), taska_fun, 20);
+    taskb_p = task_create(taskb_stack + sizeof(taskb_stack), taskb_fun, 21);
+    taskc_p = task_create(taskc_stack + sizeof(taskc_stack), taskc_fun, 22);
 
     task_switch_to(taska_p);
 }

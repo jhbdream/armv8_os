@@ -34,8 +34,11 @@ SECTIONS
 
     .rodata :
     {
+        . = ALIGN(8);
+
         *(.rodata .rodata.* .gnu.linkonce.r.*)
 
+        . = ALIGN(8);
         _shell_command_start = .;
         KEEP (*(shellCommand))
         _shell_command_end = .;
