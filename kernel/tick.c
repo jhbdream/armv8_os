@@ -46,8 +46,9 @@ void task_sleep_ms(uint64_t ms)
 
     //设置任务的唤醒时间
     t->sleep_timeout = g_systic + ms_to_tick(ms);
-    local_irq_enable();
 
     //发起调度，切出任务
     schedle();
+
+    local_irq_enable();
 }
