@@ -21,7 +21,6 @@ OD = $(CROSS_COMPILE)objdump
 
 # Commit hash from git
 COMMIT=$(shell git rev-parse --short HEAD)
-PACK_DATA=$(shell date +'%m%d_%H%M')
 
 export SRC_DIR
 export INCLUDES
@@ -87,10 +86,6 @@ clean:
 	$(call RM_FILES,$(APP))
 	$(call RM_FILES,$(APP).bin)
 	$(call RM_FILES,$(APP).dis)
-	$(call RM_FILES,*.tar.gz)
-
-pack:
-	@git archive --format tar.gz --output FT2004_Baremetal_$(PACK_DATA)_$(COMMIT).tar.gz master
 
 qemu: $(APP)
 	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 1024 -nographic -serial mon:stdio -kernel $(APP)
