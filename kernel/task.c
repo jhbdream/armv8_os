@@ -89,7 +89,16 @@ static void task_init(struct task *t, void *sp_addr, void *pc_addr, long priorit
     ELOG_ASSERT(priority < G_TASK_MAX_PRIORITY);
     ELOG_ASSERT(t != NULL);
 
-    t->sp = sp_addr;
+    uint64_t *sp_init = sp_addr;
+
+    //初始化任务栈
+    for(int i = 0; i < 31; i++)
+    {
+        *sp_init = i;
+        sp_init = sp_init - 1;
+    }
+
+    t->sp = sp_init;
     t->elr = (unsigned long)pc_addr;    //任务的入口地址
     t->spsr = 0x345;                    //在aarch64架构下 设置切换到el1 并且使能全局中断
 
