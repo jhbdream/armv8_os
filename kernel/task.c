@@ -198,11 +198,14 @@ struct task *task_schedule_alog_priority(void)
             priority_max_task = t;
         }
 
-        // 找到正在运行且优先级最高的任务 作为to任务
-        if (t->task_state & TASK_STATE_READY && t->priority > priority_max_task->priority)
+        if (priority_max_task != NULL)
         {
-            //比较有效任务的优先级 找到更高优先级任务
-            priority_max_task = t;
+            // 找到正在运行且优先级最高的任务 作为to任务
+            if (t->task_state & TASK_STATE_READY && t->priority > priority_max_task->priority)
+            {
+                //比较有效任务的优先级 找到更高优先级任务
+                priority_max_task = t;
+            }
         }
     }
 
