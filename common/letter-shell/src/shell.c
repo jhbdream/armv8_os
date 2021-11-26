@@ -199,8 +199,8 @@ void shellInit(Shell *shell, char *buffer, unsigned short size)
                                 / sizeof(ShellCommand);
     #elif defined(__GNUC__)
         shell->commandList.base = (ShellCommand *)(&_shell_command_start);
-        shell->commandList.count = ((unsigned int)(&_shell_command_end)
-                                - (unsigned int)(&_shell_command_start))
+        shell->commandList.count = ((unsigned long)(&_shell_command_end)
+                                - (unsigned long)(&_shell_command_start))
                                 / sizeof(ShellCommand);
     #else
         #error not supported compiler, please use command table mode
@@ -972,7 +972,7 @@ ShellCommand* shellSeekCommand(Shell *shell,
 {
     const char *name;
     unsigned short count = shell->commandList.count -
-        ((int)base - (int)shell->commandList.base) / sizeof(ShellCommand);
+        ((unsigned long)base - (unsigned long)shell->commandList.base) / sizeof(ShellCommand);
     for (unsigned short i = 0; i < count; i++)
     {
         if (base[i].attr.attrs.type == SHELL_TYPE_KEY
@@ -1023,7 +1023,7 @@ int shellGetVarValue(Shell *shell, ShellCommand *command)
         break;
     case SHELL_TYPE_VAR_STRING:
     case SHELL_TYPE_VAR_POINT:
-        value = (int)(command->data.var.value);
+        value = (int)(long)(command->data.var.value);
         break;
     case SHELL_TYPE_VAR_NODE:
         value = ((ShellNodeVarAttr *)command->data.var.value)->get ?
@@ -1065,7 +1065,7 @@ int shellSetVarValue(Shell *shell, ShellCommand *command, int value)
             *((char *)(command->data.var.value)) = value;
             break;
         case SHELL_TYPE_VAR_STRING:
-            shellStringCopy(((char *)(command->data.var.value)), (char *)value);
+            shellStringCopy(((char *)(command->data.var.value)), (char *)(long)value);
             break;
         case SHELL_TYPE_VAR_POINT:
             shellWriteString(shell, shellText[SHELL_TEXT_POINT_CANNOT_MODIFY]);
@@ -1111,7 +1111,7 @@ static int shellShowVar(Shell *shell, ShellCommand *command)
     {
     case SHELL_TYPE_VAR_STRING:
         shellWriteString(shell, "\"");
-        shellWriteString(shell, (char *)value);
+        shellWriteString(shell, (char *)(long)value);
         shellWriteString(shell, "\"");
         break;
     // case SHELL_TYPE_VAR_INT:

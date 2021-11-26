@@ -4,9 +4,9 @@
  * @brief shell extensions
  * @version 3.0.0
  * @date 2019-12-31
- * 
+ *
  * @copyright (c) 2019 Letter
- * 
+ *
  */
 
 #include "shell_cfg.h"
@@ -22,7 +22,7 @@ extern int shellGetVarValue(Shell *shell, ShellCommand *command);
 
 /**
  * @brief 判断数字进制
- * 
+ *
  * @param string 参数字符串
  * @return ShellNumType 进制
  */
@@ -43,7 +43,7 @@ static ShellNumType shellExtNumType(char *string)
     {
         type = NUM_TYPE_OCT;
     }
-    
+
     while (*p++)
     {
         if (*p == '.' && *(p + 1) != 0)
@@ -59,7 +59,7 @@ static ShellNumType shellExtNumType(char *string)
 
 /**
  * @brief 字符转数字
- * 
+ *
  * @param code 字符
  * @return char 数字
  */
@@ -86,7 +86,7 @@ static char shellExtToNum(char code)
 
 /**
  * @brief 解析字符参数
- * 
+ *
  * @param string 字符串参数
  * @return char 解析出的字符
  */
@@ -129,7 +129,7 @@ static char shellExtParseChar(char *string)
 
 /**
  * @brief 解析字符串参数
- * 
+ *
  * @param string 字符串参数
  * @return char* 解析出的字符串
  */
@@ -168,7 +168,7 @@ static char* shellExtParseString(char *string)
 
 /**
  * @brief 解析数字参数
- * 
+ *
  * @param string 字符串参数
  * @return unsigned int 解析出的数字
  */
@@ -196,7 +196,7 @@ static unsigned int shellExtParseNumber(char *string)
         radix = 16;
         offset = 2;
         break;
-    
+
     case NUM_TYPE_OCT:
         radix = 8;
         offset = 1;
@@ -206,7 +206,7 @@ static unsigned int shellExtParseNumber(char *string)
         radix = 2;
         offset = 2;
         break;
-    
+
     default:
         break;
     }
@@ -239,7 +239,7 @@ static unsigned int shellExtParseNumber(char *string)
 
 /**
  * @brief 解析变量参数
- * 
+ *
  * @param shell shell对象
  * @param var 变量
  * @return unsigned int 变量值
@@ -263,7 +263,7 @@ static unsigned int shellExtParseVar(Shell *shell, char *var)
 
 /**
  * @brief 解析参数
- * 
+ *
  * @param shell shell对象
  * @param string 参数
  * @return unsigned int 解析结果
@@ -284,7 +284,7 @@ unsigned int shellExtParsePara(Shell *shell, char *string)
     }
     else if (*string)
     {
-        return (unsigned int)shellExtParseString(string);
+        return (unsigned int)(unsigned long)shellExtParseString(string);
     }
     return 0;
 }
@@ -292,7 +292,7 @@ unsigned int shellExtParsePara(Shell *shell, char *string)
 
 /**
  * @brief 执行命令
- * 
+ *
  * @param shell shell对象
  * @param command 命令
  * @param argc 参数个数
@@ -302,7 +302,7 @@ unsigned int shellExtParsePara(Shell *shell, char *string)
 int shellExtRun(Shell *shell, ShellCommand *command, int argc, char *argv[])
 {
     unsigned int params[SHELL_PARAMETER_MAX_NUMBER] = {0};
-    int paramNum = command->attr.attrs.paramNum > (argc - 1) ? 
+    int paramNum = command->attr.attrs.paramNum > (argc - 1) ?
         command->attr.attrs.paramNum : (argc - 1);
     for (int i = 0; i < argc - 1; i++)
     {
