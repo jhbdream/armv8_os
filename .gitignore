@@ -58,3 +58,6 @@ tags
 *.tar.gz
 .cproject
 .project
+
+.gdb_history
+.gdbinit
