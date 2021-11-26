@@ -25,5 +25,5 @@
 #define UART011_MIS		0x40	/* Masked interrupt status. */
 #define UART011_ICR		0x44	/* Interrupt clear register. */
 
-uint8_t uart_getchar_polled(void);
-void uart_putc_polled(uint8_t c);
+int uart_putchar(uint8_t ch);
+int uart_getchar(uint8_t *ch);

@@ -5,8 +5,8 @@
 
 #include <driver/uart.h>
 
-__attribute__((weak)) uint8_t uart_getchar_polled(void);
-__attribute__((weak)) void uart_putc_polled(uint8_t c);
+__attribute__((weak)) int uart_putchar(uint8_t ch);
+__attribute__((weak)) int uart_getchar(uint8_t *ch);
 
 void initialise_monitor_handles(void)
 {
@@ -18,28 +18,38 @@ void initialise_monitor_handles(void)
 int _read(int file, char *ptr, int len)
 {
     int i;
+    uint8_t ch;
+    int read_len = 0;
 
     for (i = 0; i < len; ++i)
     {
-        ptr[i] = uart_getchar_polled();
+        if(uart_getchar(&ch) == 0 )
+        {
+            ptr[read_len] = ch;
+            read_len++;
+        }
     }
-    return len;
+    return read_len;
 }
 
 int _write(int file, char *ptr, int len)
 {
     int i;
+    int write_len = 0;
     for (i = 0; i < len; ++i)
     {
         if (ptr[i] == '\n')
         {
-            uart_putc_polled('\r');
+           while (uart_putchar('\r') < 0);
         }
 
-        uart_putc_polled(ptr[i]);
+        if(uart_putchar(ptr[write_len]) == 0)
+        {
+            write_len++;
+        }
     }
 
-    return len;
+    return write_len;
 }
 
 int _lseek(int file, int ptr, int dir)
