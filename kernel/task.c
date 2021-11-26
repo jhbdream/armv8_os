@@ -94,8 +94,8 @@ static void task_init(struct task *t, void *sp_addr, void *pc_addr, long priorit
     //初始化任务栈
     for(int i = 0; i < 31; i++)
     {
-        *sp_init = i;
         sp_init = sp_init - 1;
+        *sp_init = i;
     }
 
     t->sp = sp_init;

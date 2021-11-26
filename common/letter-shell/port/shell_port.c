@@ -2,6 +2,9 @@
 #include <driver/uart.h>
 #include <kernel/task.h>
 
+#include <elog.h>
+
+
 Shell shell;
 char shellBuffer[512];
 
@@ -14,14 +17,19 @@ char shellBuffer[512];
  */
 short shell_port_read(char *data, unsigned short len)
 {
-    short i;
+    int i;
+    uint8_t ch;
+    int read_len = 0;
 
-    for(i = 0; i < len; i++)
+    for (i = 0; i < len; ++i)
     {
-        data[i] = uart_getchar_polled();
+        if(uart_getchar(&ch) == 0 )
+        {
+            data[read_len] = ch;
+            read_len++;
+        }
     }
-
-    return i;
+    return read_len;
 }
 
 /**
@@ -33,14 +41,17 @@ short shell_port_read(char *data, unsigned short len)
  */
 short shell_port_write(char *data, unsigned short len)
 {
-    short i;
-
-    for(i = 0; i < len; i++)
+    int i;
+    int write_len = 0;
+    for (i = 0; i < len; ++i)
     {
-        uart_putc_polled(data[i]);
+        if(uart_putchar(data[write_len]) == 0)
+        {
+            write_len++;
+        }
     }
 
-    return i;
+    return write_len;
 }
 
 
@@ -52,15 +63,15 @@ short shell_port_write(char *data, unsigned short len)
  */
 void shellTask(void)
 {
-    Shell *shell = (Shell *)shell;
+    Shell *shell_handle = (Shell *)&shell;
     char data;
 #if SHELL_TASK_WHILE == 1
     while(1)
     {
 #endif
-        if (shell->read && shell->read(&data, 1) == 1)
+        if (shell_handle->read && shell_handle->read(&data, 1) == 1)
         {
-            shellHandler(shell, data);
+            shellHandler(shell_handle, data);
         }
 #if SHELL_TASK_WHILE == 1
     }
@@ -75,5 +86,5 @@ void lettel_shell_init(void)
     shell.write = shell_port_write;
     shellInit(&shell, shellBuffer, sizeof(shellBuffer));
 
-    task_create(shell_task_stack + sizeof(shell_task_stack), shellTask, 10);
+    task_create(shell_task_stack + sizeof(shell_task_stack), shellTask, 40);
 }

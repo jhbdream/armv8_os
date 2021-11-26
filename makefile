@@ -77,7 +77,7 @@ all: $(APP)
 
 $(APP): $(OBJ_FILES) gcc.ld
 	@echo Linking $@
-	$(QUIET) $(CC) $(TARGET_ARCH) $(LDFLAGS) --output $@ $(OBJ_FILES) -lm
+	$(QUIET) $(CC) $(TARGET_ARCH) $(LDFLAGS) --output $@ $(OBJ_FILES) -lm -Wl,-Map,$@.map
 	@echo Objcopying $@.bin
 	$(QUIET) $(OC) -v -O binary $@ $@.bin
 	$(QUIET) $(OD) -D $@ > $@.dis

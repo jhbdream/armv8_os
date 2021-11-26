@@ -20,8 +20,8 @@ void taska_fun(void)
 {
     while (1)
     {
-        log_v("task pid is %d!", getpid());
-        log_v("i am %s run! line:[%d]!", __func__, __LINE__);
+        log_i("task pid is %d!", getpid());
+        log_i("i am %s run! line:[%d]!", __func__, __LINE__);
         mdelay(50);
     }
 }
@@ -37,8 +37,8 @@ void taskb_fun(void)
 {
     while (1)
     {
-        log_v("task pid is %d!", getpid());
-        log_v("i am %s run! line:[%d]!", __func__, __LINE__);
+        log_i("task pid is %d!", getpid());
+        log_i("i am %s run! line:[%d]!", __func__, __LINE__);
 
         task_sleep_ms(500);
     }
@@ -49,8 +49,8 @@ void taskc_fun(void)
 {
     while (1)
     {
-        log_v("task pid is %d!", getpid());
-        log_v("i am %s run! line:[%d]!", __func__, __LINE__);
+        log_i("task pid is %d!", getpid());
+        log_i("i am %s run! line:[%d]!", __func__, __LINE__);
         task_sleep_ms(500);
     }
 }
