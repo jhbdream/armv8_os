@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <bits.h>
 
+#define TASK_NAME_LEN 64
+
 struct task
 {
     /* task contex */
@@ -15,6 +17,7 @@ struct task
                             //定义最低的优先级为 idle 空闲任务(G_TASK_MAX_PRIORITY - 1)
     uint32_t task_state;
     uint64_t sleep_timeout;
+    char task_name[TASK_NAME_LEN];
 };
 
 /**
@@ -40,8 +43,7 @@ int task_switch_to(struct task *task_to);
 int task_switch_from_to(struct task *task_from, struct task *task_to);
 void interrupt_task_switch_from_to(struct task *task_from, struct task *task_to);
 
-struct task *task_create(void *sp_addr, void *pc_addr, long priority);
-
+struct task *task_create(char *name, void *sp_addr, void *pc_addr, long priority);
 struct task *task_schedule_alog_average(void);
 struct task *task_schedule_alog_priority(void);
 

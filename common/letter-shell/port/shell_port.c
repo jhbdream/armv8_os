@@ -86,5 +86,5 @@ void lettel_shell_init(void)
     shell.write = shell_port_write;
     shellInit(&shell, shellBuffer, sizeof(shellBuffer));
 
-    task_create(shell_task_stack + sizeof(shell_task_stack), shellTask, 40);
+    task_create("lettel_shell", shell_task_stack + sizeof(shell_task_stack), shellTask, 10);
 }

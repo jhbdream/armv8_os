@@ -44,6 +44,7 @@ SRC_DIR += 	user	\
 
 include common/EasyLogger/libEasyLogger.mk
 include common/letter-shell/liblettelshell.mk
+include common/printf_format/printf_format.mk
 
 define EOL =
 

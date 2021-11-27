@@ -2,6 +2,7 @@
 #include <kernel/tick.h>
 #include <stdio.h>
 #include <elog.h>
+#include <string.h>
 
 /**
  * @brief 全局变量，任务数组
@@ -84,7 +85,7 @@ void kernel_task_init(void)
  * @param pc_addr 该任务的函数地址
  * @return int
  */
-static void task_init(struct task *t, void *sp_addr, void *pc_addr, long priority)
+static void task_init(struct task *t, char *name, void *sp_addr, void *pc_addr, long priority)
 {
     ELOG_ASSERT(priority < G_TASK_MAX_PRIORITY);
     ELOG_ASSERT(t != NULL);
@@ -104,6 +105,8 @@ static void task_init(struct task *t, void *sp_addr, void *pc_addr, long priorit
 
     t->priority = priority;
     t->task_state = TASK_STATE_READY;
+
+    strcpy(t->task_name, name);
 }
 
 /**
@@ -113,14 +116,14 @@ static void task_init(struct task *t, void *sp_addr, void *pc_addr, long priorit
  * @param pc_addr
  * @return long
  */
-struct task *task_create(void *sp_addr, void *pc_addr, long priority)
+struct task *task_create(char *name, void *sp_addr, void *pc_addr, long priority)
 {
     struct task *new_task;
 
     new_task = requset_task();
     if(new_task != NULL)
     {
-        task_init(new_task, sp_addr, pc_addr, priority);
+        task_init(new_task, name, sp_addr, pc_addr, priority);
         return new_task;
     }
     else

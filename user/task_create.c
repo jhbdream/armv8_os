@@ -22,7 +22,7 @@ void taska_fun(void)
     {
         log_i("task pid is %d!", getpid());
         log_i("i am %s run! line:[%d]!", __func__, __LINE__);
-        mdelay(50);
+        task_sleep_ms(50);
     }
 }
 
@@ -65,9 +65,9 @@ void user_task_init(void)
     struct task *taskb_p;
     struct task *taskc_p;
 
-    taska_p = task_create(taska_stack + sizeof(taska_stack), taska_fun, 20);
-    taskb_p = task_create(taskb_stack + sizeof(taskb_stack), taskb_fun, 21);
-    taskc_p = task_create(taskc_stack + sizeof(taskc_stack), taskc_fun, 22);
+    taska_p = task_create("taskA", taska_stack + sizeof(taska_stack), taska_fun, 20);
+    taskb_p = task_create("taskB", taskb_stack + sizeof(taskb_stack), taskb_fun, 21);
+    taskc_p = task_create("taskC", taskc_stack + sizeof(taskc_stack), taskc_fun, 22);
 
     task_switch_to(taska_p);
 }
