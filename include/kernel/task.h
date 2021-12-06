@@ -1,4 +1,6 @@
 #ifndef __TASK_H__
+#define __TASK_H__
+
 #include <stdint.h>
 #include <bits.h>
 
@@ -30,6 +32,8 @@ struct task
 #define TASK_STATE_READY    BIT(1)  //任务已经创建，未运行
 #define TASK_STATE_RUN      BIT(2)  //任务已经创建，并且正在运行(保留)
 #define TASK_STATE_SLEEP    BIT(3)  //任务睡眠
+#define TASK_STATE_WAIT_SEM    BIT(4)  //等待信号量挂起
+
 
 typedef struct task *task_t;
 

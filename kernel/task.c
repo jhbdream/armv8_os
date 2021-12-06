@@ -236,7 +236,7 @@ void schedle_interrupt(void)
     from = g_current_task;
     to = task_schedule_alog_priority();
 
-    log_i("schedle_interrupt: [%02d] >> [%02d]", from->pid, to->pid);
+    log_d("schedle_interrupt: [%02d] >> [%02d]", from->pid, to->pid);
     interrupt_task_switch_from_to(from, to);
 }
 
@@ -252,7 +252,7 @@ void schedle(void)
     from = g_current_task;
     to = task_schedule_alog_priority();
 
-    log_i("schedle: [%02d] >> [%02d]", from->pid, to->pid);
+    log_d("schedle: [%02d] >> [%02d]", from->pid, to->pid);
     task_switch_from_to(from, to);
 }
 

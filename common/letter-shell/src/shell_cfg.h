@@ -4,9 +4,9 @@
  * @brief shell config
  * @version 3.0.0
  * @date 2019-12-31
- * 
+ *
  * @copyright (c) 2019 Letter
- * 
+ *
  */
 
 #ifndef __SHELL_CFG_H__
@@ -164,7 +164,7 @@
 /**
  * @brief 是否在登录后清除命令行
  */
-#define     SHELL_CLS_WHEN_LOGIN        1
+#define     SHELL_CLS_WHEN_LOGIN        0
 
 /**
  * @brief shell默认用户

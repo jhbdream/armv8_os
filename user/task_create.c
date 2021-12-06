@@ -18,10 +18,11 @@ char taska_stack[4096 * 8];
 
 void taska_fun(void)
 {
+    log_i("task pid is %d!", getpid());
+    log_i("i am %s run! line:[%d]!", __func__, __LINE__);
+
     while (1)
     {
-        log_i("task pid is %d!", getpid());
-        log_i("i am %s run! line:[%d]!", __func__, __LINE__);
         task_sleep_ms(50);
     }
 }
@@ -35,23 +36,23 @@ char taskb_stack[4096 * 8];
 
 void taskb_fun(void)
 {
+    log_i("task pid is %d!", getpid());
+    log_i("i am %s run! line:[%d]!", __func__, __LINE__);
     while (1)
     {
-        log_i("task pid is %d!", getpid());
-        log_i("i am %s run! line:[%d]!", __func__, __LINE__);
-
         task_sleep_ms(500);
     }
 }
 
-char taskc_stack[4096 * 8];
-void taskc_fun(void)
+char task_idle_stack[4096];
+void task_idle(void)
 {
+    log_i("task pid is %d!", getpid());
+    log_i("i am %s run! line:[%d]!", __func__, __LINE__);
+
     while (1)
     {
-        log_i("task pid is %d!", getpid());
-        log_i("i am %s run! line:[%d]!", __func__, __LINE__);
-        task_sleep_ms(500);
+
     }
 }
 
@@ -61,13 +62,11 @@ void taskc_fun(void)
  */
 void user_task_init(void)
 {
-    struct task *taska_p;
-    struct task *taskb_p;
-    struct task *taskc_p;
+    struct task *taskp;
 
-    taska_p = task_create("taskA", taska_stack + sizeof(taska_stack), taska_fun, 20);
-    taskb_p = task_create("taskB", taskb_stack + sizeof(taskb_stack), taskb_fun, 21);
-    taskc_p = task_create("taskC", taskc_stack + sizeof(taskc_stack), taskc_fun, 22);
+    taskp = task_create("taskA", taska_stack + sizeof(taska_stack), taska_fun, 20);
+    task_create("taskB", taskb_stack + sizeof(taskb_stack), taskb_fun, 21);
+    task_create("idle", task_idle_stack + sizeof(task_idle_stack), task_idle, 0);
 
-    task_switch_to(taska_p);
+    task_switch_to(taskp);
 }

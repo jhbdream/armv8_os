@@ -5,6 +5,8 @@
 #include <shell_port.h>
 #include <kernel/task.h>
 
+extern void sem_task_init(void);
+
 int main()
 {
     printf("start run in main!\n");
@@ -13,8 +15,8 @@ int main()
     interrupt_init();
     systic_timer_init();
     kernel_task_init();
-
     lettel_shell_init();
+    sem_task_init();
     user_task_init();
 
     /* will not run here! */

@@ -1,7 +1,7 @@
 #include <shell.h>
 #include <driver/uart.h>
 #include <kernel/task.h>
-
+#include <kernel/tick.h>
 #include <elog.h>
 
 
@@ -73,6 +73,8 @@ void shellTask(void)
         {
             shellHandler(shell_handle, data);
         }
+
+        task_sleep_ms(10);
 #if SHELL_TASK_WHILE == 1
     }
 #endif
@@ -86,5 +88,5 @@ void lettel_shell_init(void)
     shell.write = shell_port_write;
     shellInit(&shell, shellBuffer, sizeof(shellBuffer));
 
-    task_create("lettel_shell", shell_task_stack + sizeof(shell_task_stack), shellTask, 10);
+    task_create("lettel_shell", shell_task_stack + sizeof(shell_task_stack), shellTask, 2);
 }

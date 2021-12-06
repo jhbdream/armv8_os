@@ -190,7 +190,7 @@ ElogErrCode elog_init(void) {
 #endif
 
     /* set level is ELOG_LVL_WARN */
-    elog_set_filter_lvl(ELOG_LVL_WARN);
+    elog_set_filter_lvl(ELOG_LVL_INFO);
 
     /* set tag_level to default val */
     elog_set_filter_tag_lvl_default();
