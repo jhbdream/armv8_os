@@ -10,7 +10,7 @@ struct semaphore
     uint32_t value;
 };
 
-int sem_init(struct semaphore *sem);
+int sem_init(struct semaphore *sem, uint32_t count);
 int sem_take(struct semaphore *sem);
 int sem_release(struct semaphore *sem);
 

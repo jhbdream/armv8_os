@@ -19,6 +19,7 @@ void sema_task(void)
 
     while (1)
     {
+        log_i("i am %s run! line:[%d] sem_release!", __func__, __LINE__);
         sem_release(&sem);
         task_sleep_ms(500);
     }
@@ -42,7 +43,7 @@ void semb_task(void)
 
 void sem_task_init(void)
 {
-    sem_init(&sem);
+    sem_init(&sem, 1);
     task_create("sema", sema_stack + sizeof(sema_stack), sema_task, 50);
     task_create("semb", semb_stack + sizeof(semb_stack), semb_task, 51);
 }
