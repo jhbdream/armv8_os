@@ -8,6 +8,13 @@ unsigned long task_interrupt_from_thread;
 unsigned long task_interrupt_to_thread;
 unsigned long task_thread_switch_interrupt_flag;
 
+unsigned long interrupt_nest = 0;
+
+int is_interrupt_nest(void)
+{
+	return (interrupt_nest > 0) ? 1 : 0;
+}
+
 /**
  * @brief 无效中断入口
  *
@@ -52,7 +59,7 @@ struct irq_desc irq_desc[NR_IRQS] = {
  */
 void irq_enter(void)
 {
-
+	interrupt_nest++;
 }
 
 /*
@@ -60,7 +67,7 @@ void irq_enter(void)
  */
 void irq_exit(void)
 {
-
+	interrupt_nest--;
 }
 
 struct irq_desc *irq_to_desc(unsigned int irq)

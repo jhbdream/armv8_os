@@ -153,4 +153,6 @@ void handle_domain_irq(struct pt_regs *regs);
 int request_irq(unsigned int irq, irq_handler_t handler, unsigned long flags,
                 const char *name, void *data);
 
+int is_interrupt_nest(void);
+
 #endif
