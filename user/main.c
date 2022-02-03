@@ -4,14 +4,16 @@
 #include <config.h>
 #include <shell_port.h>
 #include <kernel/task.h>
+#include <mm/simple_mm.h>
 
 extern void sem_task_init(void);
 
 int main()
 {
     printf("start run in main!\n");
-    elog_lib_init();
+    mm_init(0x50000000, 0x10000000);
 
+    elog_lib_init();
     interrupt_init();
     systic_timer_init();
     kernel_task_init();

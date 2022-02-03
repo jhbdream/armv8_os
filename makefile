@@ -30,7 +30,9 @@ SRC_DIR := libcpu/aarch64
 INCLUDES :=
 
 INCLUDES += -Iinclude 	\
-			-Ilibcpu/aarch64/include
+			-Ilibcpu/aarch64/include	\
+			-Iinclude/kernel
+
 
 SRC_DIR += 	user	\
 			common/libc	\
@@ -39,7 +41,9 @@ SRC_DIR += 	user	\
 			driver/uart	\
 			driver/irq	\
 			driver/irq/gicv3	\
-			kernel
+			kernel			\
+			kernel/mm
+
 
 
 include common/EasyLogger/libEasyLogger.mk
