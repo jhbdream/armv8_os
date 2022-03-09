@@ -16,6 +16,7 @@
 
 #ifndef __GIC_H__
 #define __GIC_H__
+#include <ee_stdint.h>
 
 int gic_init(void);
 void irq_mask(uint32_t hwirq);

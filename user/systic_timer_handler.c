@@ -1,12 +1,12 @@
-#include <stdio.h>
+#include <printk.h>
 #include <board_init.h>
-#include <elog.h>
 #include <config.h>
 #include <driver/gic.h>
 #include <arch_timer.h>
 #include <common/interrupt.h>
 #include <kernel/task.h>
 #include <kernel/tick.h>
+#include <ee_stddef.h>
 
 /**
  * @brief 定时器中断处理函数，在这里进行任务调度处理
@@ -33,7 +33,6 @@ void systic_timer_init(void)
 {
     if(request_irq(30, timer_handler, 0, "arch_timer", NULL) < 0)
     {
-        log_e("request_irq failed!");
         return;
     }
 

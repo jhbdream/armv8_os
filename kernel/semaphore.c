@@ -1,5 +1,6 @@
 #include <kernel/semaphore.h>
 #include <common/interrupt.h>
+#include <ee_stddef.h>
 
 int sem_init(struct semaphore *sem, uint32_t count)
 {

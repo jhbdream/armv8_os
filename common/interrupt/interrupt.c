@@ -1,8 +1,9 @@
 #include <common/interrupt.h>
-#include <errno.h>
-#include <elog.h>
+#include <ee_errno.h>
 #include <compiler_types.h>
 #include <driver/gic.h>
+#include <ee_stdarg.h>
+#include <ee_stddef.h>
 
 unsigned long task_interrupt_from_thread;
 unsigned long task_interrupt_to_thread;
@@ -22,7 +23,6 @@ int is_interrupt_nest(void)
  */
 void unexpected_exception(int val)
 {
-    log_e("unexpected exception! val = %d\n", val);
     while (1)
     {
         /* code */
@@ -31,7 +31,7 @@ void unexpected_exception(int val)
 
 static inline void ack_bad_irq(unsigned int irq)
 {
-	log_e("unexpected IRQ trap at vector %02x", irq);
+
 }
 
 /**

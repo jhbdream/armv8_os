@@ -12,7 +12,7 @@ _startup:
 	bne	hang
 
     /* Enable FP/SIMD at EL1
-     * libc printf use float reg, if not enable fp will exception
+     * libc printk use float reg, if not enable fp will exception
      */
     mov x0, #(3<<20)
     msr cpacr_el1, x0
@@ -35,8 +35,6 @@ memset_loop:
     b.lt memset_loop
 
     bl main
-
-    b exit // Will not return
 
 hang:
 	wfi

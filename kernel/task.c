@@ -1,8 +1,9 @@
 #include <kernel/task.h>
 #include <kernel/tick.h>
-#include <stdio.h>
-#include <elog.h>
-#include <string.h>
+#include <ee_stdio.h>
+#include <ee_string.h>
+#include <ee_stddef.h>
+#include <printk.h>
 
 /**
  * @brief 全局变量，任务数组
@@ -87,9 +88,6 @@ void kernel_task_init(void)
  */
 static void task_init(struct task *t, char *name, void *sp_addr, void *pc_addr, long priority)
 {
-    ELOG_ASSERT(priority < G_TASK_MAX_PRIORITY);
-    ELOG_ASSERT(t != NULL);
-
     uint64_t *sp_init = sp_addr;
 
     //初始化任务栈
@@ -128,7 +126,6 @@ struct task *task_create(char *name, void *sp_addr, void *pc_addr, long priority
     }
     else
     {
-        log_e("error: can not get task!");
         return NULL;
     }
 }
@@ -236,7 +233,6 @@ void schedle_interrupt(void)
     from = g_current_task;
     to = task_schedule_alog_priority();
 
-    log_d("schedle_interrupt: [%02d] >> [%02d]", from->pid, to->pid);
     interrupt_task_switch_from_to(from, to);
 }
 
@@ -252,7 +248,6 @@ void schedle(void)
     from = g_current_task;
     to = task_schedule_alog_priority();
 
-    log_d("schedle: [%02d] >> [%02d]", from->pid, to->pid);
     task_switch_from_to(from, to);
 }
 

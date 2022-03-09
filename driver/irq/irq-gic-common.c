@@ -1,9 +1,9 @@
-#include <errno.h>
+#include <ee_errno.h>
 #include <type.h>
 #include <io.h>
 #include <common/interrupt.h>
 #include "arm-gic.h"
-#include <elog.h>
+#include <printk.h>
 
 int gic_configure_irq(unsigned int irq, unsigned int type,
 		       void __iomem *base, void (*sync_access)(void))
@@ -44,7 +44,7 @@ int gic_configure_irq(unsigned int irq, unsigned int type,
 		if ((irq >= 32))
 			ret = -EINVAL;
 		else
-			log_w("GIC: PPI%d is secure or misconfigured\n",
+			printk("GIC: PPI%d is secure or misconfigured\n",
 				  irq - 16);
 	}
 

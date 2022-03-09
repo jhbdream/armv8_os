@@ -69,6 +69,7 @@
 #include <sysreg.h>
 #include <type.h>
 #include <compiler_types.h>
+#include <compiler_attribute.h>
 
 #define read_cpuid(reg)			read_sysreg_s(SYS_ ## reg)
 

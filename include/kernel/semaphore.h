@@ -1,7 +1,7 @@
 #ifndef __SEMAPHORE_H__
 #define __SEMAPHORE_H__
 
-#include <stdio.h>
+#include <printk.h>
 #include <kernel/task.h>
 
 struct semaphore

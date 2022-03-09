@@ -1,13 +1,11 @@
 #include <kernel/task.h>
 #include <kernel/tick.h>
-
-#include <stdio.h>
 #include <common/delay.h>
-#include <elog.h>
+#include <ee_stddef.h>
+#include <printk.h>
 
 extern struct task taska;
 extern struct task taskb;
-
 
 /**
  * @brief taska
@@ -18,12 +16,9 @@ char taska_stack[4096 * 8];
 
 void taska_fun(void)
 {
-    log_i("task pid is %d!", getpid());
-    log_i("i am %s run! line:[%d]!", __func__, __LINE__);
-
     while (1)
     {
-        task_sleep_ms(50);
+        task_sleep_ms(1000);
     }
 }
 
@@ -36,8 +31,6 @@ char taskb_stack[4096 * 8];
 
 void taskb_fun(void)
 {
-    log_i("task pid is %d!", getpid());
-    log_i("i am %s run! line:[%d]!", __func__, __LINE__);
     while (1)
     {
         task_sleep_ms(500);
@@ -45,14 +38,12 @@ void taskb_fun(void)
 }
 
 char task_idle_stack[4096];
+static uint64_t idel_count = 0;
 void task_idle(void)
 {
-    log_i("task pid is %d!", getpid());
-    log_i("i am %s run! line:[%d]!", __func__, __LINE__);
-
     while (1)
     {
-
+        idel_count++;
     }
 }
 

@@ -1,16 +1,15 @@
-#define LOG_TAG "irq-gic-v3"
-
-#include <stdint.h>
-#include <errno.h>
+#include <ee_stdint.h>
+#include <ee_stddef.h>
+#include <ee_errno.h>
 #include <io.h>
 #include <type.h>
-#include <elog.h>
 #include <common/delay.h>
 #include <common/interrupt.h>
 #include <arch_gicv3.h>
 #include <cputype.h>
 #include "arm-gic-v3.h"
 #include "../irq-gic-common.h"
+#include <printk.h>
 
 struct redist_region
 {
@@ -31,7 +30,7 @@ static struct gic_chip_data gic_data;
 #define DEFAULT_PMR_VALUE 0xf0
 
 #define cpu_relax()
-#define pr_err_ratelimited log_e
+#define pr_err_ratelimited printk
 
 static inline void __iomem *gic_data_rdist_rd_base(void)
 {
@@ -447,7 +446,6 @@ int gic_init_bases(void __iomem *dist_base,
 
 	err = gic_validate_dist_version(dist_base);
 	if (err) {
-		log_e("no distributor detected, giving up\n");
 		return err;
 	}
 

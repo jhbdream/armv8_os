@@ -2,8 +2,6 @@
 #include <driver/uart.h>
 #include <kernel/task.h>
 #include <kernel/tick.h>
-#include <elog.h>
-
 
 Shell shell;
 char shellBuffer[512];

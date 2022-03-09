@@ -1,4 +1,6 @@
-#include <stdio.h>
+#include <ee_stdio.h>
+#include <ee_stddef.h>
+#include <printk.h>
 #include <mm/simple_mm.h>
 
 static mm_node_t *head_node = NULL;
@@ -7,10 +9,10 @@ static mm_node_t *head_node = NULL;
 
 void node_dump(mm_node_t *node, const char *tag)
 {
-    printf("=====[%s]:node dump=====\n", tag);
-    printf("addr: %p\n", node->addr);
-    printf("size: %p\n", node->size);
-    printf("used: %p\n", node->used);
+    printk("=====[%s]:node dump=====\n", tag);
+    printk("addr: %p\n", node->addr);
+    printk("size: %p\n", node->size);
+    printk("used: %p\n", node->used);
 }
 
 void simple_mm_info(void)
@@ -28,11 +30,11 @@ void simple_mm_info(void)
  *        使用 mm_node_t 来管理内存片段
  *        将该结构体放在内存空间的头部
  *        使用链表串联起来全部的内存片段
- *        
+ *
  *        之后所有申请到的内存空间都在下面参数定义的区域
  * @param start_addr 动态内存分配管理空间起始地址
  * @param size 动态内存分配管理空间大小
- * @return int 
+ * @return int
  */
 int mm_init(size_t start_addr, size_t size)
 {
@@ -52,9 +54,9 @@ int mm_init(size_t start_addr, size_t size)
 
 /**
  * @brief 申请指定大小内存空间
- * 
- * @param size 
- * @return void* 
+ *
+ * @param size
+ * @return void*
  */
 void *kmalloc(size_t size)
 {
@@ -70,7 +72,7 @@ void *kmalloc(size_t size)
     /**
      * @brief 分配需要适当的对齐
      *        如果申请8字节的数据 但是没有对齐的话，访问会出现异常
-     * 
+     *
      */
     size = (((size) + (align)-1) & ~((align)-1));
 
@@ -114,8 +116,8 @@ void *kmalloc(size_t size)
 
 /**
  * @brief 释放指定的内存片段
- * 
- * @param ptr 
+ *
+ * @param ptr
  */
 void kfree(void *ptr)
 {
@@ -172,7 +174,7 @@ int mm_test_case(void)
     for (i = 0; i < 10; i++)
     {
         addr[i] = kmalloc(i);
-        printf("request: %p\n", addr);
+        printk("request: %p\n", addr);
     }
 
     kfree(addr[2]);

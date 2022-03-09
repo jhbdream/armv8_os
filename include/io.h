@@ -1,7 +1,7 @@
 #ifndef __ASM_ARM_IO_H
 #define __ASM_ARM_IO_H
 
-#include <stdint.h>
+#include <ee_stdint.h>
 #include <barriers.h>
 #include <type.h>
 #include <compiler_types.h>

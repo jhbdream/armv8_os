@@ -1,7 +1,7 @@
 #ifndef __DELAY_H__
 #define __DELAY_H__
 
-#include <stdint.h>
+#include <ee_stdint.h>
 
 void ndelay(uint32_t ns);
 void udelay(uint32_t us);

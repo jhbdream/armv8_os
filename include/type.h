@@ -1,7 +1,7 @@
 #ifndef __TYPE_H__
 #define __TYPE_H__
 
-#include <stdint.h>
+#include <ee_stdint.h>
 #include <bitops.h>
 
 #define DECLARE_BITMAP(name,bits) \
@@ -27,5 +27,15 @@ typedef __s32 s32;
 typedef __u32 u32;
 typedef __s64 s64;
 typedef __u64 u64;
+
+typedef int bool;
+
+#ifndef true
+#define true 1
+#endif
+
+#ifndef false
+#define false 0
+#endif
 
 #endif

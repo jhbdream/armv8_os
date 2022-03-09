@@ -13,7 +13,7 @@ ifeq ($(QUIET),@)
 PROGRESS = @echo Compiling $<...
 endif
 
-CROSS_COMPILE := aarch64-none-elf-
+CROSS_COMPILE :=
 
 CC = $(CROSS_COMPILE)gcc
 OC = $(CROSS_COMPILE)objcopy
@@ -31,8 +31,9 @@ INCLUDES :=
 
 INCLUDES += -Iinclude 	\
 			-Ilibcpu/aarch64/include	\
-			-Iinclude/kernel
-
+			-Iinclude/kernel	\
+			-Iinclude/libc \
+			-Iinclude/ee
 
 SRC_DIR += 	user	\
 			common/libc	\
@@ -42,11 +43,10 @@ SRC_DIR += 	user	\
 			driver/irq	\
 			driver/irq/gicv3	\
 			kernel			\
-			kernel/mm
+			kernel/mm \
+			lib	\
+			kernel/printk
 
-
-
-include common/EasyLogger/libEasyLogger.mk
 include common/letter-shell/liblettelshell.mk
 include common/printf_format/printf_format.mk
 
@@ -60,9 +60,9 @@ RM_DIRS = $(foreach dir,$(1),rm -rf $(dir)$(EOL))
 DEPEND_FLAGS = -MD -MF $@.d
 
 CPPFLAGS = $(DEFINES) $(INCLUDES) $(DEPEND_FLAGS) $(CPPFLAGS_EXTRA)
-CFLAGS = $(DEBUG_FLAGS) -O$(OPT_LEVEL)
+CFLAGS = $(DEBUG_FLAGS) -O$(OPT_LEVEL) -fno-stack-protector -nostdinc
 ASFLAGS = $(DEBUG_FLAGS)
-LDFLAGS = -Tgcc.ld -Wl,--build-id=none -nostartfiles -ffreestanding -fno-common $(LDFLAGS_EXTRA)
+LDFLAGS = -Tgcc.ld -Wl,--build-id=none -fno-stack-protector -static -nostartfiles -nostdlib -ffreestanding -fno-common $(LDFLAGS_EXTRA)
 TARGET_ARCH = -march=$(ARCH)
 
 #mkdir 创建输出文件目录
