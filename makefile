@@ -13,7 +13,7 @@ ifeq ($(QUIET),@)
 PROGRESS = @echo Compiling $<...
 endif
 
-CROSS_COMPILE :=
+CROSS_COMPILE :=aarch64-linux-gnu-
 
 CC = $(CROSS_COMPILE)gcc
 OC = $(CROSS_COMPILE)objcopy
