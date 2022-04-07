@@ -1,8 +1,8 @@
 #include <common/delay.h>
-#include <arch_timer.h>
 
 void ndelay(uint32_t ns)
 {
+#if 0
     uint64_t current = arch_timer_read();
     uint64_t condition = current + arch_timer_frequecy() * ns / 1000000000;
 
@@ -10,10 +10,12 @@ void ndelay(uint32_t ns)
     {
         current = arch_timer_read();
     }
+#endif
 }
 
 void udelay(uint32_t us)
 {
+#if 0
     uint64_t current = arch_timer_read();
     uint64_t condition = current + arch_timer_frequecy() * us / 1000000;
 
@@ -21,15 +23,18 @@ void udelay(uint32_t us)
     {
         current = arch_timer_read();
     }
+#endif
 }
 
 void mdelay(uint32_t ms)
 {
-    uint64_t current = arch_timer_read();
+#if 0
+	uint64_t current = arch_timer_read();
     uint64_t condition = current + arch_timer_frequecy() * ms / 1000;
 
     while (condition > current)
     {
         current = arch_timer_read();
     }
+#endif
 }

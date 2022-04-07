@@ -740,12 +740,13 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
 	{
 		const char *old_fmt = fmt;
 		int read = format_decode(fmt, &spec);
-
+		int copy;
+		char c;
 		fmt += read;
 		switch (spec.type)
 		{
 		case FORMAT_TYPE_NONE:
-			int copy = read;
+			copy = read;
 			if (str < end)
 			{
 				if (copy > end - str)
@@ -766,7 +767,6 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
 			break;
 
 		case FORMAT_TYPE_CHAR:
-			char c;
 
 			if (!(spec.flags & LEFT))
 			{

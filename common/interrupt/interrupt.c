@@ -100,8 +100,9 @@ int generic_handle_irq(unsigned int irq)
 	return 0;
 }
 
-void handle_domain_irq(struct pt_regs *regs)
+void handle_domain_irq(void *regs)
 {
+#if 0
 	static uint32_t irqnr;
 	irq_enter();
 	irqnr = irq_read_iar();
@@ -110,6 +111,7 @@ void handle_domain_irq(struct pt_regs *regs)
 
 	irq_eoi(irqnr);
 	irq_exit();
+#endif
 }
 
 int request_irq(unsigned int irq, irq_handler_t handler, unsigned long flags,
@@ -133,8 +135,9 @@ int request_irq(unsigned int irq, irq_handler_t handler, unsigned long flags,
 	/* Reset broken irq detection when installing new handler */
 	desc->irq_count = 0;
 
+#if 0
 	/* 申请中断意味着会取消中断控制器的屏蔽 */
 	irq_unmask(irq);
-
+#endif
 	return 0;
 }

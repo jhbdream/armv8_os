@@ -4,7 +4,6 @@
 #define _LINUX_INTERRUPT_H
 
 #include <cpumusk.h>
-#include <ptrace.h>
 #include <irqflags.h>
 
 #define NR_IRQS 8192
@@ -148,7 +147,7 @@ static inline unsigned int irq_desc_get_irq(struct irq_desc *desc)
     return desc->irq;
 }
 
-void handle_domain_irq(struct pt_regs *regs);
+void handle_domain_irq(void *regs);
 
 int request_irq(unsigned int irq, irq_handler_t handler, unsigned long flags,
                 const char *name, void *data);

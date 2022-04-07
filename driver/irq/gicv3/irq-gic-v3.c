@@ -3,7 +3,6 @@
 #include <ee_errno.h>
 #include <io.h>
 #include <type.h>
-#include <common/delay.h>
 #include <common/interrupt.h>
 #include <arch_gicv3.h>
 #include <cputype.h>
@@ -84,7 +83,6 @@ static void gic_do_wait_for_rwp(void __iomem *base)
 			return;
 		}
 		cpu_relax();
-		udelay(1);
 	};
 }
 
@@ -134,7 +132,6 @@ static void gic_enable_redist(bool enable)
 		if (enable ^ (bool)(val & GICR_WAKER_ChildrenAsleep))
 			break;
 		cpu_relax();
-		udelay(1);
 	};
 	if (!count)
 		pr_err_ratelimited("redistributor failed to %s...\n",

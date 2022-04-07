@@ -1,5 +1,5 @@
-ARCH =aarch64
-CROSS_COMPILE =aarch64-linux-gnu-
+ARCH =riscv64
+CROSS_COMPILE =/home/longma/opensource/qemu_linux/riscv64-lp64d--glibc--stable-2021.11-1/bin/riscv64-linux-
 
 # Other switches the user should not normally need to change:
 OUTPUT_IMAGE = os
@@ -34,20 +34,20 @@ INCLUDES += -Iinclude 	\
 			-Iinclude/libc \
 			-Iinclude/ee
 
-SRC_DIR += 	user	\
+SRC_DIR += 	init	\
 			common/libc	\
 			common/time	\
 			common/interrupt	\
 			driver/uart	\
-			driver/irq	\
-			driver/irq/gicv3	\
-			kernel			\
 			kernel/mm \
 			lib	\
 			kernel/printk
 
-include common/letter-shell/liblettelshell.mk
-include common/printf_format/printf_format.mk
+ifeq ("$(ARCH)", "aarch64")
+	SRC_DIR += driver/irq driver/irq/gicv3 kernel
+	include common/letter-shell/liblettelshell.mk
+	include common/printf_format/printf_format.mk
+endif
 
 define EOL =
 

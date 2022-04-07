@@ -1,1 +1,1 @@
-make CROSS_COMPILE=aarch64-linux-gnu- ARCH=aarch64
+make CROSS_COMPILE=riscv64-unknown-elf- ARCH=riscv64
