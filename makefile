@@ -1,5 +1,5 @@
-ARCH ?= aarch64 
-CROSS_COMPILE ?=aarch64-linux-gnu-
+ARCH =aarch64
+CROSS_COMPILE =aarch64-linux-gnu-
 
 # Other switches the user should not normally need to change:
 OUTPUT_IMAGE = os
