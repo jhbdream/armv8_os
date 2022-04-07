@@ -2,10 +2,12 @@ OUTPUT_ARCH( "riscv" )
 OUTPUT_FORMAT("elf64-littleriscv")
 ENTRY(_startup)
 
+STACK_SIZE = 0x10000;
+
 SECTIONS
 {
 	/* qemu riscv64 entry point */
-	. = 0x80200000;
+	. = 0x80000000;
 
 	.startup :
     {
@@ -26,7 +28,11 @@ SECTIONS
 
 	.bss :
 	{
+		. = ALIGN(8);
+		__bss_start = .;
 		*(.bss .bss.*)
+		. = ALIGN(8);
+		__bss_stop = .;
 	}
 
 	.rodata :
@@ -39,5 +45,13 @@ SECTIONS
         _shell_command_start = .;
         KEEP (*(shellCommand))
         _shell_command_end = .;
+    } 
+
+	.stack (NOLOAD):
+    {
+        . = ALIGN(8);
+        . = . + STACK_SIZE;
+        . = ALIGN(8);
+        __stack_top = .;
     } 
 }
