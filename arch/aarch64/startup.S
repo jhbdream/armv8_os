@@ -34,7 +34,7 @@ memset_loop:
     cmp x0, x1
     b.lt memset_loop
 
-    bl main
+    bl start_kernel
 
 hang:
 	wfi
