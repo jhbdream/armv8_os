@@ -1,7 +1,7 @@
 #include <kernel/task.h>
 #include <kernel/tick.h>
 #include <common/delay.h>
-#include <ee_stddef.h>
+#include <stddef.h>
 #include <printk.h>
 
 extern struct task taska;

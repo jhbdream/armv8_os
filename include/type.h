@@ -1,7 +1,7 @@
 #ifndef __TYPE_H__
 #define __TYPE_H__
 
-#include <ee_stdint.h>
+#include <stdint.h>
 #include <bitops.h>
 
 #define DECLARE_BITMAP(name,bits) \

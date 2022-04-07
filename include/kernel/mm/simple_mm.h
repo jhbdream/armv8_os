@@ -1,7 +1,7 @@
 #ifndef __SIMPLE_MM_H__
 #define __SIMPLE_MM_H__
 
-#include <ee_stdint.h>
+#include <stdint.h>
 
 /*
 mm_node_t-> +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+

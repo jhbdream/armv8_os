@@ -1,4 +1,4 @@
-#include <ee_stdio.h>
+#include <stdio.h>
 #include <board_init.h>
 #include <config.h>
 #include <kernel/task.h>

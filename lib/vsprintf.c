@@ -1,7 +1,7 @@
-#include <ee_stdarg.h>
-#include <ee_stdint.h>
-#include <ee_string.h>
-#include <ee_stdio.h>
+#include <stdarg.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdio.h>
 #include <limits.h>
 #include <type.h>
 #include <ctype.h>

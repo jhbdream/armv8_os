@@ -1,6 +1,6 @@
-#include <ee_stdint.h>
-#include <ee_stddef.h>
-#include <ee_string.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
 char *strcpy(char *dest, const char *src)
 {

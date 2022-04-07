@@ -1,5 +1,5 @@
-#include <ee_stdio.h>
-#include <ee_stddef.h>
+#include <stdio.h>
+#include <stddef.h>
 #include <printk.h>
 #include <mm/simple_mm.h>
 

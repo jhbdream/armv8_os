@@ -6,7 +6,7 @@
 #include <common/interrupt.h>
 #include <kernel/task.h>
 #include <kernel/tick.h>
-#include <ee_stddef.h>
+#include <stddef.h>
 
 /**
  * @brief 定时器中断处理函数，在这里进行任务调度处理

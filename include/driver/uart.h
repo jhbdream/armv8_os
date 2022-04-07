@@ -1,4 +1,4 @@
-#include <ee_stdint.h>
+#include <stdint.h>
 
 #define UART01x_DR		0x00	/* Data read or written from the interface. */
 #define UART01x_RSR		0x04	/* Receive status register (Read). */

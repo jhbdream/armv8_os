@@ -1,7 +1,7 @@
 #ifndef __TASK_H__
 #define __TASK_H__
 
-#include <ee_stdint.h>
+#include <stdint.h>
 #include <bits.h>
 
 #define TASK_NAME_LEN 64

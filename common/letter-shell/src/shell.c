@@ -9,10 +9,10 @@
  */
 
 #include "shell.h"
-#include "ee_string.h"
-#include "ee_stdarg.h"
-#include "ee_stddef.h"
-#include "ee_stdio.h"
+#include "string.h"
+#include "stdarg.h"
+#include "stddef.h"
+#include "stdio.h"
 #include "shell_ext.h"
 
 

@@ -2,8 +2,8 @@
 #include <ee_errno.h>
 #include <compiler_types.h>
 #include <driver/gic.h>
-#include <ee_stdarg.h>
-#include <ee_stddef.h>
+#include <stdarg.h>
+#include <stddef.h>
 
 unsigned long task_interrupt_from_thread;
 unsigned long task_interrupt_to_thread;

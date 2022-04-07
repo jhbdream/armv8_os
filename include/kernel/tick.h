@@ -1,6 +1,6 @@
 #ifndef __TICK_H__
 #define __TICK_H__
-#include <ee_stdint.h>
+#include <stdint.h>
 
 extern volatile uint64_t g_systic;
 

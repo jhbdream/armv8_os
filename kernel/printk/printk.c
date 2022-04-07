@@ -1,5 +1,5 @@
-#include <ee_stdarg.h>
-#include <ee_stdio.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <printk.h>
 
 extern int _write(int file, char *ptr, int len);

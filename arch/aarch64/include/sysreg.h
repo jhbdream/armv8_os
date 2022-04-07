@@ -20,7 +20,7 @@
 #ifndef __ASM_SYSREG_H
 #define __ASM_SYSREG_H
 
-#include <ee_stdint.h>
+#include <stdint.h>
 #include <stringify.h>
 
 /*

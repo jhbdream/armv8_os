@@ -1,7 +1,7 @@
 #ifndef __ARCH_TIMER_H
 #define __ARCH_TIMER_H
 
-#include <ee_stdint.h>
+#include <stdint.h>
 #include <sysreg.h>
 
 static inline void arch_timer_start(void)

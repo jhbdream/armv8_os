@@ -1,5 +1,5 @@
-#include <ee_stdint.h>
-#include <ee_stddef.h>
+#include <stdint.h>
+#include <stddef.h>
 #include <ee_errno.h>
 #include <io.h>
 #include <type.h>

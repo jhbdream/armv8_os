@@ -1,8 +1,8 @@
 #include <kernel/task.h>
 #include <kernel/tick.h>
-#include <ee_stdio.h>
-#include <ee_string.h>
-#include <ee_stddef.h>
+#include <stdio.h>
+#include <string.h>
+#include <stddef.h>
 #include <printk.h>
 
 /**
