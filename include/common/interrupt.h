@@ -8,30 +8,6 @@
 
 #define NR_IRQS 8192
 
-#define local_irq_enable()       \
-    do                           \
-    {                            \
-        arch_local_irq_enable(); \
-    } while (0)
-
-#define local_irq_disable()       \
-    do                            \
-    {                             \
-        arch_local_irq_disable(); \
-    } while (0)
-
-#define local_irq_save(flags)          \
-    do                                 \
-    {                                  \
-        flags = arch_local_irq_save(); \
-    } while (0)
-
-#define local_irq_restore(flags)       \
-    do                                 \
-    {                                  \
-        arch_local_irq_restore(flags); \
-    } while (0)
-
 /*
  * irq_get_irqchip_state/irq_set_irqchip_state specific flags
  */
