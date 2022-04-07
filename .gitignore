@@ -62,3 +62,8 @@ cscope.files
 
 .gdb_history
 .gdbinit
+
+*.bin
+*.dis
+*.map
+os

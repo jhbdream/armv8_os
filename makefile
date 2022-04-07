@@ -2,7 +2,7 @@ ARCH ?= aarch64
 CROSS_COMPILE ?=aarch64-linux-gnu-
 
 # Other switches the user should not normally need to change:
-APP = app
+OUTPUT_IMAGE = os
 DEBUG_FLAGS = -g
 QUIET ?=@
 OPT_LEVEL ?= 0
@@ -15,6 +15,8 @@ endif
 CC = $(CROSS_COMPILE)gcc
 OC = $(CROSS_COMPILE)objcopy
 OD = $(CROSS_COMPILE)objdump
+
+LD_FILE = arch/$(ARCH)/ld_script/kernel.ld
 
 # Commit hash from git
 COMMIT=$(shell git rev-parse --short HEAD)
@@ -56,11 +58,14 @@ RM_DIRS = $(foreach dir,$(1),rm -rf $(dir)$(EOL))
 
 DEPEND_FLAGS = -MD -MF $@.d
 
-CPPFLAGS = $(DEFINES) $(INCLUDES) $(DEPEND_FLAGS) $(CPPFLAGS_EXTRA)
-CFLAGS = $(DEBUG_FLAGS) -O$(OPT_LEVEL) -fno-stack-protector -nostdinc
-ASFLAGS = $(DEBUG_FLAGS)
-LDFLAGS = -Tgcc.ld -Wl,--build-id=none -fno-stack-protector -static -nostartfiles -nostdlib -ffreestanding -fno-common $(LDFLAGS_EXTRA)
-TARGET_ARCH = 
+CPPFLAGS := $(DEFINES) $(INCLUDES) $(DEPEND_FLAGS)
+CFLAGS := $(DEBUG_FLAGS) -O$(OPT_LEVEL)
+ASFLAGS := $(DEBUG_FLAGS)
+LDFLAGS := -T$(LD_FILE)
+TARGET_ARCH :=
+
+export CFLAGS ASFLAGS LDFLAGS DEFINES
+include arch/$(ARCH)/arch_config.mk
 
 #mkdir 创建输出文件目录
 X_OUTPUT_DIRS := $(patsubst %, $(OBJ_DIR)/%, $(SRC_DIR))
@@ -74,9 +79,9 @@ DEP_FILES := $(OBJ_FILES:%=%.d)
 
 .phony: all clean pack
 
-all: $(APP)
+all: $(OUTPUT_IMAGE)
 
-$(APP): $(OBJ_FILES) gcc.ld
+$(OUTPUT_IMAGE): $(OBJ_FILES) $(LD_FILE)
 	@echo Linking $@
 	$(QUIET) $(CC) $(TARGET_ARCH) $(LDFLAGS) --output $@ $(OBJ_FILES) -lm -Wl,-Map,$@.map
 	@echo Objcopying $@.bin
@@ -86,15 +91,15 @@ $(APP): $(OBJ_FILES) gcc.ld
 
 clean:
 	$(call RM_DIRS,$(OBJ_DIR))
-	$(call RM_FILES,$(APP))
-	$(call RM_FILES,$(APP).bin)
-	$(call RM_FILES,$(APP).dis)
+	$(call RM_FILES,$(OUTPUT_IMAGE))
+	$(call RM_FILES,$(OUTPUT_IMAGE).bin)
+	$(call RM_FILES,$(OUTPUT_IMAGE).dis)
 
-qemu: $(APP)
-	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 1024 -nographic -serial mon:stdio -kernel $(APP)
+qemu: $(OUTPUT_IMAGE)
+	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 1024 -nographic -serial mon:stdio -kernel $(OUTPUT_IMAGE)
 
-qemu_gdb: $(APP)
-	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 1024 -nographic -serial mon:stdio -kernel $(APP) -S -gdb tcp::1234
+qemu_gdb: $(OUTPUT_IMAGE)
+	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 1024 -nographic -serial mon:stdio -kernel $(OUTPUT_IMAGE) -S -gdb tcp::1234
 
 $(X_OUTPUT_DIRS):
 	@mkdir -p $@
@@ -108,6 +113,6 @@ $(OBJ_DIR)/%.o : %.S | $(X_OUTPUT_DIRS)
 	$(QUIET) $(CC) -c $(TARGET_ARCH) $(CPPFLAGS) $(ASFLAGS) -o $@ $<
 
 # Make sure everything is rebuilt if this makefile is changed
-$(OBJ_FILES) $(APP): makefile
+$(OBJ_FILES) $(OUTPUT_IMAGE): makefile
 
 -include $(DEP_FILES)
