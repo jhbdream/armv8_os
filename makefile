@@ -96,10 +96,20 @@ clean:
 	$(call RM_FILES,$(OUTPUT_IMAGE).dis)
 
 qemu: $(OUTPUT_IMAGE)
+ifeq ("$(ARCH)", "aarch64")
 	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 1024 -nographic -serial mon:stdio -kernel $(OUTPUT_IMAGE)
+endif
+ifeq ("$(ARCH)", "riscv64")
+	qemu-system-riscv64 -machine virt -smp 1 -m 1024 -nographic -serial mon:stdio -bios $(OUTPUT_IMAGE)
+endif
 
 qemu_gdb: $(OUTPUT_IMAGE)
-	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 1024 -nographic -serial mon:stdio -kernel $(OUTPUT_IMAGE) -S -gdb tcp::1234
+ifeq ("$(ARCH)", "aarch64")
+	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 1024 -nographic -serial mon:stdio -kernel $(OUTPUT_IMAGE) -S -s
+endif
+ifeq ("$(ARCH)", "riscv64")
+	qemu-system-riscv64 -machine virt -smp 1 -m 1024 -nographic -serial mon:stdio -bios $(OUTPUT_IMAGE) -S -s
+endif
 
 $(X_OUTPUT_DIRS):
 	@mkdir -p $@
