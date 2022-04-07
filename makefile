@@ -1,19 +1,16 @@
-APP ?= app
-
-QUIET ?=@
-OPT_LEVEL ?= 0
+ARCH ?= aarch64 
+CROSS_COMPILE ?=aarch64-linux-gnu-
 
 # Other switches the user should not normally need to change:
-ARCH = armv8-a
+APP = app
 DEBUG_FLAGS = -g
-
+QUIET ?=@
+OPT_LEVEL ?= 0
 CPPFLAGS_EXTRA :=
 
 ifeq ($(QUIET),@)
 PROGRESS = @echo Compiling $<...
 endif
-
-CROSS_COMPILE :=aarch64-linux-gnu-
 
 CC = $(CROSS_COMPILE)gcc
 OC = $(CROSS_COMPILE)objcopy
@@ -26,11 +23,11 @@ export SRC_DIR
 export INCLUDES
 
 OBJ_DIR := obj
-SRC_DIR := libcpu/aarch64
-INCLUDES :=
+
+SRC_DIR := arch/$(ARCH)
+INCLUDES := -Iarch/$(ARCH)/include
 
 INCLUDES += -Iinclude 	\
-			-Ilibcpu/aarch64/include	\
 			-Iinclude/kernel	\
 			-Iinclude/libc \
 			-Iinclude/ee
@@ -63,14 +60,13 @@ CPPFLAGS = $(DEFINES) $(INCLUDES) $(DEPEND_FLAGS) $(CPPFLAGS_EXTRA)
 CFLAGS = $(DEBUG_FLAGS) -O$(OPT_LEVEL) -fno-stack-protector -nostdinc
 ASFLAGS = $(DEBUG_FLAGS)
 LDFLAGS = -Tgcc.ld -Wl,--build-id=none -fno-stack-protector -static -nostartfiles -nostdlib -ffreestanding -fno-common $(LDFLAGS_EXTRA)
-TARGET_ARCH = -march=$(ARCH)
+TARGET_ARCH = 
 
 #mkdir 创建输出文件目录
-X_OUTPUT_DIRS :=	$(patsubst %, $(OBJ_DIR)/%, $(SRC_DIR))
+X_OUTPUT_DIRS := $(patsubst %, $(OBJ_DIR)/%, $(SRC_DIR))
 
 APP_C_SRC	:=	$(foreach dir, $(SRC_DIR), $(wildcard $(dir)/*.c))
 APP_S_SRC	:=	$(foreach dir, $(SRC_DIR), $(wildcard $(dir)/*.S))
-
 OBJ_FILES	:=	$(patsubst %, $(OBJ_DIR)/%, $(APP_C_SRC:.c=.o)) \
 				$(patsubst %, $(OBJ_DIR)/%, $(APP_S_SRC:.S=.o))
 
