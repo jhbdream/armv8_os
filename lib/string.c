@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
+#include <ctype.h>
 
 char *strcpy(char *dest, const char *src)
 {
@@ -217,3 +218,58 @@ void *memset(void *s, int c, size_t count)
 	}
 	return s;
 }
+
+unsigned long strtoul(const char *cp, char **endp, unsigned int base)
+{
+	unsigned long result = 0;
+
+	if(!base)
+	{
+		base = 10;
+	}
+	
+	if(base == 16 && cp[0] == '0' && tolower(cp[1]) == 'x')
+	{
+		cp += 2;
+	}
+	
+	while(isxdigit(*cp))
+	{
+		unsigned int value;
+		value = isdigit(*cp) ? *cp - '0' : tolower(*cp) - 'a' + 10;
+		if(value > base)
+			break;
+		
+		result = result * base + value;
+		cp++;
+	}
+	
+	if(endp)
+		*endp = (char *)cp;
+
+	return result;
+}
+
+char *strchr(const char *src, int ch)
+{
+	for (; *src != (char)ch; ++src)
+		if (*src == '\0')
+			return NULL;
+	return (char *)src;
+}
+
+/**
+ * strrchr - Find the last occurrence of a character in a string
+ * @s: The string to be searched
+ * @c: The character to search for
+ */
+char *strrchr(const char *s, int c)
+{
+    const char *last = NULL;
+    do {
+        if (*s == (char)c)
+            last = s;
+    } while (*s++);
+    return (char *)last;
+}
+

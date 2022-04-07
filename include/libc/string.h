@@ -17,4 +17,8 @@ void *memchr(const void *s, int c, size_t n);
 void *memcpy(void *dest, const void *src, size_t count);
 void *memmove(void *dest, const void *src, size_t count);
 void *memset(void *s, int c, size_t count);
+
+unsigned long strtoul(const char *cp, char **endp, unsigned int base);
+char *strchr(const char *src, int ch);
+char *strrchr(const char *s, int c);
 #endif

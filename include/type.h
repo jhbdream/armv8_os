@@ -29,6 +29,7 @@ typedef __s64 s64;
 typedef __u64 u64;
 
 typedef int bool;
+typedef unsigned long       uintptr_t;
 
 #ifndef true
 #define true 1
