@@ -58,6 +58,7 @@ tags
 *.tar.gz
 .cproject
 .project
+cscope.files
 
 .gdb_history
 .gdbinit
