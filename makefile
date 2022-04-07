@@ -49,7 +49,7 @@ ifeq ("$(ARCH)", "aarch64")
 	include common/printf_format/printf_format.mk
 endif
 	
-#include common/libfdt/libfdt.mk
+include common/libfdt/libfdt.mk
 
 define EOL =
 
