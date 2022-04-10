@@ -67,3 +67,7 @@ cscope.files
 *.dis
 *.map
 os
+
+GPATH
+GRTAGS
+GTAGS
