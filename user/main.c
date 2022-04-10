@@ -17,7 +17,7 @@ int main()
     systic_timer_init();
     kernel_task_init();
     lettel_shell_init();
-    sem_task_init();
+    sem_task_init(main);
     user_task_init();
 
     /* will not run here! */

@@ -1,0 +1,193 @@
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+ram              0x0000000040000000 0x0000000002000000
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+                0x0000000000000100                STACK_SIZE = 0x100
+
+.startup        0x0000000040000000       0x60
+                0x0000000040000000                __code_start = .
+ *(StartUp)
+ StartUp        0x0000000040000000       0x60 arch/aarch64/kernel/startup.o
+                0x0000000040000000                _startup
+
+.init
+ *(SORT_NONE(.init))
+
+.text           0x0000000040000060        0x4
+ *(.text*)
+ .text          0x0000000040000060        0x0 arch/aarch64/kernel/startup.o
+ .text          0x0000000040000060        0x4 init/built-in.o
+                0x0000000040000060                start_kernel
+ .text          0x0000000040000064        0x0 arch/aarch64/kernel/built-in.o
+ .text          0x0000000040000064        0x0 allsymbols.o
+
+.iplt           0x0000000040000064        0x0
+ .iplt          0x0000000040000064        0x0 arch/aarch64/kernel/startup.o
+
+.fini
+ *(SORT_NONE(.fini))
+
+.rodata         0x0000000040000070       0x88
+                0x0000000040000070                . = ALIGN (0x8)
+ *(.rodata .rodata.* .gnu.linkonce.r.*)
+ .rodata        0x0000000040000070       0x84 allsymbols.o
+                0x0000000040000070                allsyms_addresses
+                0x0000000040000090                allsyms_num_syms
+                0x00000000400000a0                allsyms_offset
+                0x00000000400000c0                allsyms_names
+                0x00000000400000f8                . = ALIGN (0x8)
+ *fill*         0x00000000400000f4        0x4 
+                0x00000000400000f8                _shell_command_start = .
+ *(shellCommand)
+                0x00000000400000f8                _shell_command_end = .
+
+.__symbols__    0x00000000400000f8       0x10
+ .__symbols__   0x00000000400000f8       0x10 allsymbols.o
+
+.eh_frame       0x0000000040000108       0x28
+ *(.eh_frame)
+ .eh_frame      0x0000000040000108       0x28 init/built-in.o
+
+.rela.dyn       0x0000000040000130        0x0
+ .rela.iplt     0x0000000040000130        0x0 arch/aarch64/kernel/startup.o
+ .relaStartUp   0x0000000040000130        0x0 arch/aarch64/kernel/startup.o
+
+.ARM.extab
+ *(.ARM.extab* .gnu.linkonce.armextab.*)
+
+.ARM.exidx      0x0000000040000130        0x0
+                0x0000000040000130                __exidx_start = .
+ *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+                0x0000000040000130                __exidx_end = .
+
+.preinit_array  0x0000000040000130        0x0
+                [!provide]                        PROVIDE (__preinit_array_start = .)
+ *(.preinit_array)
+                [!provide]                        PROVIDE (__preinit_array_end = .)
+
+.init_array     0x0000000040000130        0x0
+                [!provide]                        PROVIDE (__init_array_start = .)
+ *(SORT_BY_NAME(.init_array.*))
+ *(.init_array)
+                [!provide]                        PROVIDE (__init_array_end = .)
+
+.fini_array     0x0000000040000130        0x0
+                [!provide]                        PROVIDE (__fini_array_start = .)
+ *(SORT_BY_NAME(.fini_array.*))
+ *(.fini_array)
+                [!provide]                        PROVIDE (__fini_array_end = .)
+
+.ctors
+ *crtbegin.o(.ctors)
+ *crtbegin?.o(.ctors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
+ *(SORT_BY_NAME(.ctors.*))
+ *(.ctors)
+
+.dtors
+ *crtbegin.o(.dtors)
+ *crtbegin?.o(.dtors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
+ *(SORT_BY_NAME(.dtors.*))
+ *(.dtors)
+
+.jcr
+ *(.jcr)
+
+.data           0x0000000040000130        0x0
+                0x0000000040000130                __data_start = .
+ *(.data .data.* .gnu.linkonce.d.*)
+ .data          0x0000000040000130        0x0 arch/aarch64/kernel/startup.o
+ .data          0x0000000040000130        0x0 init/built-in.o
+ .data          0x0000000040000130        0x0 arch/aarch64/kernel/built-in.o
+ .data          0x0000000040000130        0x0 allsymbols.o
+
+.igot.plt       0x0000000040000130        0x0
+ .igot.plt      0x0000000040000130        0x0 arch/aarch64/kernel/startup.o
+
+.bss            0x0000000040000130       0x10
+                0x0000000040000140                . = ALIGN (0x40)
+ *fill*         0x0000000040000130       0x10 
+                0x0000000040000140                __bss_start__ = .
+ *(.bss*)
+ .bss           0x0000000040000140        0x0 arch/aarch64/kernel/startup.o
+ .bss           0x0000000040000140        0x0 init/built-in.o
+ .bss           0x0000000040000140        0x0 arch/aarch64/kernel/built-in.o
+ .bss           0x0000000040000140        0x0 allsymbols.o
+ *(COMMON)
+                0x0000000040000140                . = ALIGN (0x40)
+                0x0000000040000140                __bss_end__ = .
+
+.heap           0x0000000040000140     0x1000
+                0x0000000040000140                . = ALIGN (0x40)
+                0x0000000040000140                __end__ = .
+                [!provide]                        PROVIDE (end = .)
+                0x0000000040001140                . = (. + 0x1000)
+ *fill*         0x0000000040000140     0x1000 
+
+.el1_stack      0x0000000040001140      0x100
+                0x0000000040001140                . = ALIGN (0x40)
+                0x0000000040001240                . = (. + STACK_SIZE)
+ *fill*         0x0000000040001140      0x100 
+                0x0000000040001240                __el1_stack = .
+                0x0000000040001240                __stack_top = .
+                0x0000000040001240                __top_of_ram = .
+LOAD arch/aarch64/kernel/startup.o
+LOAD init/built-in.o
+LOAD arch/aarch64/kernel/built-in.o
+LOAD allsymbols.o
+OUTPUT(ee.elf elf64-littleaarch64)
+LOAD linker stubs
+
+.debug_line     0x0000000000000000       0xa9
+ .debug_line    0x0000000000000000       0x5b arch/aarch64/kernel/startup.o
+ .debug_line    0x000000000000005b       0x4e init/built-in.o
+ .debug_line    0x00000000000000a9        0x0 arch/aarch64/kernel/built-in.o
+
+.debug_line_str
+                0x0000000000000000       0x48
+ .debug_line_str
+                0x0000000000000000       0x1e arch/aarch64/kernel/startup.o
+                                         0x3c (size before relaxing)
+ .debug_line_str
+                0x000000000000001e       0x20 init/built-in.o
+                                         0x42 (size before relaxing)
+ .debug_line_str
+                0x000000000000003e        0xa arch/aarch64/kernel/built-in.o
+                                         0x19 (size before relaxing)
+
+.debug_info     0x0000000000000000       0x71
+ .debug_info    0x0000000000000000       0x28 arch/aarch64/kernel/startup.o
+ .debug_info    0x0000000000000028       0x49 init/built-in.o
+
+.debug_abbrev   0x0000000000000000       0x41
+ .debug_abbrev  0x0000000000000000       0x14 arch/aarch64/kernel/startup.o
+ .debug_abbrev  0x0000000000000014       0x2d init/built-in.o
+
+.debug_aranges  0x0000000000000000       0x60
+ .debug_aranges
+                0x0000000000000000       0x30 arch/aarch64/kernel/startup.o
+ .debug_aranges
+                0x0000000000000030       0x30 init/built-in.o
+
+.debug_str      0x0000000000000000       0xf5
+ .debug_str     0x0000000000000000       0x25 arch/aarch64/kernel/startup.o
+ .debug_str     0x0000000000000025       0xd0 init/built-in.o
+ .debug_str     0x00000000000000f5       0xc3 arch/aarch64/kernel/built-in.o
+
+.comment        0x0000000000000000       0x25
+ .comment       0x0000000000000000       0x25 init/built-in.o
+                                         0x26 (size before relaxing)
+ .comment       0x0000000000000025       0x26 arch/aarch64/kernel/built-in.o
+
+.note.GNU-stack
+                0x0000000000000000        0x0
+ .note.GNU-stack
+                0x0000000000000000        0x0 init/built-in.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 arch/aarch64/kernel/built-in.o

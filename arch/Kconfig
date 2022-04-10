@@ -1,0 +1,12 @@
+
+choice
+	prompt "Architecture select"
+	default AARCH64
+
+config AARCH64
+	bool "AARCH64"
+
+config RISCV64
+	bool "RISCV64"
+
+endchoice

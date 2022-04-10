@@ -71,3 +71,8 @@ os
 GPATH
 GRTAGS
 GTAGS
+
+.tmp*
+.config
+.config.old
+allsymbols.S
