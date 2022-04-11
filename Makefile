@@ -84,8 +84,10 @@ EEOSINCLUDE    := \
 		-I$(srctree)/arch/$(SRCARCH)/include \
 		-I$(srctree)/arch/$(SRCARCH)/include/asm \
 		-I$(objtree)/include	\
+		-I$(objtree)/include/kernel	\
 		-I$(objtree)/include/config \
-		-I$(objtree)/include/libc
+		-I$(objtree)/include/libc	\
+		-I$(objtree)/include/ee
 
 CSTD_FLAG := -std=gnu11
 MBUILD_DEFINE := -D__KERNEL__
@@ -118,7 +120,7 @@ export RCS_TAR_IGNORE := --exclude SCCS --exclude BitKeeper --exclude .svn \
 PHONY += all
 _all: all
 
-core-y		:= init/
+core-y		:= init/ kernel/ lib/
 drivers-y	:= driver/
 external-y	:=
 libs-y		:=

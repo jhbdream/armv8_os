@@ -1,6 +1,9 @@
-#include <driver/uart.h>
 #include <io.h>
 #include <config.h>
+#include <driver/console.h>
+#include <driver/uart.h>
+
+struct console console_qemu;
 
 #if CONFIG_AARCH64
 #define QEMU_UART_DR ((void __iomem *)(0x09000000 + UART01x_DR))
@@ -37,3 +40,18 @@ int uart_putchar(uint8_t ch)
 	writeb(ch, QEMU_UART_DR);
     return 0;
 }
+
+static void qemu_console_write(struct console *con,const char *s, unsigned n)
+{
+	unsigned int i;
+	for(i = 0; i < n; i++, s++)
+	{
+		if(*s == '\n')
+		{
+			uart_putchar('\r');
+		}
+		uart_putchar(*s);
+	}
+}
+
+CONSOLE_DECLARE("qemu_uart", qemu_console_write, NULL);

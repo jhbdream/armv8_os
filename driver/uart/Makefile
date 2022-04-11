@@ -1,1 +1,1 @@
-obj-y += uart.o
+obj-y += qemu_uart.o

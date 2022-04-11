@@ -1,15 +1,24 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <printk.h>
+#include <driver/console.h>
 
-extern int _write(int file, char *ptr, int len);
+struct console *uart_console;
 
 int vprintk(const char *fmt, va_list args)
 {
 	char p_buf[1024];
 	int len;
+
+	if(!uart_console)
+	{
+		return 0;
+	}
+
 	len = vsnprintf(p_buf, sizeof(p_buf), fmt, args);
-	_write(0, p_buf, len);
+
+	uart_console->write(uart_console, p_buf, len);
+
 	return len;
 }
 

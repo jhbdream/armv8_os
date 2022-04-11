@@ -1,0 +1,1 @@
+obj-y += printk/printk.o
