@@ -45,6 +45,11 @@ SECTIONS
         _shell_command_start = .;
         KEEP (*(shellCommand))
         _shell_command_end = .;
+
+		. = ALIGN(8);
+		__console_device_begin = .;
+		KEEP (*(__console));
+		__console_device_end = .;
     } 
 
 	.stack (NOLOAD):

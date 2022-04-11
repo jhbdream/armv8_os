@@ -18,7 +18,7 @@ int vprintk(const char *fmt, va_list args)
 	len = vsnprintf(p_buf, sizeof(p_buf), fmt, args);
 
 	uart_console->write(uart_console, p_buf, len);
-
+	
 	return len;
 }
 

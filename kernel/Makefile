@@ -1,1 +1,1 @@
-obj-y += printk/printk.o
+obj-y += printk/

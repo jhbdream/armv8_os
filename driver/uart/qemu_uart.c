@@ -2,8 +2,7 @@
 #include <config.h>
 #include <driver/console.h>
 #include <driver/uart.h>
-
-struct console console_qemu;
+#include <stddef.h>
 
 #if CONFIG_AARCH64
 #define QEMU_UART_DR ((void __iomem *)(0x09000000 + UART01x_DR))
@@ -31,17 +30,11 @@ int uart_getchar(uint8_t *ch)
 
 int uart_putchar(uint8_t ch)
 {
-	// rv 读取该寄存器会出异常
-    while((readb(QEMU_UART_FR) & 0x20) == 0)
-	{
-
-	}
-
 	writeb(ch, QEMU_UART_DR);
     return 0;
 }
 
-static void qemu_console_write(struct console *con,const char *s, unsigned n)
+static void qemu_console_write(struct console *con, const char *s, unsigned n)
 {
 	unsigned int i;
 	for(i = 0; i < n; i++, s++)
@@ -54,4 +47,4 @@ static void qemu_console_write(struct console *con,const char *s, unsigned n)
 	}
 }
 
-CONSOLE_DECLARE("qemu_uart", qemu_console_write, NULL);
+CONSOLE_DECLARE(qemu, 0, qemu_console_write, NULL);
