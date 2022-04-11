@@ -8,5 +8,8 @@ config AARCH64
 
 config RISCV64
 	bool "RISCV64"
-
 endchoice
+
+
+source "arch/aarch64/Kconfig"
+source "arch/riscv64/Kconfig"

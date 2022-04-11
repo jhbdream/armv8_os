@@ -82,7 +82,10 @@ DTC		= dtc
 # Needed to be compatible with the O= option
 EEOSINCLUDE    := \
 		-I$(srctree)/arch/$(SRCARCH)/include \
-		-I$(objtree)/include
+		-I$(srctree)/arch/$(SRCARCH)/include/asm \
+		-I$(objtree)/include	\
+		-I$(objtree)/include/config \
+		-I$(objtree)/include/libc
 
 CSTD_FLAG := -std=gnu11
 MBUILD_DEFINE := -D__KERNEL__
@@ -116,7 +119,7 @@ PHONY += all
 _all: all
 
 core-y		:= init/
-drivers-y	:=
+drivers-y	:= driver/
 external-y	:=
 libs-y		:=
 
@@ -270,6 +273,15 @@ genconfig:
 	$(Q) echo "  GEN      .config From configs/$@"
 	$(Q) mkdir -p include/config
 	$(Q) python $(srctree)/scripts/Kconfiglib/defconfig.py $(Kconfig) configs/$@
+
+PHONY += qemu
+qemu: $(MBUILD_IMAGE_ELF)
+ifeq ("$(SRCARCH)", "aarch64")
+	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 1024 -nographic -serial mon:stdio -kernel $(MBUILD_IMAGE_ELF)
+endif
+ifeq ("$(SRCARCH)", "riscv64")
+	qemu-system-riscv64 -machine virt -smp 1 -m 1024 -nographic -serial mon:stdio -bios $(MBUILD_IMAGE_ELF)
+endif
 
 PHONY += FORCE
 FORCE:

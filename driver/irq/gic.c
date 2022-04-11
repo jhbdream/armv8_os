@@ -1,4 +1,4 @@
-#include <config.h>
+#include <gic_config.h>
 #include <common/interrupt.h>
 #include "gicv3/arm-gic-v3.h"
 
