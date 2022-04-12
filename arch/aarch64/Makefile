@@ -1,5 +1,5 @@
-ARCH_CFLAGS += -fno-stack-protector -nostdinc
-ARCH_AFLAGS += -fno-stack-protector -nostdinc
+ARCH_CFLAGS +=
+ARCH_AFLAGS +=
 ARCH_LDFLAGS +=
 
 head-y += arch/aarch64/boot/startup.o

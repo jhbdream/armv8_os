@@ -64,7 +64,7 @@ OBJ_DEPS	= $(real-dep-y)
 MBUILD_CFLAGS += $(ARCH_CFLAGS) $(EXTRA_CFLAGS)
 MBUILD_CFLAGS += -MMD -MF $(@D)/.$(@F).d
 
-MBUILD_AFLAGS += $(MBUILD_CFLAGS) $(EXTRA_AFLAGS)
+MBUILD_AFLAGS += $(ARCH_AFLAGS) $(EXTRA_AFLAGS)
 
 builtin-target 	:= $(obj)/built-in.o
 
@@ -89,7 +89,7 @@ endif
 
 %.o: %.S $(obj)/Makefile $(srctree)/Makefile
 	$(Q) echo "  CC      $@"
-	$(Q) $(CC) $(MBUILD_CFLAGS) -c $< -o $@
+	$(Q) $(CC)  $(MBUILD_AFLAGS) $(MBUILD_CFLAGS) -c $< -o $@
 
 %.lds: %.lds.S $(obj)/Makefile $(srctree)/Makefile
 	$(Q) echo "  CC      $@"

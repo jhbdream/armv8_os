@@ -84,8 +84,6 @@ PYTHON3		= python3
 CHECK		= sparse
 DTC		= dtc
 
-# Use LINUXINCLUDE when you must reference the include/ directory.
-# Needed to be compatible with the O= option
 EEOSINCLUDE    := \
 		-I$(srctree)/arch/$(SRCARCH)/include \
 		-I$(srctree)/arch/$(SRCARCH)/include/asm \
@@ -101,12 +99,13 @@ NOSTDINC_FLAGS += -nostdinc
 
 MBUILD_CFLAGS   := 	-Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   			-fno-strict-aliasing -fno-common -fshort-wchar \
+					-fno-stack-protector \
 		   			-Werror-implicit-function-declaration \
 		   			-Wno-format-security -O$(O_LEVEL) \
 		   			$(CSTD_FLAG) --static -nostdlib  -nostartfiles -fno-builtin	\
 					-g $(EEOSINCLUDE) $(MBUILD_DEFINE) $(NOSTDINC_FLAGS)
 
-MBUILD_AFLAGS   := -D__ASSEMBLY__ $(MBUILD_CFLAGS)
+MBUILD_AFLAGS   := -D__ASSEMBLY__
 MBUILD_LDFLAGS := --no-undefined -static -nostdlib
 
 export ARCH SRCARCH CROSS_COMPILE AS LD CC DTC
@@ -188,7 +187,7 @@ eeos: $(eeos-deps) scripts/generate_allsymbols.py
 	$(Q) echo "  PYTHON  allsymbols.S"
 	$(Q) python3 scripts/generate_allsymbols.py .tmp.eeos.symbols allsymbols.S
 	$(Q) echo "  CC      $(MBUILD_IMAGE_SYMBOLS)"
-	$(Q) $(CC) $(MBUILD_CFLAGS) $(ARCH_CFLAGS) -c allsymbols.S -o $(MBUILD_IMAGE_SYMBOLS)
+	$(Q) $(CC) $(MBUILD_AFLAGS) $(MBUILD_CFLAGS) $(ARCH_CFLAGS) -c allsymbols.S -o $(MBUILD_IMAGE_SYMBOLS)
 	$(Q) echo "  LD      $(MBUILD_IMAGE_ELF)"
 	$(Q) $(LD) $(eeos_LDFLAGS) -o $(MBUILD_IMAGE_ELF) $(MBUILD_EEOS_INIT) $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS) $(MBUILD_IMAGE_SYMBOLS)
 	$(Q) echo "  OBJCOPY $(MBUILD_IMAGE)"
