@@ -61,10 +61,10 @@ real-obj-y	:= $(filter-out $(MBUILD_EEOS_INIT), $(real-obj-y))
 
 OBJ_DEPS	= $(real-dep-y)
 
-CFLAGS		= $(MBUILD_CFLAGS) $(ARCH_CFLAGS) $(EXTRA_CFLAGS)
-CFLAGS		+= -MMD -MF $(@D)/.$(@F).d
+MBUILD_CFLAGS += $(ARCH_CFLAGS) $(EXTRA_CFLAGS)
+MBUILD_CFLAGS += -MMD -MF $(@D)/.$(@F).d
 
-AFLAGS 		= $(MBUILD_AFLAGS) $(ARCH_AFLAGS) $(EXTRA_AFLAGS)
+MBUILD_AFLAGS += $(MBUILD_CFLAGS) $(EXTRA_AFLAGS)
 
 builtin-target 	:= $(obj)/built-in.o
 
@@ -75,7 +75,7 @@ ifdef builtin-target
 $(builtin-target): $(real-obj-y)
 ifeq ($(real-obj-y),)
 	$(Q) echo "  CC      $@"
-	$(Q) $(CC) $(CFLAGS) -c -x c /dev/null -o $@
+	$(Q) $(CC) $(MBUILD_CFLAGS) -c -x c /dev/null -o $@
 else
 	$(Q) echo "  LD      $@"
 	$(Q) $(LD) $(MBUILD_LDFLAGS) -r -o $@ $^
@@ -85,11 +85,11 @@ endif
 
 %.o: %.c $(obj)/Makefile $(srctree)/Makefile
 	$(Q) echo "  CC      $@"
-	$(Q) $(CC) $(CFLAGS) -c $< -o $@
+	$(Q) $(CC) $(MBUILD_CFLAGS) -c $< -o $@
 
 %.o: %.S $(obj)/Makefile $(srctree)/Makefile
 	$(Q) echo "  CC      $@"
-	$(Q) $(CC) $(AFLAGS) -c $< -o $@
+	$(Q) $(CC) $(MBUILD_CFLAGS) -c $< -o $@
 
 %.lds: %.lds.S $(obj)/Makefile $(srctree)/Makefile
 	$(Q) echo "  CC      $@"

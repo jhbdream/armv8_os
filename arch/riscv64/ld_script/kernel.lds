@@ -15,31 +15,14 @@ SECTIONS
         KEEP(*(StartUp))
     }
 
-	.text : 
+	.text :
 	{
 		*(.text .text.*)
-		. = ALIGN(4K);
 	}
 
 	.data :
 	{
 		*(.data .data.*)
-	}
-
-	.bss :
-	{
-		. = ALIGN(8);
-		__bss_start = .;
-		*(.bss .bss.*)
-		. = ALIGN(8);
-		__bss_stop = .;
-	}
-
-	.rodata :
-    {
-        . = ALIGN(8);
-
-        *(.rodata .rodata.* .gnu.linkonce.r.*)
 
         . = ALIGN(8);
         _shell_command_start = .;
@@ -50,7 +33,18 @@ SECTIONS
 		__console_device_begin = .;
 		KEEP (*(__console));
 		__console_device_end = .;
-    } 
+	}
+
+	.bss :
+	{
+		. = ALIGN(8);
+		__bss_start = .;
+		*(.bss .bss.*)
+		*(.sbss)
+		*(.sbss.*)
+		. = ALIGN(8);
+		__bss_stop = .;
+	}
 
 	.stack (NOLOAD):
     {
@@ -58,5 +52,5 @@ SECTIONS
         . = . + STACK_SIZE;
         . = ALIGN(8);
         __stack_top = .;
-    } 
+    }
 }

@@ -45,13 +45,19 @@ version_h := include/config/version.h
 
 clean-targets := %clean
 
+-include .config
 include scripts/config.mk
 
 KERNELVERSION = $(VERSION)$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(SUBLEVEL)))$(EXTRAVERSION)
 export VERSION PATCHLEVEL SUBLEVEL KERNELVERSION
 
-ARCH		= aarch64
-CROSS_COMPILE 	= aarch64-linux-gnu-
+ifeq ($(CONFIG_AARCH64), y)
+	ARCH		= aarch64
+	CROSS_COMPILE 	= aarch64-linux-gnu-
+else ifeq ($(CONFIG_RISCV64), y)
+	ARCH		= riscv64
+	CROSS_COMPILE 	= riscv64-unknown-elf-
+endif
 
 SRCARCH 	:= $(ARCH)
 
@@ -97,11 +103,11 @@ MBUILD_CFLAGS   := 	-Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   			-fno-strict-aliasing -fno-common -fshort-wchar \
 		   			-Werror-implicit-function-declaration \
 		   			-Wno-format-security -O$(O_LEVEL) \
-		   			$(CSTD_FLAG) --static -nostdlib -fno-builtin	\
+		   			$(CSTD_FLAG) --static -nostdlib  -nostartfiles -fno-builtin	\
 					-g $(EEOSINCLUDE) $(MBUILD_DEFINE) $(NOSTDINC_FLAGS)
 
 MBUILD_AFLAGS   := -D__ASSEMBLY__ $(MBUILD_CFLAGS)
-MBUILD_LDFLAGS := --no-undefined
+MBUILD_LDFLAGS := --no-undefined -static -nostdlib
 
 export ARCH SRCARCH CROSS_COMPILE AS LD CC DTC
 export CPP AR NM STRIP OBJCOPY OBJDUMP
@@ -125,13 +131,12 @@ drivers-y	:= driver/
 external-y	:=
 libs-y		:=
 
--include .config
-
 # The arch Makefile can set ARCH_{CPP,A,C}FLAGS to override the default
 # values of the respective MBUILD_* variables
 ARCH_AFLAGS :=
 ARCH_CFLAGS :=
-export ARCH_CFLAGS ARCH_AFLAGS
+ARCH_AFLAGS :=
+export ARCH_CFLAGS ARCH_AFLAGS ARCH_AFLAGS
 
 -include arch/$(SRCARCH)/Makefile
 
@@ -168,7 +173,7 @@ CLEAN_DIRS	:=
 clean: rm-dirs 	:= $(CLEAN_DIRS)
 clean-dirs      := $(addprefix _clean_, . $(eeos-cleandirs))
 
-eeos_LDFLAGS := $(MBUILD_LDFLAGS)
+eeos_LDFLAGS := $(MBUILD_LDFLAGS) $(ARCH_LDFLAGS)
 eeos_LDFLAGS += -T$(MBUILD_LDS) -Map=$(srctree)/linkmap.txt
 
 PHONY += $(clean-dirs) clean distclean
@@ -183,7 +188,7 @@ eeos: $(eeos-deps) scripts/generate_allsymbols.py
 	$(Q) echo "  PYTHON  allsymbols.S"
 	$(Q) python3 scripts/generate_allsymbols.py .tmp.eeos.symbols allsymbols.S
 	$(Q) echo "  CC      $(MBUILD_IMAGE_SYMBOLS)"
-	$(Q) $(CC) $(CCFLAG) $(MBUILD_CFLAGS) -c allsymbols.S -o $(MBUILD_IMAGE_SYMBOLS)
+	$(Q) $(CC) $(MBUILD_CFLAGS) $(ARCH_CFLAGS) -c allsymbols.S -o $(MBUILD_IMAGE_SYMBOLS)
 	$(Q) echo "  LD      $(MBUILD_IMAGE_ELF)"
 	$(Q) $(LD) $(eeos_LDFLAGS) -o $(MBUILD_IMAGE_ELF) $(MBUILD_EEOS_INIT) $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS) $(MBUILD_IMAGE_SYMBOLS)
 	$(Q) echo "  OBJCOPY $(MBUILD_IMAGE)"

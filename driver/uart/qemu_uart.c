@@ -4,15 +4,16 @@
 #include <driver/uart.h>
 #include <stddef.h>
 
-#if CONFIG_AARCH64
+#ifdef CONFIG_AARCH64
 #define QEMU_UART_DR ((void __iomem *)(0x09000000 + UART01x_DR))
 #define QEMU_UART_FR ((void __iomem *)(0x09000000 + UART01x_FR))
-#elif CONFIG_RISCV64
+#endif
+
+#ifdef CONFIG_RISCV64
 #define QEMU_UART_DR ((void __iomem *)(0x10000000 + 0x00))
 #define QEMU_UART_FR ((void __iomem *)(0x10000000 + 0x05))
-#else
-#error "please select arch"
 #endif
+
 
 /**
  * @brief
