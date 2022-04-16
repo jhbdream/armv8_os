@@ -139,8 +139,8 @@ export ARCH_CFLAGS ARCH_AFLAGS ARCH_AFLAGS
 
 -include arch/$(SRCARCH)/Makefile
 
-MBUILD_IMAGE 	:= ee.bin
-MBUILD_IMAGE_ELF := ee.elf
+MBUILD_IMAGE 	:= eeos.bin
+MBUILD_IMAGE_ELF := eeos.elf
 MBUILD_IMAGE_SYMBOLS := allsymbols.o
 
 all: include/config/config.h $(version_h) eeos
@@ -240,8 +240,8 @@ include/config/config.h: .config
 
 clean: $(clean-dirs)
 	$(Q) echo "  CLEAN   all .o .*.d *.dtb built-in.o"
-	$(Q) echo "  CLEAN   allsymbols.o allsymbols.S linkmap.txt eeos.s .tmp.eeos.elf .tmp.eeos.symbols eeos.bin eeos.elf"
-	$(Q) rm -f allsymbols.o allsymbols.S linkmap.txt eeos.s .tmp.eeos.elf .tmp.eeos.symbols eeos.bin eeos.elf
+	$(Q) echo "  CLEAN   allsymbols.o allsymbols.S linkmap.txt eeos.s .tmp.eeos.elf .tmp.eeos.symbols eeos.bin eeos.elf eeos.dis"
+	$(Q) rm -f allsymbols.o allsymbols.S linkmap.txt eeos.s .tmp.eeos.elf .tmp.eeos.symbols eeos.bin eeos.elf eeos.dis
 
 distclean: clean
 	$(Q) echo "  CLEAN   .config include/config"
