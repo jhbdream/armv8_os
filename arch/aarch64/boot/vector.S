@@ -129,6 +129,7 @@ SynchronousInterruptHandler:
     restoreregister
 	eret
 
+.globl el1_irq_handle
 IRQInterruptHandler:
 	//进入中断，保存寄存器
 	saveregister

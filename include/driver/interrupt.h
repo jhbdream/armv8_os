@@ -121,7 +121,7 @@ static inline unsigned int irq_desc_get_irq(struct irq_desc *desc)
 }
 
 void handle_domain_irq(void *regs);
-
+int set_handle_irq(void (*handle_irq)(void *));
 int request_irq(unsigned int irq, irq_handler_t handler, unsigned long flags,
                 const char *name, void *data);
 

@@ -113,6 +113,19 @@ void handle_domain_irq(void *regs)
 #endif
 }
 
+void (*handle_arch_irq)(void *);
+
+int set_handle_irq(void (*handle_irq)(void *))
+{
+	if(handle_arch_irq)
+	{
+		return -EBUSY;
+	}
+
+	handle_arch_irq = handle_irq;
+	return 0;
+}
+
 int request_irq(unsigned int irq, irq_handler_t handler, unsigned long flags,
 					const char *name, void *data)
 {
