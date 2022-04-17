@@ -3,7 +3,6 @@
 #ifndef _LINUX_INTERRUPT_H
 #define _LINUX_INTERRUPT_H
 
-#include <cpumusk.h>
 #include <irqflags.h>
 
 #define NR_IRQS 8192
@@ -110,8 +109,6 @@ struct irq_desc
     unsigned int status_use_accessors;
     unsigned int depth;     /* nested irq disables */
     unsigned int irq_count; /* For detecting broken IRQs */
-    struct cpumask *percpu_enabled;
-    const struct cpumask *percpu_affinity;
     const char *name;
     void *handler_data;
 };

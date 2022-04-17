@@ -193,7 +193,7 @@ exit_irq_with_task_switch:
     ldr x1, [x2]
 
     // 即将进行任务切换，更新to任务到当前任务信息 g_current_task
-    adr x2, g_current_task
+    //adr x2, g_current_task
     str x1, [x2]
 
     //2 保存from任务sp状态

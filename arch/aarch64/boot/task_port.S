@@ -1,4 +1,4 @@
-    .global g_current_task
+    //.global g_current_task
 
     .global task_switch_to
     .type task_switch_to, "function"
@@ -8,7 +8,7 @@
 task_switch_to:
 
     // 即将进行任务切换，更新to任务到当前任务信息
-    adr x2, g_current_task
+    //adr x2, g_current_task
     str x0, [x2]
 
     //1 恢复任务的堆栈寄存器
@@ -113,7 +113,7 @@ task_switch_from_to:
 
 
     // 即将进行任务切换，更新to任务到当前任务信息
-    adr x2, g_current_task
+    //adr x2, g_current_task
     str x1, [x2]
 
     //恢复to任务的状态

@@ -1,9 +1,8 @@
-#include <common/interrupt.h>
-#include <ee_errno.h>
-#include <compiler_types.h>
-#include <driver/gic.h>
+#include <driver/interrupt.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <ee_errno.h>
+#include <compiler_types.h>
 
 unsigned long task_interrupt_from_thread;
 unsigned long task_interrupt_to_thread;
