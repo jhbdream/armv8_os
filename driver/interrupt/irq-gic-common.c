@@ -1,9 +1,9 @@
 #include <ee_errno.h>
 #include <type.h>
 #include <io.h>
-#include <common/interrupt.h>
-#include "arm-gic.h"
 #include <printk.h>
+#include <driver/interrupt.h>
+#include "arm-gic.h"
 
 int gic_configure_irq(unsigned int irq, unsigned int type,
 		       void __iomem *base, void (*sync_access)(void))
@@ -12,7 +12,6 @@ int gic_configure_irq(unsigned int irq, unsigned int type,
 	u32 confoff = (irq / 16) * 4;
 	u32 val, oldval;
 	int ret = 0;
-	unsigned long flags;
 
 	/*
 	 * Read current configuration register, and insert the config

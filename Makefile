@@ -45,7 +45,7 @@ version_h := include/config/version.h
 
 clean-targets := %clean
 
--include .config
+include .config
 include scripts/config.mk
 
 KERNELVERSION = $(VERSION)$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(SUBLEVEL)))$(EXTRAVERSION)

@@ -3,11 +3,12 @@
 #include <ee_errno.h>
 #include <io.h>
 #include <type.h>
-#include <common/interrupt.h>
+#include <driver/interrupt.h>
 #include <arch_gicv3.h>
 #include <cputype.h>
-#include "arm-gic-v3.h"
-#include "../irq-gic-common.h"
+#include "irq-gic-v3.h"
+#include "gic_config.h"
+#include "irq-gic-common.h"
 #include <printk.h>
 
 struct redist_region
