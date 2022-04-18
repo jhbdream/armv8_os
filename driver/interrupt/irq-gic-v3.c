@@ -181,7 +181,7 @@ void gic_mask_irq(u32 hwirq)
 	gic_poke_irq(hwirq, GICD_ICENABLER);
 }
 
-static void gic_eoimode1_mask_irq(u32 hwirq)
+__attribute__ ((unused)) static void gic_eoimode1_mask_irq(u32 hwirq)
 {
 	gic_mask_irq(hwirq);
 }
@@ -191,7 +191,7 @@ void gic_unmask_irq(u32 hwirq)
 	gic_poke_irq(hwirq, GICD_ISENABLER);
 }
 
-static int gic_irq_set_irqchip_state(u32 hwirq,
+__attribute__ ((unused)) static int gic_irq_set_irqchip_state(u32 hwirq,
 									 enum irqchip_irq_state which, u8 val)
 {
 	u32 reg;
@@ -252,7 +252,7 @@ void gic_eoimode1_eoi_irq(u32 hwirq)
 	gic_write_dir(hwirq);
 }
 
-static int gic_set_type(u32 hwirq, unsigned int type)
+__attribute__ ((unused)) static int gic_set_type(u32 hwirq, unsigned int type)
 {
 	unsigned int irq = hwirq;
 	void (*rwp_wait)(void);
@@ -341,7 +341,6 @@ static void gic_dist_init(void)
 
 static void gic_cpu_sys_reg_init(void)
 {
-	int i;
 	bool group0;
 	u32 val, pribits;
 
@@ -440,7 +439,6 @@ int gic_init_bases(void __iomem *dist_base,
 	u32 typer;
 	int gic_irqs;
 	int i, err;
-	struct redist_region *rdist_regs;
 
 	err = gic_validate_dist_version(dist_base);
 	if (err) {
