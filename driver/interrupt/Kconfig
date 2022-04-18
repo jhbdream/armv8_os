@@ -1,0 +1,11 @@
+menu "IRQ chip support"
+
+config IRQCHIP
+    bool "IRQCHIP"
+    def_bool y
+
+config ARM_GIC
+    bool "ARM_GIC"
+    depends on AARCH64 && IRQCHIP
+
+endmenu

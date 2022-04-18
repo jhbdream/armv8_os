@@ -85,6 +85,8 @@ static inline void generic_handle_irq_desc(struct irq_desc *desc)
 
 /**
  * generic_handle_irq - Invoke the handler for a particular irq
+ * 由中断控制器的handle调用该接口
+ *
  * @irq:	The irq number to handle
  *
  */
@@ -99,20 +101,6 @@ int generic_handle_irq(unsigned int irq)
 	return 0;
 }
 
-void handle_domain_irq(void *regs)
-{
-#if 0
-	static uint32_t irqnr;
-	irq_enter();
-	irqnr = irq_read_iar();
-
-	generic_handle_irq(irqnr);
-
-	irq_eoi(irqnr);
-	irq_exit();
-#endif
-}
-
 void (*handle_arch_irq)(void *);
 
 int set_handle_irq(void (*handle_irq)(void *))
@@ -124,6 +112,16 @@ int set_handle_irq(void (*handle_irq)(void *))
 
 	handle_arch_irq = handle_irq;
 	return 0;
+}
+
+void handle_domain_irq(void *regs)
+{
+	irq_enter();
+
+	if(handle_arch_irq)
+		handle_arch_irq(regs);
+
+	irq_exit();
 }
 
 int request_irq(unsigned int irq, irq_handler_t handler, unsigned long flags,

@@ -5,3 +5,4 @@ config SRCARCH
     option env="SRCARCH"
 
 source "arch/Kconfig"
+source "driver/Kconfig"
