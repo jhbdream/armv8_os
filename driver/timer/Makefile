@@ -1,0 +1,1 @@
+obj-$(CONFIG_AARCH64) += aarch64_timer.o
