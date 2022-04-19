@@ -45,6 +45,13 @@ void handle_bad_irq(struct irq_desc *desc)
 	ack_bad_irq(irq);
 }
 
+struct irq_chip _irq_chip =
+{
+	.irq_eoi = NULL,
+	.irq_mask = NULL,
+	.irq_unmask = NULL,
+};
+
 /* global irq desc */
 struct irq_desc irq_desc[NR_IRQS] = {
 	[0 ... NR_IRQS-1] = {
@@ -103,6 +110,25 @@ int generic_handle_irq(unsigned int irq)
 
 void (*handle_arch_irq)(void *);
 
+int set_irq_chip(struct irq_chip *irq_chip)
+{
+	if(!irq_chip)
+	{
+		return -EBUSY;
+	}
+
+	_irq_chip.irq_unmask = irq_chip->irq_unmask;
+	_irq_chip.irq_mask = irq_chip->irq_mask;
+	_irq_chip.irq_eoi = irq_chip->irq_eoi;
+
+	return 0;
+}
+
+struct irq_chip *get_irq_chip(void)
+{
+	return &_irq_chip;
+}
+
 int set_handle_irq(void (*handle_irq)(void *))
 {
 	if(handle_arch_irq)
@@ -122,6 +148,28 @@ void handle_domain_irq(void *regs)
 		handle_arch_irq(regs);
 
 	irq_exit();
+}
+
+void mask_irq(unsigned int irq)
+{
+	struct irq_chip *chip = get_irq_chip();
+
+	if(chip->irq_mask)
+		chip->irq_mask(irq);
+}
+
+void unmask_irq(unsigned int irq)
+{
+	struct irq_chip *chip = get_irq_chip();
+
+	if(chip->irq_unmask)
+		chip->irq_unmask(irq);
+}
+
+static int _setup_irq(unsigned int irq)
+{
+	unmask_irq(irq);
+	return 0;
 }
 
 int request_irq(unsigned int irq, irq_handler_t handler, unsigned long flags,
@@ -145,9 +193,7 @@ int request_irq(unsigned int irq, irq_handler_t handler, unsigned long flags,
 	/* Reset broken irq detection when installing new handler */
 	desc->irq_count = 0;
 
-#if 0
 	/* 申请中断意味着会取消中断控制器的屏蔽 */
-	irq_unmask(irq);
-#endif
+	_setup_irq(irq);
 	return 0;
 }

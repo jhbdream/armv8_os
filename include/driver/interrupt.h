@@ -88,8 +88,16 @@ enum
     IRQ_DISABLE_UNLAZY = (1 << 19),
 };
 
+
 struct irq_desc;
 typedef void (*irq_handler_t)(struct irq_desc *desc);
+
+struct irq_chip
+{
+    void (*irq_mask)(unsigned int irq);
+    void (*irq_unmask)(unsigned int irq);
+    void (*irq_eoi)(unsigned int irq);
+};
 
 /**
  * struct irq_desc - interrupt descriptor
@@ -121,10 +129,12 @@ static inline unsigned int irq_desc_get_irq(struct irq_desc *desc)
 }
 
 void handle_domain_irq(void *regs);
+int set_irq_chip(struct irq_chip *irq_chip);
 int set_handle_irq(void (*handle_irq)(void *));
 int request_irq(unsigned int irq, irq_handler_t handler, unsigned long flags,
                 const char *name, void *data);
 
 int is_interrupt_nest(void);
+int generic_handle_irq(unsigned int irq);
 
 #endif

@@ -470,3 +470,33 @@ int gic_init_bases(void __iomem *dist_base,
 
 	return 0;
 }
+
+struct irq_chip gicv3_chip =
+{
+	.irq_mask = gic_mask_irq,
+	.irq_unmask = gic_unmask_irq,
+	.irq_eoi = gic_eoi_irq,
+};
+
+static void gic_handle_irq(void *reg)
+{
+	uint32_t irqnr = (uint32_t)gic_read_iar();
+
+	if((irqnr >= 1020 && irqnr <= 1023))
+	{
+		return;
+	}
+
+	generic_handle_irq(irqnr);
+
+	gic_eoi_irq(irqnr);
+}
+
+int arm_gicv3_interrupu_init(void *dist_base, void *rdist_base, uint32_t nr_redist_regions)
+{
+	set_irq_chip(&gicv3_chip);
+	set_handle_irq(gic_handle_irq);
+	gic_init_bases(dist_base, rdist_base, nr_redist_regions);
+
+	return 0;
+}
