@@ -14,6 +14,11 @@
 #define QEMU_UART_FR ((void __iomem *)(0x10000000 + 0x05))
 #endif
 
+#ifdef CONFIG_RISCV32
+#define QEMU_UART_DR ((void __iomem *)(0x10000000 + 0x00))
+#define QEMU_UART_FR ((void __iomem *)(0x10000000 + 0x05))
+#endif
+
 
 /**
  * @brief

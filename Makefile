@@ -57,6 +57,9 @@ ifeq ($(CONFIG_AARCH64), y)
 else ifeq ($(CONFIG_RISCV64), y)
 	ARCH		= riscv64
 	CROSS_COMPILE 	= riscv64-unknown-elf-
+else ifeq ($(CONFIG_RISCV32), y)
+	ARCH		= riscv32
+	CROSS_COMPILE 	= riscv32-unknown-elf-
 endif
 
 SRCARCH 	:= $(ARCH)
@@ -288,7 +291,9 @@ endif
 ifeq ("$(SRCARCH)", "riscv64")
 	qemu-system-riscv64 -machine virt -smp 1 -m 1024 -nographic -serial mon:stdio -bios $(MBUILD_IMAGE_ELF)
 endif
-
+ifeq ("$(SRCARCH)", "riscv32")
+	qemu-system-riscv32 -machine virt -smp 1 -m 1024 -nographic -serial mon:stdio -bios $(MBUILD_IMAGE_ELF)
+endif
 PHONY += FORCE
 FORCE:
 
