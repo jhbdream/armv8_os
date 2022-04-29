@@ -79,3 +79,5 @@ allsymbols.S
 scripts/Kconfiglib/__pycache__
 linkmap.txt
 include/config/config.h
+
+*.pyc
