@@ -4,17 +4,17 @@
 #include <driver/uart.h>
 #include <stddef.h>
 
-#ifdef CONFIG_AARCH64
+#ifdef  CONFIG_ARCH_AARCH64
 #define QEMU_UART_DR ((void __iomem *)(0x09000000 + UART01x_DR))
 #define QEMU_UART_FR ((void __iomem *)(0x09000000 + UART01x_FR))
 #endif
 
-#ifdef CONFIG_RISCV64
+#ifdef  CONFIG_ARCH_RISCV64
 #define QEMU_UART_DR ((void __iomem *)(0x10000000 + 0x00))
 #define QEMU_UART_FR ((void __iomem *)(0x10000000 + 0x05))
 #endif
 
-#ifdef CONFIG_RISCV32
+#ifdef  CONFIG_ARCH_RISCV32
 #define QEMU_UART_DR ((void __iomem *)(0x10000000 + 0x00))
 #define QEMU_UART_FR ((void __iomem *)(0x10000000 + 0x05))
 #endif

@@ -1,15 +1,15 @@
 
 choice
 	prompt "Architecture select"
-	default AARCH64
+	default ARCH_AARCH64
 
-config AARCH64
+config ARCH_AARCH64
 	bool "AARCH64"
 
-config RISCV64
+config ARCH_RISCV64
 	bool "RISCV64"
 
-config RISCV32
+config ARCH_RISCV32
 	bool "RISCV32"
 endchoice
 

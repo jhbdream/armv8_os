@@ -2,6 +2,6 @@ menu "IRQ chip support"
 
 config ARM_GIC
     bool "ARM_GIC"
-    depends on AARCH64
+    depends on ARCH_AARCH64
 
 endmenu

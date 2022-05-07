@@ -51,13 +51,13 @@ include scripts/config.mk
 KERNELVERSION = $(VERSION)$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(SUBLEVEL)))$(EXTRAVERSION)
 export VERSION PATCHLEVEL SUBLEVEL KERNELVERSION
 
-ifeq ($(CONFIG_AARCH64), y)
+ifeq ($(CONFIG_ARCH_AARCH64), y)
 	ARCH		= aarch64
 	CROSS_COMPILE 	= aarch64-linux-gnu-
-else ifeq ($(CONFIG_RISCV64), y)
+else ifeq ($(CONFIG_ARCH_RISCV64), y)
 	ARCH		= riscv64
 	CROSS_COMPILE 	= riscv64-unknown-elf-
-else ifeq ($(CONFIG_RISCV32), y)
+else ifeq ($(CONFIG_ARCH_RISCV32), y)
 	ARCH		= riscv32
 	CROSS_COMPILE 	= riscv32-unknown-elf-
 endif
