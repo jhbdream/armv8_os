@@ -286,7 +286,7 @@ genconfig:
 PHONY += qemu
 qemu: $(MBUILD_IMAGE_ELF)
 ifeq ("$(SRCARCH)", "aarch64")
-	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 1024 -nographic -serial mon:stdio -kernel $(MBUILD_IMAGE_ELF)
+	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 1024 -nographic -serial mon:stdio -kernel $(MBUILD_IMAGE) -S -s
 endif
 ifeq ("$(SRCARCH)", "riscv64")
 	qemu-system-riscv64 -machine virt -smp 1 -m 1024 -nographic -serial mon:stdio -bios $(MBUILD_IMAGE_ELF)
