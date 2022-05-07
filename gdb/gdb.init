@@ -1,0 +1,11 @@
+#target remote localhost:3333
+#set architecture riscv:rv32
+#target remote 10.10.22.57:1025
+
+target remote localhost:1234
+#source gdb/verfy.py
+#source gdb/write_r.py
+add-symbol-file -o -(0xffff000000000000-0x40080000) eeos.elf
+#add-symbol-file eeos.elf
+
+dashboard registers -style list "x0 x1 x2 x3 x4 x5 x6 x7 sp pc"
