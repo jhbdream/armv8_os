@@ -1,36 +1,33 @@
-OUTPUT_FORMAT("elf64-littleaarch64", "elf64-littleaarch64", "elf64-littleaarch64")
+OUTPUT_FORMAT("elf64-littleaarch64")
 OUTPUT_ARCH("aarch64")
 ENTRY(_startup)
 
 STACK_SIZE = 0x100;
 
-MEMORY
-{
-    ram : org = 0x40000000, len = 32M
-}
-
 SECTIONS
 {
+    . = 0x40000000;
+
     .startup :
     {
         __code_start = .;
         KEEP(*(StartUp))
-    } > ram
+    }
 
     .init :
     {
         KEEP (*(SORT_NONE(.init)))
-    } > ram
+    }
 
     .text :
     {
         *(.text*)
-    } > ram
+    }
 
     .fini :
     {
         KEEP (*(SORT_NONE(.fini)))
-    } > ram
+    }
 
     .rodata :
     {
@@ -42,36 +39,36 @@ SECTIONS
         _shell_command_start = .;
         KEEP (*(shellCommand))
         _shell_command_end = .;
-    
+
 		. = ALIGN(8);
 		__console_device_begin = .;
 		KEEP (*(__console));
 		__console_device_end = .;
-	} > ram
+	}
 
     .eh_frame :
     {
         KEEP (*(.eh_frame))
-    } > ram
+    }
 
     .ARM.extab :
     {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
-    } > ram
+    }
 
     .ARM.exidx :
     {
         __exidx_start = .;
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
         __exidx_end = .;
-    } > ram
+    }
 
     .preinit_array :
     {
         PROVIDE_HIDDEN (__preinit_array_start = .);
         KEEP (*(.preinit_array))
         PROVIDE_HIDDEN (__preinit_array_end = .);
-    } > ram
+    }
 
     .init_array :
     {
@@ -79,7 +76,7 @@ SECTIONS
         KEEP (*(SORT(.init_array.*)))
         KEEP (*(.init_array ))
         PROVIDE_HIDDEN (__init_array_end = .);
-    } > ram
+    }
 
     .fini_array :
     {
@@ -87,7 +84,7 @@ SECTIONS
         KEEP (*(SORT(.fini_array.*)))
         KEEP (*(.fini_array ))
         PROVIDE_HIDDEN (__fini_array_end = .);
-    } > ram
+    }
 
     .ctors :
     {
@@ -109,7 +106,7 @@ SECTIONS
         KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o ) .ctors))
         KEEP (*(SORT(.ctors.*)))
         KEEP (*(.ctors))
-    } > ram
+    }
 
     .dtors :
     {
@@ -118,19 +115,19 @@ SECTIONS
         KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o ) .dtors))
         KEEP (*(SORT(.dtors.*)))
         KEEP (*(.dtors))
-    } > ram
+    }
 
     .jcr :
     {
         KEEP (*(.jcr))
-    } > ram
+    }
 
     .data :
     {
         __data_start = . ;
         *(.data .data.* .gnu.linkonce.d.*)
         SORT(CONSTRUCTORS)
-    } > ram
+    }
 
     .bss :
     {
@@ -140,7 +137,35 @@ SECTIONS
         *(COMMON)
         . = ALIGN(64);
         __bss_end__ = .;
-    } > ram
+    }
+
+    .init_pg_dir (NOLOAD):
+    {
+        . = ALIGN(4096);
+        __init_pgd = .;
+        . = . + 0x1000;
+    }
+
+    .init_pud (NOLOAD):
+    {
+        . = ALIGN(4096);
+        __init_pud = .;
+        . = . + 0x1000;
+    }
+
+    .init_pmd (NOLOAD):
+    {
+        . = ALIGN(4096);
+        __init_pmd = .;
+        . = . + 0x1000;
+    }
+
+    .init_pte (NOLOAD):
+    {
+        . = ALIGN(4096);
+        __init_pte = .;
+        . = . + 0x1000;
+    }
 
     .heap (NOLOAD):
     {
@@ -148,7 +173,7 @@ SECTIONS
         __end__ = .;
         PROVIDE(end = .);
         . = . + 0x1000;
-    } > ram
+    }
 
     .el1_stack (NOLOAD):
     {
@@ -156,8 +181,7 @@ SECTIONS
         . = . + STACK_SIZE;
         __el1_stack = .;
         __stack_top = .;
-    } > ram
-
+    }
 
     /*
      * The startup code uses the end of this region to calculate
