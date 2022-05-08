@@ -137,19 +137,18 @@ _create_init_page_table:
      */
     adrp    x0, __idmap_pg_start
     adrp    x3, __idmap_text_start      // __pa(__idmap_text_start)
+    adrp    x6, __idmap_text_end
+    mov x4, #1 << (PHYS_MASK_SHIFT - PGDIR_SHIFT)
 
-    mov x5, #VA_BITS
+    map_memory x0, x1, x3, x6, x7, x3, x4, x10, x11, x12, x13, x14
 
     adrp x0, __init_pg_dir_start     // x0 = 1级页表基地址
-
-    mov x5, KIMAGE_VADDR    // x5 = image 虚拟地址的起始地址
+    mov_q x5, KIMAGE_VADDR    // x5 = image 虚拟地址的起始地址
     mov x4, PTRS_PER_PGD    // x4 =页表项的大小
-
     adrp x3, __kimage_start // x3 = image 物理地址起始地址
     adrp x6, __kimage_end
     sub x6, x6, x3
     add x6, x6, x5          // x6 = image 虚拟地址的结束地址
-
 
     /*
     *  Map the kernel image
@@ -161,7 +160,7 @@ _create_init_page_table:
     *  x7: 最后一级页表的一些参数
     *  x3: 映射的物理地址 起始位置
     *  x4: pgd entry 数量
-    *  x10, x11, x12, x13, x14: 临时寄存器、无需初始化
+    *  x 10, x11, x12, x13, x14: 临时寄存器、无需初始化
     */
     map_memory x0, x1, x5, x6, x7, x3, x4, x10, x11, x12, x13, x14
 
@@ -224,17 +223,19 @@ __cpu_setup:
     .unreq  mair
     .unreq  tcr
 
+__enable_mmu:
+    adrp x1, __init_pg_dir_start
+    adrp x2, __idmap_pg_start
 
+    msr ttbr0_el1, x2           // load TTBR0
+    msr ttbr1_el1, x1           // load TTBR1
+    isb
 
+    set_sctlr_el1   x0
 
-    /* disable all exception */
-    msr daifset, 0xf
-
-    /* Enable FP/SIMD at EL1
-     * libc printk use float reg, if not enable fp will exception
-     */
-    mov x0, #(3<<20)
-    msr cpacr_el1, x0
+    ldr x8, =__mmu_on
+    blr x8
+__mmu_on:
 
     // Zero the bss
     ldr x0, =__bss_start__ // Start of block

@@ -16,7 +16,7 @@
 #define CONFIG_ARM64_4K_PAGES (1)
 
 #define VA_BITS (48)
-#define KIMAGE_VADDR (0xFFFF000000000000)
+#define KIMAGE_VADDR (0xFFFF000000080000)
 
 /*
  * Memory types available.

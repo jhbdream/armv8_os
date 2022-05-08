@@ -35,5 +35,28 @@
     movk    \reg, :abs_g0_nc:\val
     .endm
 
+    /*
+     * in the process. This is called when setting the MMU on.
+     */
+    .macro set_sctlr, sreg, reg
+       msr \sreg, \reg
+       isb
+       /*
+        * Invalidate the local I-cache so that any instructions fetched
+        * speculatively from the PoC are discarded, since they may have
+        * been dynamically patched at the PoU.
+        */
+       ic  iallu
+       dsb nsh
+       isb
+    .endm
+
+    .macro set_sctlr_el1, reg
+        set_sctlr sctlr_el1, \reg
+    .endm
+
+    .macro set_sctlr_el2, reg
+        set_sctlr sctlr_el2, \reg
+    .endm
 
 #endif
