@@ -231,11 +231,17 @@ __enable_mmu:
     msr ttbr1_el1, x1           // load TTBR1
     isb
 
+    // 设置 sctlr 寄存器 打开mmu功能
     set_sctlr_el1   x0
 
+    // 获取虚拟地址 跳转到虚拟地址执行
     ldr x8, =__mmu_on
     blr x8
 __mmu_on:
+
+    adrp   x8, vectors         // load VBAR_EL1 with virtual
+    msr vbar_el1, x8            // vector table address
+    isb
 
     // Zero the bss
     ldr x0, =__bss_start__ // Start of block
@@ -248,8 +254,6 @@ memset_loop:
 
     // 创建临时的镜像映射 此时的页表是使用链接脚本分配的空间
     // 正式的页表需要后续使用动态分配内存创建映射关系、然后在切换页表
-
-
     bl start_kernel
 
 hang:
