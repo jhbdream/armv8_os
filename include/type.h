@@ -39,4 +39,6 @@ typedef unsigned long       uintptr_t;
 #define false 0
 #endif
 
+typedef u64 phys_addr_t;
+
 #endif
