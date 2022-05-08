@@ -121,13 +121,23 @@
 
     /* default boot from el1 */
 _startup:
-
 	/* check CPU ID = 0x0, or jump to hang */
 	mrs	x0, mpidr_el1
 	and	x0, x0, #3
 	cmp	x0, #0
 	bne	hang
 
+__init_el1:
+    mov_q   x0, INIT_SCTLR_EL1_MMU_OFF
+    msr sctlr_el1, x0
+    isb
+    mov_q   x0, 0x3c5
+    msr spsr_el1, x0
+    adr x8, __init_el1_done
+    msr elr_el1, x8
+    eret
+
+__init_el1_done:
 _create_init_page_table:
 
     mov x7, SWAPPER_MM_MMUFLAGS
@@ -251,6 +261,9 @@ memset_loop:
     str wzr, [x0], #4
     cmp x0, x1
     b.lt memset_loop
+
+    adr x8, __stack_top
+    mov sp, x8
 
     // 创建临时的镜像映射 此时的页表是使用链接脚本分配的空间
     // 正式的页表需要后续使用动态分配内存创建映射关系、然后在切换页表

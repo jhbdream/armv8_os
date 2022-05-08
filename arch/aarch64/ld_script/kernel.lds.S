@@ -177,6 +177,8 @@ SECTIONS
     {
         . = ALIGN(64);
         . = . + STACK_SIZE;
+
+        . = ALIGN(64);
         __el1_stack = .;
         __stack_top = .;
     }
