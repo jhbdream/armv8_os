@@ -1,5 +1,8 @@
 #ifndef __LIMITS_H__
 #define __LIMITS_H__
+#include  <type.h>
+
+#define PHYS_ADDR_MAX   (~(phys_addr_t)0)
 
 #define USHRT_MAX	((unsigned short)~0U)
 #define SHRT_MAX	((short)(USHRT_MAX >> 1))

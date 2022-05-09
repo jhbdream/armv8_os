@@ -1,6 +1,8 @@
 #ifndef __TYPE_H__
 #define __TYPE_H__
 
+#ifndef __ASSEMBLY__
+
 #include <stdint.h>
 #include <bitops.h>
 
@@ -41,4 +43,5 @@ typedef unsigned long       uintptr_t;
 
 typedef u64 phys_addr_t;
 
+#endif /* #ifndef __ASSEMBLY__*/
 #endif

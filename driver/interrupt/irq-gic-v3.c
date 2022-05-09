@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
-#include <ee_errno.h>
+#include <errno.h>
 #include <io.h>
 #include <type.h>
 #include <driver/interrupt.h>

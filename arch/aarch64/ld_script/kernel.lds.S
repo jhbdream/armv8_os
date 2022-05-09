@@ -147,6 +147,13 @@ SECTIONS
     /* USE 39BIT VA 3LEVEL PAGE TABLE */
     // 根据虚拟地址范围计算需要的页表个数
     // 使用链接脚本分配出来对应大小的空间
+    .idmap_pg_dir (NOLOAD):
+    {
+        . = ALIGN(4096);
+        __idmap_pg_start = .;
+        . += IDMAP_DIR_SIZE;
+        __idmap_pg_end = .;
+    }
 
     .idmap_pg_dir (NOLOAD):
     {

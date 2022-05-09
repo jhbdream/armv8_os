@@ -1,4 +1,4 @@
-#include <ee_errno.h>
+#include <errno.h>
 #include <type.h>
 #include <io.h>
 #include <printk.h>

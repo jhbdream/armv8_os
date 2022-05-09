@@ -2,7 +2,6 @@
 #ifndef _LINUX_BITOPS_H
 #define _LINUX_BITOPS_H
 
-#include <type.h>
 #include <bits.h>
 #include <round.h>
 

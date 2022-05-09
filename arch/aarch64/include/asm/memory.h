@@ -31,4 +31,21 @@
 #define MT_DEVICE_nGnRnE    3
 #define MT_DEVICE_nGnRE     4
 
+#ifndef __ASSEMBLY__
+
+#define virt_to_phys virt_to_phys
+static inline phys_addr_t virt_to_phys(const volatile void *x)
+{
+    return ((unsigned long)(x));
+}
+
+#define phys_to_virt phys_to_virt
+static inline void *phys_to_virt(phys_addr_t x)
+{
+    return (void *)((x));
+}
+
+#define __pa(x)     ((unsigned long)(x))
+
+#endif /* #ifndef __ASSEMBLY__ */
 #endif

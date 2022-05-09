@@ -1,7 +1,7 @@
 #include <driver/interrupt.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <ee_errno.h>
+#include <errno.h>
 #include <compiler_types.h>
 
 unsigned long task_interrupt_from_thread;
