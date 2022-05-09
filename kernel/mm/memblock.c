@@ -401,7 +401,7 @@ static phys_addr_t memblock_find(phys_addr_t size, phys_addr_t align)
     return 0;
 }
 
-static phys_addr_t memblock_alloc_range(phys_addr_t size, phys_addr_t align)
+phys_addr_t memblock_alloc_range(phys_addr_t size, phys_addr_t align)
 {
     phys_addr_t found;
 
