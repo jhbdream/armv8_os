@@ -101,6 +101,7 @@ MBUILD_DEFINE := -D__KERNEL__
 NOSTDINC_FLAGS += -nostdinc
 
 MBUILD_CFLAGS   := 	-Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+					-Wno-unused-function -Wno-unused-variable \
 		   			-fno-strict-aliasing -fno-common -fshort-wchar \
 					-fno-stack-protector \
 		   			-Werror-implicit-function-declaration \
