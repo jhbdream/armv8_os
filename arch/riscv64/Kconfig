@@ -1,0 +1,4 @@
+menu "RISCV64 architecture"
+    depends on ARCH_RISCV64
+
+endmenu

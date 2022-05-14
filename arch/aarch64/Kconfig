@@ -1,0 +1,20 @@
+menu "ARM architecture"
+    depends on ARCH_AARCH64
+
+choice
+    prompt "Physical address space size"
+    default ARM64_PA_BITS_48
+    help
+      Choose the maximum physical address range that the kernel will
+      support.
+
+    config ARM64_PA_BITS_48
+        bool "48-bit"
+
+endchoice
+
+config ARM64_PA_BITS
+    int
+    default 48 if ARM64_PA_BITS_48
+
+endmenu
