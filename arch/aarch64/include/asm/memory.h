@@ -11,11 +11,9 @@
 #ifndef __ASM_MEMORY_H
 #define __ASM_MEMORY_H
 
-#define CONFIG_ARM64_PA_BITS (48)
-#define CONFIG_PGTABLE_LEVELS (4)
-#define CONFIG_ARM64_4K_PAGES (1)
+#include <config.h>
 
-#define VA_BITS (48)
+#define VA_BITS (CONFIG_ARM64_VA_BITS)
 #define KIMAGE_VADDR (0xFFFF000000080000)
 
 /*

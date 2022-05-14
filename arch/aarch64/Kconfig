@@ -10,11 +10,51 @@ choice
 
     config ARM64_PA_BITS_48
         bool "48-bit"
-
 endchoice
 
 config ARM64_PA_BITS
     int
     default 48 if ARM64_PA_BITS_48
+
+choice
+    prompt "Page size"
+    default ARM64_4K_PAGES
+    help
+      Page size (translation granule) configuration.
+
+config ARM64_4K_PAGES
+    bool "4KB"
+    help
+      This feature enables 4KB pages support.
+
+endchoice
+
+choice
+    prompt "Virtual address space size"
+    default ARM64_VA_BITS_39 if ARM64_4K_PAGES
+    help
+      Allows choosing one of multiple possible virtual address
+      space sizes. The level of translation table is determined by
+      a combination of page size and virtual address space size.
+
+config ARM64_VA_BITS_39
+    bool "39-bit"
+    depends on ARM64_4K_PAGES
+
+config ARM64_VA_BITS_48
+    bool "48-bit"
+    depends on ARM64_4K_PAGES
+
+endchoice
+
+config ARM64_VA_BITS
+    int
+    default 39 if ARM64_VA_BITS_39
+    default 48 if ARM64_VA_BITS_48
+
+config PGTABLE_LEVELS
+    int
+    default 3 if ARM64_4K_PAGES && ARM64_VA_BITS_39
+    default 4 if ARM64_4K_PAGES && ARM64_VA_BITS_48
 
 endmenu

@@ -11,6 +11,7 @@
 #ifndef __ASM_PGTABLE_TYPES_H
 #define __ASM_PGTABLE_TYPES_H
 
+#include <config.h>
 #include <type.h>
 
 typedef u64 pteval_t;
