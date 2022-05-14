@@ -3,10 +3,12 @@
 #include <stdint.h>
 #include <config.h>
 #include <ee/irqflags.h>
+#include <ee/init.h>
 
 void start_kernel(void)
 {
 	console_init();
+	setup_arch();
 
 #ifdef CONFIG_AARCH64
 	extern int arm_gicv3_interrupu_init(void *dist_base, void *rdist_base, uint32_t nr_redist_regions);
