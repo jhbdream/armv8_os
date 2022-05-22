@@ -12,9 +12,13 @@
 #define __ASM_MEMORY_H
 
 #include <config.h>
+#include <ee/sizes.h>
 
 #define VA_BITS (CONFIG_ARM64_VA_BITS)
 #define KIMAGE_VADDR (0xFFFF000000080000)
+
+#define FIXADDR_TOP (KIMAGE_VADDR + SZ_512M)
+
 
 /*
  * Memory types available.

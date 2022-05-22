@@ -1,14 +1,29 @@
 #include <pgtable.h>
 #include <asm/pgtable_type.h>
+#include <asm/fixmap.h>
+#include <asm/pgtable.h>
 #include <compiler_attribute.h>
 
 static pte_t bm_pte[PTRS_PER_PTE] __section(".bss") __aligned(PAGE_SIZE);
 static pmd_t bm_pmd[PTRS_PER_PMD] __section(".bss") __aligned(PAGE_SIZE);
 static pud_t bm_pud[PTRS_PER_PUD] __section(".bss") __aligned(PAGE_SIZE);
 
-void early_fixmap_init(void)
+void early_fixmap_init(pgd_t *pgd)
 {
+    pgd_t *pgdp;
+    //pgd_t pgd;
+    pud_t *pudp;
+    pmd_t *pmdp;
+    unsigned long addr = FIXADDR_START;
 
+    //pgdp = pgd_offset_pgd(pgd, addr);
+    //  pgd = pgd_val(*pgdp);
+
+    // 没有创建过fixmap页表
+    //if(!pgd_none(pgd))
+    {
+
+    }
 }
 
 
@@ -23,7 +38,7 @@ static void __create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
     (void)addr;
     (void)end;
 
-    pgd_t *pgdp = pgd_offset_pgd(pgdir, virt);
+    //pgd_t *pgdp = pgd_offset_pgd(pgdir, virt);
 
     //TODO: check phys and virt has same offset in a page
     // make sure (phys ^ virt) & ~PAGE_MASK) == 0
