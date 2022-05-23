@@ -167,6 +167,12 @@
 #define PTE_ADDR_MASK       PTE_ADDR_LOW
 
 /*
+ * AttrIndx[2:0] encoding (mapping attributes defined in the MAIR* registers).
+ */
+#define PTE_ATTRINDX(t)     (_AT(pteval_t, (t)) << 2)
+#define PTE_ATTRINDX_MASK   (_AT(pteval_t, 7) << 2)
+
+/*
  * Highest possible physical address supported.
  */
 #define PHYS_MASK_SHIFT     (CONFIG_ARM64_PA_BITS)
