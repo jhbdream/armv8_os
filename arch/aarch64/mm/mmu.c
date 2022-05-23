@@ -2,27 +2,30 @@
 #include <asm/pgtable_type.h>
 #include <asm/fixmap.h>
 #include <asm/pgtable.h>
+#include <asm/pgalloc.h>
 #include <compiler_attribute.h>
+#include <ee/pgtable.h>
 
+uint64_t kimage_voffset;
 static pte_t bm_pte[PTRS_PER_PTE] __section(".bss") __aligned(PAGE_SIZE);
 static pmd_t bm_pmd[PTRS_PER_PMD] __section(".bss") __aligned(PAGE_SIZE);
 static pud_t bm_pud[PTRS_PER_PUD] __section(".bss") __aligned(PAGE_SIZE);
 
-void early_fixmap_init(pgd_t *pgd)
+void early_fixmap_init(pgd_t *pg_dir)
 {
     pgd_t *pgdp;
-    //pgd_t pgd;
+    pgd_t pgd;
     pud_t *pudp;
     pmd_t *pmdp;
     unsigned long addr = FIXADDR_START;
 
-    //pgdp = pgd_offset_pgd(pgd, addr);
-    //  pgd = pgd_val(*pgdp);
+    pgdp = pgd_offset_pgd(pg_dir, addr);
+    pgd = *pgdp;
 
-    // 没有创建过fixmap页表
-    //if(!pgd_none(pgd))
+    // pgd空时创建页表
+    if(pgd_none(pgd))
     {
-
+        __pgd_populate(pgdp, bm_pud, PGD_TYPE_TABLE);
     }
 }
 

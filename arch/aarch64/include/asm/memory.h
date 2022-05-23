@@ -35,6 +35,8 @@
 
 #ifndef __ASSEMBLY__
 
+extern uint64_t kimage_voffset;
+
 #define virt_to_phys virt_to_phys
 static inline phys_addr_t virt_to_phys(const volatile void *x)
 {
@@ -47,7 +49,12 @@ static inline void *phys_to_virt(phys_addr_t x)
     return (void *)((x));
 }
 
+#define __kimg_to_phys(addr)    ((addr) - kimage_voffset)
+#define __phys_addr_symbol(x) __kimg_to_phys((phys_addr_t)(x))
+
 #define __pa(x)     ((unsigned long)(x))
+#define __pa_symbol(x) __phys_addr_symbol(x)
+
 
 #endif /* #ifndef __ASSEMBLY__ */
 #endif

@@ -97,6 +97,14 @@
 #define P4D_TABLE_PXN       (_AT(p4dval_t, 1) << 59)
 #define P4D_TABLE_UXN       (_AT(p4dval_t, 1) << 60)
 
+#define PGD_TYPE_TABLE      (_AT(pgdval_t, 3) << 0)
+#define PGD_TABLE_BIT       (_AT(pgdval_t, 1) << 1)
+#define PGD_TYPE_MASK       (_AT(pgdval_t, 3) << 0)
+#define PGD_TYPE_SECT       (_AT(pgdval_t, 1) << 0)
+#define PGD_SECT_RDONLY     (_AT(pgdval_t, 1) << 7)     /* AP[2] */
+#define PGD_TABLE_PXN       (_AT(pgdval_t, 1) << 59)
+#define PGD_TABLE_UXN       (_AT(pgdval_t, 1) << 60)
+
 /*
  * Level 1 descriptor (PUD).
  */
