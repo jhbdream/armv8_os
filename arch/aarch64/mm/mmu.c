@@ -56,6 +56,15 @@ void early_fixmap_init(pgd_t *pg_dir)
     //bm_pte 4K * 512 map to fixaddr
 }
 
+static void alloc_init_cont_pmd(pgd_t *pudp, unsigned long addr, unsigned long end,
+                           phys_addr_t phys, pgprot_t prot,
+                           phys_addr_t (*pgtable_alloc)(int),
+                           int flags)
+{
+
+}
+
+
 static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
                            phys_addr_t phys, pgprot_t prot,
                            phys_addr_t (*pgtable_alloc)(int),
@@ -74,7 +83,16 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
     }
 
     // use fix map do temp map for pud page alloc from memblock
-    pudp = pud_set_fixmap(addr);
+    pudp = pud_offset_phys(pgdp, addr);
+
+    do
+    {
+        next = pud_addr_end(addr, end);
+        alloc_init_cont_pmd(pudp, addr, end, phys, prot, pgtable_alloc, flags);
+        phys += next - addr;
+    } while (pudp++, addr = next, addr != end);
+
+
 }
 
 static void __create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
