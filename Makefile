@@ -164,13 +164,12 @@ libs-y1		:= $(patsubst %/, %/lib.a, $(libs-y))
 libs-y2		:= $(patsubst %/, %/built-in.o, $(filter-out %.o, $(libs-y)))
 
 # Externally visible symbols (used by link-eeos.sh)
-export MBUILD_EEOS_INIT := $(head-y)
 export MBUILD_EEOS_MAIN := $(core-y) $(libs-y2) $(drivers-y) $(external-y)
 export MBUILD_EEOS_LIBS := $(libs-y1)
 export MBUILD_LDS          := $(objtree)/arch/$(SRCARCH)/ld_script/kernel.lds
 export LDFLAGS_eeos
 
-eeos-deps := $(MBUILD_LDS) $(MBUILD_EEOS_INIT) $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS)
+eeos-deps := $(MBUILD_LDS) $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS)
 
 CLEAN_DIRS	:=
 clean: rm-dirs 	:= $(CLEAN_DIRS)
@@ -185,7 +184,7 @@ $(clean-dirs):
 
 eeos: $(eeos-deps) scripts/generate_allsymbols.py
 	$(Q) echo "  LD      .tmp.eeos.elf"
-	$(Q) $(LD) $(eeos_LDFLAGS) -o .tmp.eeos.elf $(MBUILD_EEOS_INIT) $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS)
+	$(Q) $(LD) $(eeos_LDFLAGS) -o .tmp.eeos.elf $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS)
 	$(Q) echo "  NM      .tmp.eeos.symbols"
 	$(Q) $(NM) -n .tmp.eeos.elf > .tmp.eeos.symbols
 	$(Q) echo "  PYTHON  allsymbols.S"
@@ -193,7 +192,7 @@ eeos: $(eeos-deps) scripts/generate_allsymbols.py
 	$(Q) echo "  CC      $(MBUILD_IMAGE_SYMBOLS)"
 	$(Q) $(CC) $(MBUILD_AFLAGS) $(MBUILD_CFLAGS) $(ARCH_CFLAGS) -c allsymbols.S -o $(MBUILD_IMAGE_SYMBOLS)
 	$(Q) echo "  LD      $(MBUILD_IMAGE_ELF)"
-	$(Q) $(LD) $(eeos_LDFLAGS) -o $(MBUILD_IMAGE_ELF) $(MBUILD_EEOS_INIT) $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS) $(MBUILD_IMAGE_SYMBOLS)
+	$(Q) $(LD) $(eeos_LDFLAGS) -o $(MBUILD_IMAGE_ELF) $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS) $(MBUILD_IMAGE_SYMBOLS)
 	$(Q) echo "  OBJCOPY $(MBUILD_IMAGE)"
 	$(Q) $(OBJCOPY) -O binary $(MBUILD_IMAGE_ELF) $(MBUILD_IMAGE)
 	$(Q) echo "  OBJDUMP eeos.dis"
