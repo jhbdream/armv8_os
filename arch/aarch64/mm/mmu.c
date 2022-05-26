@@ -5,12 +5,15 @@
 #include <asm/pgalloc.h>
 #include <compiler_attribute.h>
 #include <ee/pgtable.h>
+#include <mm/memblock.h>
 
 uint64_t kimage_voffset;
 
 static pte_t bm_pte[PTRS_PER_PTE] __aligned(PAGE_SIZE);
 static pmd_t bm_pmd[PTRS_PER_PMD] __aligned(PAGE_SIZE);
 static pud_t bm_pud[PTRS_PER_PUD] __aligned(PAGE_SIZE);
+
+pgd_t test_pg_dir[512] __aligned(PAGE_SIZE);
 
 static inline pte_t *fixmap_pte(unsigned long addr)
 {
@@ -25,6 +28,14 @@ void __set_fixmap(enum fixed_addresses idx,
 
     ptep = fixmap_pte(addr);
     *ptep = pfn_pte(phys >> PAGE_SHIFT, flags);
+}
+
+phys_addr_t early_pgtable_alloc(int shift)
+{
+    phys_addr_t phys;
+
+    phys = memblock_phys_alloc_align(PAGE_SIZE, PAGE_SIZE);
+    return phys;
 }
 
 void early_fixmap_init(pgd_t *pg_dir)
@@ -42,9 +53,9 @@ void early_fixmap_init(pgd_t *pg_dir)
     if (pgd_none(pgd))
     {
         __pgd_populate(pgdp, __pa_symbol(bm_pud), PGD_TYPE_TABLE);
-        pudp = pud_offset_pud(bm_pud, addr);
     }
 
+    pudp = pud_offset_pud(bm_pud, addr);
     if (pud_none(*pudp))
     {
         __pud_populate(pudp, __pa_symbol(bm_pmd), PUD_TYPE_TABLE);
@@ -56,12 +67,61 @@ void early_fixmap_init(pgd_t *pg_dir)
     //bm_pte 4K * 512 map to fixaddr
 }
 
-static void alloc_init_cont_pmd(pgd_t *pudp, unsigned long addr, unsigned long end,
+static void alloc_init_pte(pmd_t *pmdp, unsigned long addr, unsigned long end,
                            phys_addr_t phys, pgprot_t prot,
                            phys_addr_t (*pgtable_alloc)(int),
                            int flags)
 {
+    unsigned long next;
+    pte_t *ptep;
+    pmd_t pmd = *pmdp;
 
+    if(pmd_none(pmd))
+    {
+        pmdval_t pmdval = PMD_TYPE_TABLE | PMD_TABLE_UXN;
+        phys_addr_t pte_phys;
+
+        pte_phys = pgtable_alloc(PAGE_SHIFT);
+        __pmd_populate(pmdp, pte_phys, pmdval);
+        pmd = *pmdp;
+    }
+
+    ptep = pte_set_fixmap(pmd_val(pmd));
+
+    do
+    {
+        *ptep = pfn_pte((phys >> PAGE_SHIFT), prot);
+        phys += PAGE_SIZE;
+    } while (ptep++, addr += PAGE_SIZE, addr != end);
+
+}
+
+static void alloc_init_pmd(pud_t *pudp, unsigned long addr, unsigned long end,
+                           phys_addr_t phys, pgprot_t prot,
+                           phys_addr_t (*pgtable_alloc)(int),
+                           int flags)
+{
+    unsigned long next;
+    pmd_t *pmdp;
+    pud_t pud = *pudp;
+
+    if(pud_none(pud))
+    {
+        pudval_t pudval = PUD_TYPE_TABLE | PUD_TABLE_UXN;
+        phys_addr_t pmd_phys;
+
+        pmd_phys = pgtable_alloc(PMD_SHIFT);
+        __pud_populate(pudp, pmd_phys, pudval);
+        pud = *pudp;
+    }
+
+    pmdp = pmd_set_fixmap(pud_val(pud));
+    do
+    {
+        next = pmd_addr_end(addr, end);
+        alloc_init_pte(pmdp, addr, next, phys, prot, pgtable_alloc, flags);
+        phys += next - addr;
+    } while (pmdp++, addr = next, addr != end);
 }
 
 
@@ -80,22 +140,23 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
         phys_addr_t pud_phys;
         pud_phys = pgtable_alloc(PUD_SHIFT);
         __pgd_populate(pgdp, pud_phys, pgdval);
+        pgd = *pgdp;
     }
 
     // use fix map do temp map for pud page alloc from memblock
-    pudp = pud_offset_phys(pgdp, addr);
+    pudp = pud_set_fixmap(pgd_val(pgd));
 
     do
     {
         next = pud_addr_end(addr, end);
-        alloc_init_cont_pmd(pudp, addr, end, phys, prot, pgtable_alloc, flags);
+        alloc_init_pmd(pudp, addr, end, phys, prot, pgtable_alloc, flags);
         phys += next - addr;
     } while (pudp++, addr = next, addr != end);
 
 
 }
 
-static void __create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
+void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
                                  unsigned long virt, phys_addr_t size,
                                  pgprot_t prot,
                                  phys_addr_t (*pgtable_alloc)(int),

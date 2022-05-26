@@ -29,7 +29,7 @@ ifeq ("$(origin O)", "command line")
 	O_LEVEL = $(O)
 endif
 ifndef O_LEVEL
-	O_LEVEL = 2
+	O_LEVEL = 0
 endif
 
 export quiet Q MBUILD_VERBOSE

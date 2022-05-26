@@ -401,7 +401,7 @@ static phys_addr_t memblock_find(phys_addr_t size, phys_addr_t align)
     return 0;
 }
 
-phys_addr_t memblock_alloc_range(phys_addr_t size, phys_addr_t align)
+phys_addr_t memblock_phys_alloc_align(phys_addr_t size, phys_addr_t align)
 {
     phys_addr_t found;
 
@@ -413,6 +413,14 @@ phys_addr_t memblock_alloc_range(phys_addr_t size, phys_addr_t align)
     return 0;
 }
 
+int memblock_phys_free(phys_addr_t base, phys_addr_t size)
+{
+    phys_addr_t end = base + size - 1;
+    memblock_dbg("%s: [%pa-%pa]\n", __func__, &base, &end);
+
+    return memblock_remove_range(&memblock.reserved, base, size);
+}
+
 void *memblock_alloc(phys_addr_t size, phys_addr_t align)
 {
 
@@ -421,20 +429,12 @@ void *memblock_alloc(phys_addr_t size, phys_addr_t align)
 
     phys_addr_t alloc;
 
-    alloc = memblock_alloc_range(size, align);
+    alloc = memblock_phys_alloc_align(size, align);
 
     if(!alloc)
         return NULL;
 
     return phys_to_virt(alloc);
-}
-
-int memblock_phys_free(phys_addr_t base, phys_addr_t size)
-{
-    phys_addr_t end = base + size - 1;
-    memblock_dbg("%s: [%pa-%pa]\n", __func__, &base, &end);
-
-    return memblock_remove_range(&memblock.reserved, base, size);
 }
 
 void memblock_free(void *ptr, size_t size)

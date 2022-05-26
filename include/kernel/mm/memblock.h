@@ -39,7 +39,7 @@ struct memblock
 int memblock_add(phys_addr_t base, phys_addr_t size);
 int memblock_remove(phys_addr_t base, phys_addr_t size);
 int memblock_reserve(phys_addr_t base, phys_addr_t size);
-phys_addr_t memblock_alloc_range(phys_addr_t size, phys_addr_t align);
+phys_addr_t memblock_phys_alloc_align(phys_addr_t size, phys_addr_t align);
 void *memblock_alloc(phys_addr_t size, phys_addr_t align);
 int memblock_phys_free(phys_addr_t base, phys_addr_t size);
 void memblock_free(void *ptr, size_t size);

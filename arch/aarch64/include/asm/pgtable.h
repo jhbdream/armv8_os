@@ -63,7 +63,6 @@ static inline pmd_t pte_pmd(pte_t pte)
 #define set_fixmap_offset(idx, phys) \
     __set_fixmap_offset(idx, phys, PAGE_KERNEL)
 
-
 #define pud_offset_phys(dir, addr) (__pgd_to_phys((*dir)) + pud_index(addr) * sizeof(pud_t))
 
 #define pgd_set_fixmap(addr)        ((pgd_t *)set_fixmap_offset(FIX_PGD, addr))
