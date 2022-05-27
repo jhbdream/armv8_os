@@ -367,7 +367,7 @@ void __next_mem_range_rev(u64 *idx,
             {
                 if(out_start)
                     *out_start = max(m_start, r_start);
-                if(*out_end)
+                if(out_end)
                     *out_end = min(m_end, r_end);
                 if(m_start >= r_start)
                     idx_a--;
