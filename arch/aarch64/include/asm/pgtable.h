@@ -17,6 +17,11 @@
 #define pfn_pte(pfn, prot)    \
         __pte(__phys_to_pte_val(pfn << PAGE_SHIFT) | pgprot_val(prot))
 
+#define __pgd_to_phys(pgd)  __pte_to_phys(pgd_pte(pgd))
+#define __pud_to_phys(pud)  __pte_to_phys(pud_pte(pud))
+#define __pmd_to_phys(pmd)  __pte_to_phys(pmd_pte(pmd))
+
+#define __phys_to_pgd_val(phys) __phys_to_pte_val(phys)
 
 static inline pte_t pgd_pte(pgd_t pgd)
 {
@@ -48,8 +53,25 @@ static inline pmd_t pte_pmd(pte_t pte)
     return __pmd(pte_val(pte));
 }
 
-#define __pgd_to_phys(pgd)  __pte_to_phys(pgd_pte(pgd))
-#define __phys_to_pgd_val(phys) __phys_to_pte_val(phys)
+static inline phys_addr_t pgd_page_paddr(pgd_t pgd)
+{
+    return __pgd_to_phys(pgd);
+}
+
+static inline phys_addr_t pud_page_paddr(pud_t pud)
+{
+    return __pud_to_phys(pud);
+}
+
+static inline phys_addr_t pmd_page_paddr(pmd_t pmd)
+{
+    return __pmd_to_phys(pmd);
+}
+
+static inline phys_addr_t pte_page_paddr(pte_t pte)
+{
+    return __pte_to_phys(pte);
+}
 
 /* Return a pointer with offset calculated */
 #define __set_fixmap_offset(idx, phys, flags)               \
@@ -64,10 +86,11 @@ static inline pmd_t pte_pmd(pte_t pte)
     __set_fixmap_offset(idx, phys, PAGE_KERNEL)
 
 #define pud_offset_phys(dir, addr) (__pgd_to_phys((*dir)) + pud_index(addr) * sizeof(pud_t))
+#define pmd_offset_phys(dir, addr) (__pud_to_phys((*dir)) + pmd_index(addr) * sizeof(pmd_t))
+#define pte_offset_phys(dir, addr) (__pmd_to_phys((*dir)) + pte_index(addr) * sizeof(pte_t))
 
-#define pgd_set_fixmap(addr)        ((pgd_t *)set_fixmap_offset(FIX_PGD, addr))
-#define pud_set_fixmap(addr)        ((pud_t *)set_fixmap_offset(FIX_PUD, addr))
-#define pmd_set_fixmap(addr)        ((pmd_t *)set_fixmap_offset(FIX_PMD, addr))
-#define pte_set_fixmap(addr)        ((pte_t *)set_fixmap_offset(FIX_PTE, addr))
+#define pud_set_fixmap(dir, addr)    ((pud_t *)set_fixmap_offset(FIX_PUD, pud_offset_phys(dir, addr)))
+#define pmd_set_fixmap(dir, addr)    ((pmd_t *)set_fixmap_offset(FIX_PMD, pmd_offset_phys(dir, addr)))
+#define pte_set_fixmap(dir, addr)    ((pte_t *)set_fixmap_offset(FIX_PTE, pte_offset_phys(dir, addr)))
 
 #endif

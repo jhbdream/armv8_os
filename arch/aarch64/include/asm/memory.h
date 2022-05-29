@@ -49,6 +49,7 @@ static inline void *phys_to_virt(phys_addr_t x)
     return (void *)((x));
 }
 
+#define __phys_to_kimg(x) ((unsigned long)((x) + kimage_voffset))
 #define __kimg_to_phys(addr)    ((addr) - kimage_voffset)
 #define __phys_addr_symbol(x) __kimg_to_phys((phys_addr_t)(x))
 

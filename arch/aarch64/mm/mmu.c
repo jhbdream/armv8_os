@@ -53,16 +53,34 @@ void early_fixmap_init(pgd_t *pg_dir)
     if (pgd_none(pgd))
     {
         __pgd_populate(pgdp, __pa_symbol(bm_pud), PGD_TYPE_TABLE);
+        pudp = pud_offset_pud(bm_pud, addr);
+    }
+    else
+    {
+        // 如果已经创建了pud，获取pudp虚拟地址
+        pudp = (pud_t *)(__phys_to_kimg(__pgd_to_phys(pgd)));
+        pudp = pud_offset_pud(pudp, addr);
     }
 
-    pudp = pud_offset_pud(bm_pud, addr);
     if (pud_none(*pudp))
     {
         __pud_populate(pudp, __pa_symbol(bm_pmd), PUD_TYPE_TABLE);
+        pmdp = pmd_offset_pmd(bm_pmd, addr);
+    }
+    else
+    {
+        pmdp = (pmd_t *)(__phys_to_kimg(__pud_to_phys(*pudp)));
+        pmdp = pmd_offset_pmd(pmdp, addr);
     }
 
-    pmdp = pmd_offset_pmd(bm_pmd, addr);
-    __pmd_populate(pmdp, __pa_symbol(bm_pte), PMD_TYPE_TABLE);
+    if(pmd_none(*pmdp))
+    {
+        __pmd_populate(pmdp, __pa_symbol(bm_pte), PMD_TYPE_TABLE);
+    }
+    else
+    {
+        // wrony
+    }
 
     //bm_pte 4K * 512 map to fixaddr
 }
@@ -78,7 +96,7 @@ static void alloc_init_pte(pmd_t *pmdp, unsigned long addr, unsigned long end,
 
     if(pmd_none(pmd))
     {
-        pmdval_t pmdval = PMD_TYPE_TABLE | PMD_TABLE_UXN;
+        pmdval_t pmdval = PMD_TYPE_TABLE;
         phys_addr_t pte_phys;
 
         pte_phys = pgtable_alloc(PAGE_SHIFT);
@@ -86,8 +104,9 @@ static void alloc_init_pte(pmd_t *pmdp, unsigned long addr, unsigned long end,
         pmd = *pmdp;
     }
 
-    ptep = pte_set_fixmap(pmd_val(pmd));
+    ptep = pte_set_fixmap(pmdp, addr);
 
+    prot.pgprot |=  0x701;
     do
     {
         *ptep = pfn_pte((phys >> PAGE_SHIFT), prot);
@@ -107,7 +126,7 @@ static void alloc_init_pmd(pud_t *pudp, unsigned long addr, unsigned long end,
 
     if(pud_none(pud))
     {
-        pudval_t pudval = PUD_TYPE_TABLE | PUD_TABLE_UXN;
+        pudval_t pudval = PUD_TYPE_TABLE;
         phys_addr_t pmd_phys;
 
         pmd_phys = pgtable_alloc(PMD_SHIFT);
@@ -115,7 +134,7 @@ static void alloc_init_pmd(pud_t *pudp, unsigned long addr, unsigned long end,
         pud = *pudp;
     }
 
-    pmdp = pmd_set_fixmap(pud_val(pud));
+    pmdp = pmd_set_fixmap(pudp, addr);
     do
     {
         next = pmd_addr_end(addr, end);
@@ -136,7 +155,7 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
 
     if (pgd_none(pgd))
     {
-        pgdval_t pgdval = PGD_TYPE_TABLE | PGD_TABLE_UXN;
+        pgdval_t pgdval = PGD_TYPE_TABLE;
         phys_addr_t pud_phys;
         pud_phys = pgtable_alloc(PUD_SHIFT);
         __pgd_populate(pgdp, pud_phys, pgdval);
@@ -144,7 +163,7 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
     }
 
     // use fix map do temp map for pud page alloc from memblock
-    pudp = pud_set_fixmap(pgd_val(pgd));
+    pudp = pud_set_fixmap(pgdp, addr);
 
     do
     {
@@ -173,7 +192,7 @@ void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
 
     phys = phys & PAGE_MASK;
     addr = virt & PAGE_MASK;
-    end = phys + size;
+    end = addr + size;
 
     do
     {

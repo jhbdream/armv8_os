@@ -5,8 +5,8 @@
 #include <stddef.h>
 
 #ifdef  CONFIG_ARCH_AARCH64
-#define QEMU_UART_DR ((void __iomem *)(0x09000000 + UART01x_DR))
-#define QEMU_UART_FR ((void __iomem *)(0x09000000 + UART01x_FR))
+#define QEMU_UART_DR ((void __iomem *)(0xFFFF000080000000 + UART01x_DR))
+#define QEMU_UART_FR ((void __iomem *)(0xFFFF000080000000 + UART01x_FR))
 #endif
 
 #ifdef  CONFIG_ARCH_RISCV64

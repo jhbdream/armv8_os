@@ -350,7 +350,7 @@ void __next_mem_range_rev(u64 *idx,
             return;
         }
 
-        for(; idx_b > 0; idx_b--)
+        for(; idx_b >= 0; idx_b--)
         {
             struct memblock_region *r;
             phys_addr_t r_start;

@@ -20,6 +20,8 @@ void start_kernel(void)
 	local_irq_enable();
 #endif
 
+	while (1);
+
 	printk("hello kernel!\n");
 
 	while (1);
