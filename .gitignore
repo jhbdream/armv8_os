@@ -82,3 +82,6 @@ include/config/config.h
 *.lds
 
 *.pyc
+
+.cache/
+compile_commands.json
