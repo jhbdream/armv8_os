@@ -220,7 +220,7 @@ __cpu_setup:
 
     mov_q   tcr, TCR_TxSZ(VA_BITS) | TCR_CACHE_FLAGS | TCR_SMP_FLAGS | \
             TCR_TG_FLAGS | TCR_KASLR_FLAGS | TCR_ASID16 | \
-            TCR_TBI0 | TCR_A1 | TCR_KASAN_SW_FLAGS
+            TCR_TBI0 | TCR_TBI1 | TCR_A1 | TCR_KASAN_SW_FLAGS
 
     msr mair_el1, mair
     msr tcr_el1, tcr

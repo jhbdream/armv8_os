@@ -35,5 +35,7 @@
 #define PAGE_KERNEL_EXEC    __pgprot(PROT_NORMAL & ~PTE_PXN)
 #define PAGE_KERNEL_EXEC_CONT   __pgprot((PROT_NORMAL & ~PTE_PXN) | PTE_CONT)
 
+#define PAGE_DEVICE     __pgprot(PROT_DEVICE_nGnRnE)
+
 
 #endif

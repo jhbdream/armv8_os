@@ -1,3 +1,4 @@
+#include "type.h"
 #include <pgtable.h>
 #include <asm/pgtable_type.h>
 #include <asm/fixmap.h>
@@ -13,7 +14,7 @@ static pte_t bm_pte[PTRS_PER_PTE] __aligned(PAGE_SIZE);
 static pmd_t bm_pmd[PTRS_PER_PMD] __aligned(PAGE_SIZE);
 static pud_t bm_pud[PTRS_PER_PUD] __aligned(PAGE_SIZE);
 
-pgd_t test_pg_dir[512] __aligned(PAGE_SIZE);
+extern pgd_t swapper_pg_dir[PTRS_PER_PGD];
 
 static inline pte_t *fixmap_pte(unsigned long addr)
 {
@@ -28,6 +29,10 @@ void __set_fixmap(enum fixed_addresses idx,
 
     ptep = fixmap_pte(addr);
     *ptep = pfn_pte(phys >> PAGE_SHIFT, flags);
+
+    // 切换页表映射关系之后 需要进行刷新tlb操作 否则无法访问正确的物理地址
+    asm volatile("tlbi vmalle1");
+    asm volatile("isb");
 }
 
 phys_addr_t early_pgtable_alloc(int shift)
@@ -106,7 +111,6 @@ static void alloc_init_pte(pmd_t *pmdp, unsigned long addr, unsigned long end,
 
     ptep = pte_set_fixmap(pmdp, addr);
 
-    prot.pgprot |=  0x701;
     do
     {
         *ptep = pfn_pte((phys >> PAGE_SHIFT), prot);
@@ -171,8 +175,6 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
         alloc_init_pmd(pudp, addr, end, phys, prot, pgtable_alloc, flags);
         phys += next - addr;
     } while (pudp++, addr = next, addr != end);
-
-
 }
 
 void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
@@ -200,4 +202,28 @@ void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
         alloc_init_pud(pgdp, addr, next, phys, prot, pgtable_alloc, flags);
         phys += next - addr;
     } while (pgdp++, addr = next, addr != end);
+}
+
+static void map_kernel(pgd_t *pgdp)
+{
+    phys_addr_t pa;
+    unsigned long va;
+    unsigned long size;
+
+    extern unsigned long __kimage_start[], __kimage_end[];
+    pa = __pa_symbol(__kimage_start);
+    va = (unsigned long)__kimage_start;
+    size = (unsigned long)__kimage_end - (unsigned long)__kimage_start;
+
+    create_pgd_mapping(pgdp, pa, va, size, PAGE_KERNEL, early_pgtable_alloc, 0);
+}
+
+static void map_mem(pgd_t *pgdp)
+{
+
+}
+
+void paging_init(void)
+{
+    map_kernel(swapper_pg_dir);
 }

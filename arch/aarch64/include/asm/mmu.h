@@ -10,5 +10,6 @@ void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
                                  pgprot_t prot,
                                  phys_addr_t (*pgtable_alloc)(int),
                                  int flags);
+void paging_init(void);
 
 #endif

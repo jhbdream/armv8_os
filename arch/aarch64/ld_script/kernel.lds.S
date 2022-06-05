@@ -10,7 +10,7 @@ STACK_SIZE = 0x100;
 SECTIONS
 {
     . = KIMAGE_VADDR;
-    __kimage_start = .;
+    PROVIDE(__kimage_start = .);
 
     .startup :
     {
@@ -144,7 +144,6 @@ SECTIONS
         __bss_end__ = .;
     }
 
-    /* USE 39BIT VA 3LEVEL PAGE TABLE */
     // 根据虚拟地址范围计算需要的页表个数
     // 使用链接脚本分配出来对应大小的空间
     .idmap_pg_dir (NOLOAD):
@@ -155,15 +154,6 @@ SECTIONS
         __idmap_pg_end = .;
     }
 
-    .idmap_pg_dir (NOLOAD):
-    {
-        . = ALIGN(4096);
-        __idmap_pg_start = .;
-        . += IDMAP_DIR_SIZE;
-        __idmap_pg_end = .;
-    }
-
-
     .init_pg_dir (NOLOAD):
     {
         . = ALIGN(4096);
@@ -171,6 +161,10 @@ SECTIONS
         . = . + INIT_DIR_SIZE;
         __init_pg_dir_end = .;
     }
+
+    . = ALIGN(4096);
+    swapper_pg_dir = .;
+    . += PAGE_SIZE;
 
     .heap (NOLOAD):
     {
@@ -196,5 +190,6 @@ SECTIONS
      */
     __top_of_ram = .;
 
-    __kimage_end = .;
+    . = ALIGN(4096);
+    PROVIDE(__kimage_end = .);
 }

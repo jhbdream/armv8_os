@@ -10,7 +10,7 @@ void start_kernel(void)
 	console_init();
 	setup_arch();
 
-#ifdef CONFIG_AARCH64
+#if 0
 	extern int arm_gicv3_interrupu_init(void *dist_base, void *rdist_base, uint32_t nr_redist_regions);
 	// for qemu hardware address
 	arm_gicv3_interrupu_init((void *)0x08000000, (void *)0x080A0000, 1);
@@ -19,8 +19,6 @@ void start_kernel(void)
 	aarch64_timer_init();
 	local_irq_enable();
 #endif
-
-	while (1);
 
 	printk("hello kernel!\n");
 
