@@ -15,11 +15,13 @@
 #include <ee/sizes.h>
 #include <type.h>
 
+
 #define VA_BITS (CONFIG_ARM64_VA_BITS)
+#define _PAGE_OFFSET(va) (-(UL(1) << (va)))
+#define PAGE_OFFSET (0xFFFF800000000000)
 #define KIMAGE_VADDR (0xFFFF000000080000)
-
 #define FIXADDR_TOP (KIMAGE_VADDR + SZ_512M)
-
+#define PHYS_OFFSET (memory_strart)
 
 /*
  * Memory types available.
@@ -36,18 +38,26 @@
 
 #ifndef __ASSEMBLY__
 
+extern s64 memory_strart;
 extern uint64_t kimage_voffset;
+
+#define __lm_to_phys(addr)  (((addr) - PAGE_OFFSET) + PHYS_OFFSET)
+#define __kimg_to_phys(addr)    ((addr) - kimage_voffset)
+#define __is_lm_address(addr)   (((u64)(addr) >= PAGE_OFFSET))
+
+#define __phys_to_virt(x) ((x - PHYS_OFFSET) | PAGE_OFFSET)
+#define __virt_to_phys(x) (__is_lm_address(x) ? __lm_to_phys(x) : __kimg_to_phys(x))
 
 #define virt_to_phys virt_to_phys
 static inline phys_addr_t virt_to_phys(const volatile void *x)
 {
-    return ((unsigned long)(x));
+    return (__virt_to_phys((unsigned long)(x)));
 }
 
 #define phys_to_virt phys_to_virt
 static inline void *phys_to_virt(phys_addr_t x)
 {
-    return (void *)((x));
+    return (void *)(__phys_to_virt(x));
 }
 
 #define __phys_to_kimg(x) ((unsigned long)((x) + kimage_voffset))
