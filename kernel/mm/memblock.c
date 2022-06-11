@@ -348,40 +348,42 @@ void __next_mem_range(u64 *idx,
             *idx = (u32)idx_a | (u64)idx_b << 32;
             return;
         }
-    }
 
-    for(; idx_b < type_b->cnt; idx_b++)
-    {
-        r = &type_b->regions[idx_b];
 
-        r_start = idx_b ? (r[-1].base + r[-1].size) : 0;
-        r_end = (idx_b < type_b->cnt) ? r->base : PHYS_ADDR_MAX;
-
-        if(r_start >= m_end)
+        for(; idx_b < type_b->cnt + 1; idx_b++)
         {
-            break;
-        }
+            r = &type_b->regions[idx_b];
 
-        if(m_start < r_end)
-        {
-            if(out_start)
-                *out_start = max(m_start, r_start);
-            if(out_end)
-                *out_end = min(m_end, r_end);
+            r_start = idx_b ? (r[-1].base + r[-1].size) : 0;
+            r_end = (idx_b < type_b->cnt) ? r->base : PHYS_ADDR_MAX;
 
-            if(m_end <= r_end)
+            if(r_start >= m_end)
             {
-                idx_a++;
-            }
-            else
-            {
-                idx_b++;
+                break;
             }
 
-            *idx = (u32)idx_a | (u64)idx_b << 32;
-            return;
+            if(m_start < r_end)
+            {
+                if(out_start)
+                    *out_start = max(m_start, r_start);
+                if(out_end)
+                    *out_end = min(m_end, r_end);
+
+                if(m_end <= r_end)
+                {
+                    idx_a++;
+                }
+                else
+                {
+                    idx_b++;
+                }
+
+                *idx = (u32)idx_a | (u64)idx_b << 32;
+                return;
+            }
         }
     }
+
 
     *idx = ULLONG_MAX;
 }

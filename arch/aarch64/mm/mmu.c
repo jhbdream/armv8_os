@@ -9,6 +9,7 @@
 #include <compiler_attribute.h>
 #include <ee/pgtable.h>
 #include <mm/memblock.h>
+#include <asm/mmu_context.h>
 
 uint64_t kimage_voffset;
 
@@ -242,4 +243,6 @@ void paging_init(void)
 {
     map_kernel(swapper_pg_dir);
     map_mem(swapper_pg_dir);
+
+    cpu_replace_ttbr1(swapper_pg_dir);
 }
