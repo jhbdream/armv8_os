@@ -8,6 +8,7 @@
  *
  */
 
+#include "type.h"
 #include <mm/memblock.h>
 #include <ee/minmax.h>
 #include <ee/errno.h>
@@ -310,6 +311,79 @@ int memblock_reserve(phys_addr_t base, phys_addr_t size)
     phys_addr_t end = base + size - 1;
     memblock_dbg("%s: [%pa-%pa]\n", __func__, &base, &end);
     return memblock_add_range(&memblock.reserved, base, size);
+}
+
+void __next_mem_range(u64 *idx,
+                          struct memblock_type *type_a,
+                          struct memblock_type *type_b,
+                          phys_addr_t *out_start,
+                          phys_addr_t *out_end)
+{
+    // 使用一个64位变量 低32位表示可用mem序号 高32位表示保留mem序号
+    int idx_a = *idx & 0xffffffff;
+    int idx_b = *idx >> 32;
+    struct memblock_region *m;
+    struct memblock_region *r;
+    phys_addr_t m_start;
+    phys_addr_t m_end;
+    phys_addr_t r_start;
+    phys_addr_t r_end;
+
+    //  首先遍历可用mem空间 找到第一块可用空间
+    for(; idx_a < type_a->cnt; idx_a++)
+    {
+        m = &type_a->regions[idx_a];
+
+        m_start = m->base;
+        m_end = m->base + m->size;
+
+        if(!type_b)
+        {
+            if(out_start)
+                *out_start = m_start;
+            if(out_end)
+                *out_end = m_end;
+
+            idx_a++;
+            *idx = (u32)idx_a | (u64)idx_b << 32;
+            return;
+        }
+    }
+
+    for(; idx_b < type_b->cnt; idx_b++)
+    {
+        r = &type_b->regions[idx_b];
+
+        r_start = idx_b ? (r[-1].base + r[-1].size) : 0;
+        r_end = (idx_b < type_b->cnt) ? r->base : PHYS_ADDR_MAX;
+
+        if(r_start >= m_end)
+        {
+            break;
+        }
+
+        if(m_start < r_end)
+        {
+            if(out_start)
+                *out_start = max(m_start, r_start);
+            if(out_end)
+                *out_end = min(m_end, r_end);
+
+            if(m_end <= r_end)
+            {
+                idx_a++;
+            }
+            else
+            {
+                idx_b++;
+            }
+
+            *idx = (u32)idx_a | (u64)idx_b << 32;
+            return;
+        }
+    }
+
+    *idx = ULLONG_MAX;
 }
 
 void __next_mem_range_rev(u64 *idx,

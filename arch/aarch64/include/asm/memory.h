@@ -13,6 +13,7 @@
 
 #include <config.h>
 #include <ee/sizes.h>
+#include <type.h>
 
 #define VA_BITS (CONFIG_ARM64_VA_BITS)
 #define KIMAGE_VADDR (0xFFFF000000080000)

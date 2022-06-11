@@ -1,4 +1,6 @@
-#include "type.h"
+#include <memory.h>
+#include <printk.h>
+#include <type.h>
 #include <pgtable.h>
 #include <asm/pgtable_type.h>
 #include <asm/fixmap.h>
@@ -220,10 +222,24 @@ static void map_kernel(pgd_t *pgdp)
 
 static void map_mem(pgd_t *pgdp)
 {
+    u64 i;
+    phys_addr_t start, end;
 
+
+    for_each_mem_range(i, &start, &end)
+    {
+        printk("start: [0x%x]\n", start);
+        printk("end: [0x%x]\n", end);
+
+        if(start >= end)
+            break;
+
+        create_pgd_mapping(pgdp, start, (unsigned long)phys_to_virt(start), end - start, PAGE_KERNEL, early_pgtable_alloc, 0);
+    }
 }
 
 void paging_init(void)
 {
     map_kernel(swapper_pg_dir);
+    map_mem(swapper_pg_dir);
 }
