@@ -518,3 +518,36 @@ void memblock_free(void *ptr, size_t size)
     if(ptr)
         memblock_phys_free(__pa(ptr), size);
 }
+
+static void memblock_dump(struct memblock_type *type)
+{
+    struct memblock_region *rgn;
+    int idx;
+    phys_addr_t base, end, size;
+
+    printk("%s.cnt = 0x%lx\n", type->name, type->cnt);
+
+    for_each_memblock_type(idx, type, rgn)
+    {
+        rgn = &type->regions[idx];
+
+        base = rgn->base;
+        size = rgn->size;
+        end = base + size;
+
+        printk(" %s[%#x]\t[%pa-%pa], %pa bytes\n",
+            type->name, idx, &base, &end, &size);
+    }
+
+}
+
+void memblock_dump_all(void)
+{
+    printk("MEMBLOCK configuration:\n");
+    printk(" memory size = %pa reserved size = %pa\n",
+        &memblock.memory.total_size,
+        &memblock.reserved.total_size);
+
+    memblock_dump(&memblock.memory);
+    memblock_dump(&memblock.reserved);
+}
