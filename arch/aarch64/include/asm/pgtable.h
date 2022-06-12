@@ -1,6 +1,7 @@
 #ifndef _ASM_PGTABLE_H
 #define _ASM_PGTABLE_H
 
+#include "pgtable_hwdef.h"
 #include <asm/pgtable_type.h>
 #include <asm/pgtable_prot.h>
 #include <asm/fixmap.h>
@@ -16,6 +17,15 @@
 #define pte_pfn(pte)        (__pte_to_phys(pte) >> PAGE_SHIFT)
 #define pfn_pte(pfn, prot)    \
         __pte(__phys_to_pte_val(pfn << PAGE_SHIFT) | pgprot_val(prot))
+
+#define pud_pfn(pud)        ((__pud_to_phys(pud) & PUD_MASK) >> PAGE_SHIFT)
+#define __phys_to_pud_val(phys) __phys_to_pte_val(phys)
+#define pfn_pud(pfn,prot)   __pud(__phys_to_pud_val((phys_addr_t)(pfn) << PAGE_SHIFT) | pgprot_val(prot))
+
+#define pmd_pfn(pmd)        ((__pmd_to_phys(pmd) & PMD_MASK) >> PAGE_SHIFT)
+#define __phys_to_pmd_val(phys) __phys_to_pte_val(phys)
+#define pfn_pmd(pfn,prot)   __pmd(__phys_to_pmd_val((phys_addr_t)(pfn) << PAGE_SHIFT) | pgprot_val(prot))
+#define mk_pmd(page,prot)   pfn_pmd(page_to_pfn(page),prot)
 
 #define __pgd_to_phys(pgd)  __pte_to_phys(pgd_pte(pgd))
 #define __pud_to_phys(pud)  __pte_to_phys(pud_pte(pud))
@@ -51,6 +61,16 @@ static inline pte_t pmd_pte(pmd_t pmd)
 static inline pmd_t pte_pmd(pte_t pte)
 {
     return __pmd(pte_val(pte));
+}
+
+static inline pgprot_t mk_pud_sect_prot(pgprot_t prot)
+{
+    return (__pgprot( (pgprot_val(prot) & ~PUD_TABLE_BIT) | PUD_TYPE_SECT));
+}
+
+static inline pgprot_t mk_pmd_sect_prot(pgprot_t prot)
+{
+    return (__pgprot( (pgprot_val(prot) & ~PMD_TABLE_BIT) | PMD_TYPE_SECT));
 }
 
 static inline phys_addr_t pgd_page_paddr(pgd_t pgd)

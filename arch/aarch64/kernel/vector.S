@@ -285,6 +285,7 @@ SErrorInterruptHandler:
 	eret
 
 invalid_exception:
+	b .
 	saveregister
 
 	mov x0, 1

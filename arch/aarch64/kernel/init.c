@@ -9,8 +9,7 @@ void arm64_memblock_init(void)
     uint64_t base;
     uint64_t size;
 
-
-    base = 0x40000000;
+    base = 0x40080000;
     size = 0x20000000;
 
     // add total memory to manager by memblock
@@ -27,5 +26,5 @@ void arm64_memblock_init(void)
     kimage_start = __pa_symbol(__kimage_start);
     kimage_end = __pa_symbol(__kimage_end);
 
-    memblock_reserve(kimage_start, kimage_end);
+    memblock_reserve(kimage_start, kimage_end - kimage_start);
 }

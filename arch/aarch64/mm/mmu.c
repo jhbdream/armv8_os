@@ -1,3 +1,4 @@
+#include "pgtable_hwdef.h"
 #include <memory.h>
 #include <printk.h>
 #include <type.h>
@@ -44,6 +45,32 @@ phys_addr_t early_pgtable_alloc(int shift)
 
     phys = memblock_phys_alloc_align(PAGE_SIZE, PAGE_SIZE);
     return phys;
+}
+
+static inline bool use_1G_block(unsigned long addr, unsigned long next, unsigned long phys)
+{
+  if (((addr | next | phys) & ~PUD_MASK) != 0)
+    return false;
+
+  return true;
+}
+
+void pud_set_huge(pud_t *pud, phys_addr_t phys, pgprot_t prot)
+{
+    pud_t new_pud = pfn_pud((phys >> PAGE_SHIFT), mk_pud_sect_prot(prot));
+    *pud = new_pud;
+
+    asm volatile("tlbi vmalle1");
+    asm volatile("isb");
+}
+
+void pmd_set_huge(pmd_t *pmd, phys_addr_t phys, pgprot_t prot)
+{
+    pmd_t new_pmd = pfn_pmd((phys >> PAGE_SHIFT), mk_pmd_sect_prot(prot));
+    *pmd = new_pmd;
+
+    asm volatile("tlbi vmalle1");
+    asm volatile("isb");
 }
 
 void early_fixmap_init(pgd_t *pg_dir)
@@ -145,7 +172,15 @@ static void alloc_init_pmd(pud_t *pudp, unsigned long addr, unsigned long end,
     do
     {
         next = pmd_addr_end(addr, end);
-        alloc_init_pte(pmdp, addr, next, phys, prot, pgtable_alloc, flags);
+
+        if(((addr | phys | next) & ~PMD_MASK) == 0)
+        {
+            pmd_set_huge(pmdp, phys, prot);
+        }
+        else {
+            alloc_init_pte(pmdp, addr, next, phys, prot, pgtable_alloc, flags);
+        }
+
         phys += next - addr;
     } while (pmdp++, addr = next, addr != end);
 }
@@ -175,7 +210,16 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
     do
     {
         next = pud_addr_end(addr, end);
-        alloc_init_pmd(pudp, addr, end, phys, prot, pgtable_alloc, flags);
+
+        if(use_1G_block(addr, next, phys))
+        {
+            pud_set_huge(pudp, phys, prot);
+        }
+        else
+        {
+            alloc_init_pmd(pudp, addr, end, phys, prot, pgtable_alloc, flags);
+        }
+
         phys += next - addr;
     } while (pudp++, addr = next, addr != end);
 }
@@ -218,7 +262,7 @@ static void map_kernel(pgd_t *pgdp)
     va = (unsigned long)__kimage_start;
     size = (unsigned long)__kimage_end - (unsigned long)__kimage_start;
 
-    create_pgd_mapping(pgdp, pa, va, size, PAGE_KERNEL, early_pgtable_alloc, 0);
+    create_pgd_mapping(pgdp, pa, va, size, PAGE_KERNEL_EXEC, early_pgtable_alloc, 0);
 }
 
 static void map_mem(pgd_t *pgdp)
@@ -244,5 +288,9 @@ void paging_init(void)
     map_kernel(swapper_pg_dir);
     map_mem(swapper_pg_dir);
 
+    create_pgd_mapping(swapper_pg_dir, 0x09000000, 0xFFFF100000000000, 0x1000, PAGE_DEVICE, early_pgtable_alloc, 0);
+
     cpu_replace_ttbr1(swapper_pg_dir);
+
+    printk("hello new world page!\n");
 }

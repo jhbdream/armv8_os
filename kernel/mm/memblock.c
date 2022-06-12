@@ -535,8 +535,8 @@ static void memblock_dump(struct memblock_type *type)
         size = rgn->size;
         end = base + size;
 
-        printk(" %s[%#x]\t[%pa-%pa], %pa bytes\n",
-            type->name, idx, &base, &end, &size);
+        printk(" %s[%#x]\t[0x%016x-%016x], 0x%016x bytes\n",
+            type->name, idx, base, end, size);
     }
 
 }
@@ -544,9 +544,9 @@ static void memblock_dump(struct memblock_type *type)
 void memblock_dump_all(void)
 {
     printk("MEMBLOCK configuration:\n");
-    printk(" memory size = %pa reserved size = %pa\n",
-        &memblock.memory.total_size,
-        &memblock.reserved.total_size);
+    printk(" memory size = 0x%016x reserved size = 0x%016x\n",
+        memblock.memory.total_size,
+        memblock.reserved.total_size);
 
     memblock_dump(&memblock.memory);
     memblock_dump(&memblock.reserved);
