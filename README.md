@@ -1,4 +1,10 @@
-# EEOS 
+# EEOS
+
+[![GitHub forks](https://img.shields.io/github/forks/jhbdream/armv8_os)](https://github.com/jhbdream/armv8_os/network)
+[![GitHub stars](https://img.shields.io/github/stars/jhbdream/armv8_os)](https://github.com/jhbdream/armv8_os/stargazers)
+[![GitHub license](https://img.shields.io/github/license/jhbdream/armv8_os)](https://github.com/jhbdream/armv8_os/blob/main/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/jhbdream/armv8_os)](https://github.com/jhbdream/armv8_os/issues)
+
 
 > a simple operating system support multi-architecture by qemu enumlature
 >
