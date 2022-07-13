@@ -7,6 +7,7 @@ struct console
 {
     char name[16];
 	void *arg;
+    int (*init)(struct console *);
     void (*write)(struct console *, const char *, unsigned);
     void (*read)(struct console *, char *, unsigned);
 };
@@ -21,12 +22,13 @@ void console_init(void);
  * _write 输出接口
  * _read 输入接口
  */
-#define CONSOLE_DECLARE(_name, _arg, _write, _read)  \
+#define CONSOLE_DECLARE(_name, _arg, _init, _write, _read)  \
     static const struct console __UNIQUE_ID(_console_##_name)    \
     __attribute__((__used__)) __attribute__((__section__("__console"))) = \
     {                                               \
         .name = __stringify(_name),                 \
 		.arg = _arg,								\
+        .init = _init,                              \
         .write = _write,			                \
         .read = _read,                              \
     };                                              \

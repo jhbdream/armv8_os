@@ -53,4 +53,4 @@ static void qemu_console_write(struct console *con, const char *s, unsigned n)
 	}
 }
 
-CONSOLE_DECLARE(qemu, 0, qemu_console_write, NULL);
+CONSOLE_DECLARE(qemu, 0, NULL, qemu_console_write, NULL);

@@ -1,0 +1,7 @@
+menu "Console"
+
+config CONSOLE_NAME
+    string "Console name"
+    default "qemu"
+
+endmenu
