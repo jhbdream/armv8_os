@@ -20,6 +20,12 @@ void start_kernel(void)
 	local_irq_enable();
 #endif
 
+#if 1 
+	extern void riscv_plic_init(void);
+	riscv_plic_init();
+	local_irq_enable();
+#endif
+	
 	printk("hello kernel!\n");
 
 	while (1);

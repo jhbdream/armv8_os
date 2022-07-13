@@ -4,4 +4,8 @@ config ARM_GIC
     bool "ARM_GIC"
     depends on ARCH_AARCH64
 
+config PLIC
+    bool "PLIC IRQ CONTROLLER"
+    depends on ARCH_RISCV64
+
 endmenu
