@@ -93,7 +93,7 @@ endif
 
 %.lds: %.lds.S $(obj)/Makefile $(srctree)/Makefile
 	$(Q) echo "  CC      $@"
-	$(Q) $(CC) $(MBUILD_AFLAGS) $(MBUILD_CFLAGS) -E -P $< -o $@
+	$(Q) $(CC) $(MBUILD_AFLAGS) $(MBUILD_CFLAGS) -DLINKER_SCRIPT -E -P $< -o $@
 
 %.dtb: %.dts $(obj)/Makefile $(srctree)/Makefile
 	$(Q) echo "  DTC     $@"
