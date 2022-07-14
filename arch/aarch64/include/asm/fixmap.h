@@ -1,7 +1,7 @@
 #ifndef _FIXMAP_H
 #define _FIXMAP_H
 
-#include <memory.h>
+#include <asm/memory.h>
 #include <ee/sizes.h>
 #include <asm/pgtable_hwdef.h>
 

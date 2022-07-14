@@ -2,7 +2,7 @@
 #include <asm/mmu.h>
 #include <stdint.h>
 #include <asm/pgtable_type.h>
-#include <pgtable_prot.h>
+#include <asm/pgtable_prot.h>
 #include <mm/memblock.h>
 
 extern pgd_t __init_pg_dir_start[512];

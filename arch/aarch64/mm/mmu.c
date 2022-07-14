@@ -1,5 +1,5 @@
-#include "pgtable_hwdef.h"
-#include <memory.h>
+#include <asm/pgtable_hwdef.h>
+#include <asm/memory.h>
 #include <printk.h>
 #include <type.h>
 #include <pgtable.h>
