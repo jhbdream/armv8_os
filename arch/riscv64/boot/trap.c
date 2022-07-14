@@ -1,4 +1,5 @@
 #include "driver/interrupt.h"
+#include "printk.h"
 #include <asm/asm.h>
 #include <asm/csr.h>
 #include <stddef.h>
@@ -18,8 +19,9 @@ void trap_irq(unsigned long mcause)
 		break;
 
 	case INTERRUPT_CAUSE_TIMER:
+		printk("timer irq!\n");
 		break;
-		
+
 	case INTERRUPT_CAUSE_EXTERNAL:
 		handle_domain_irq(NULL);
 		break;
@@ -39,6 +41,6 @@ void trap_handler(unsigned long mcause, unsigned long mtval)
 	/* exception handle */
 	switch(mcause)
 	{
-		
+
 	}
 }

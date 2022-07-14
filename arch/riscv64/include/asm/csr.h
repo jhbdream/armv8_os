@@ -36,6 +36,12 @@
 #define EXC_LOAD_PAGE_FAULT	13
 #define EXC_STORE_PAGE_FAULT	15
 
+/* MIE (Interrupt Enable) and MIP (Interrupt Pending) flags */
+#define MIE_MSIE		(_AC(0x1, UL) << IRQ_M_SOFT)
+#define MIE_MTIE		(_AC(0x1, UL) << IRQ_M_TIMER)
+#define MIE_MEIE		(_AC(0x1, UL) << IRQ_M_EXT)
+#define MIE_MMIE		(_AC(0x1, UL) << IRQ_M_PMU)
+
 #ifndef __ASSEMBLY__
 
 #define csr_swap(csr, val)                  \
@@ -99,5 +105,5 @@
 })
 
 #endif /* __ASSEMBLY__ */
-
 #endif
+

@@ -12,5 +12,5 @@ void start_kernel(void)
 
 	printk("hello kernel!\n");
 
-	while (1);
+   	while (1);
 }
