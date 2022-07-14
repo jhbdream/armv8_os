@@ -30,7 +30,9 @@ pmp_done:
 	li t0, SR_FS                                                                                                                              
 	csrc mstatus, t0
 
-	//qemu run
+	la t0, handle_exception
+	csrw mtvec, t0	
+
     /* Clear BSS for flat non-ELF images */
     la a3, __bss_start
     la a4, __bss_stop
