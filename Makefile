@@ -89,7 +89,6 @@ DTC		= dtc
 
 EEOSINCLUDE    := \
 		-I$(srctree)/arch/$(SRCARCH)/include \
-		-I$(srctree)/arch/$(SRCARCH)/include/asm \
 		-I$(objtree)/include	\
 		-I$(objtree)/include/kernel	\
 		-I$(objtree)/include/config \
