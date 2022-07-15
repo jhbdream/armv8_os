@@ -37,14 +37,20 @@
 	sd x30, 30 * REGBYTES(sp)
 	sd x31, 31 * REGBYTES(sp)
 
-	csrr x0, mstatus
-	sd x0, 32 * REGBYTES(sp)
+	csrr t0, mstatus
+	sd t0, 32 * REGBYTES(sp)
 
-	csrr x0, mepc
-	sd x0, 33 * REGBYTES(sp)
+	csrr t0, mepc
+	sd t0, 33 * REGBYTES(sp)
 .endm
 
 .macro restore_register
+	ld t0, 32 * REGBYTES(sp)
+	csrw mstatus, t0
+
+	ld t0, 33 * REGBYTES(sp)
+	csrw mepc, t0
+
 	ld x0,   0 * REGBYTES(sp)
 	ld x1,   1 * REGBYTES(sp)
 	ld x2,   2 * REGBYTES(sp)
@@ -77,12 +83,6 @@
 	ld x29, 29 * REGBYTES(sp)
 	ld x30, 30 * REGBYTES(sp)
 	ld x31, 31 * REGBYTES(sp)
-
-	ld x0, 32 * REGBYTES(sp)
-	csrw mstatus, x0
-
-	sd x0, 33 * REGBYTES(sp)
-	csrw mepc, x0
 
 	addi sp, sp, 34 * REGBYTES
 .endm
