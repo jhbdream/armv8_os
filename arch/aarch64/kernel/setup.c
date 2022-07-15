@@ -4,11 +4,13 @@
 #include <asm/pgtable_type.h>
 #include <asm/pgtable_prot.h>
 #include <mm/memblock.h>
+#include <driver/console.h>
 
 extern pgd_t __init_pg_dir_start[512];
 
 void setup_arch(void)
 {
+	console_init();
     arm64_memblock_init();
 
     early_fixmap_init((pgd_t *)__init_pg_dir_start);
