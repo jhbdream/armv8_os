@@ -3,6 +3,7 @@
 #include <printk.h>
 #include <stddef.h>
 
+#include "asm/csr.h"
 #include "plic.h"
 
 #define PLIC_PRIORITY_BASE 0x0
@@ -18,7 +19,7 @@ static void plic_toggle(void *base, int hwirq, int enable)
 {
     u32 *reg = base + PLIC_ENABLE_BASE + (hwirq / 32) * sizeof(u32);
     u32 hwirq_mask = 1 << (hwirq % 32);
-    
+
     if(enable)
     {
         writel(readl(reg) | hwirq_mask, reg);
@@ -27,6 +28,12 @@ static void plic_toggle(void *base, int hwirq, int enable)
     {
         writel(readl(reg) & ~hwirq_mask, reg);
     }
+}
+
+static void plic_set_prio(void *base, int hwirq, int prio)
+{
+    u32 *reg = base + PLIC_PRIORITY_BASE + hwirq * 4;
+    writel(prio, reg);
 }
 
 static void plic_eoi(void *base, int hwirq)
@@ -53,12 +60,16 @@ void plic_init(void *base, int nr_irqs, int nr_contexts)
     {
         reg = base + PLIC_ENABLE_BASE + i * 0x1000 + 0x00;
         writel(threshold, reg);
-    
+
         for(hwirq = 1; hwirq < nr_irqs; hwirq++)
         {
+            plic_set_prio(base, hwirq, 0xFF);
             plic_toggle(base, hwirq, 0);
         }
     }
+
+    /* enable extern irq */
+    csr_set(mie, MIE_MEIE);
 
     printk("plic: init done!\n");
 }
@@ -76,7 +87,7 @@ void plic_irq_unmask(unsigned int hwirq)
 /* TODO: only support 1 core */
 void plic_irq_eoi(unsigned int hwirq)
 {
-    plic_eoi(plic_regs, hwirq);   
+    plic_eoi(plic_regs, hwirq);
 }
 
 unsigned int plic_irq_claim(void)
@@ -96,7 +107,7 @@ static void riscv_handle_irq(void *reg)
 	uint32_t irqnr = (uint32_t)plic_irq_claim();
 
 	generic_handle_irq(irqnr);
-    
+
     plic_irq_eoi(irqnr);
 }
 
@@ -104,7 +115,7 @@ void riscv_plic_init(void)
 {
 	set_irq_chip(&riscv_plic_chip);
 	set_handle_irq(riscv_handle_irq);
-    
+
     /* hw init */
     plic_init((void *)0x60000000, 128, 1);
 }
