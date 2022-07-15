@@ -93,8 +93,8 @@ ENTRY(handle_exception)
 	save_register
 
 	/* call c trap handler */
-	csrr x0, mcause
-	csrr x1, mtval
+	csrr a0, mcause
+	csrr a1, mtval
 	call trap_handler
 
 	restore_register
