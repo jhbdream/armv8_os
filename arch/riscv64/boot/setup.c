@@ -6,6 +6,6 @@ void setup_arch(void)
 	riscv_plic_init();
 	local_irq_enable();
 
-	extern void riscv_timer_start(void);
-	riscv_timer_start();
+	extern void riscv_timer_init(void);
+	riscv_timer_init();
 }

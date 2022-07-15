@@ -19,6 +19,7 @@ void trap_irq(unsigned long mcause)
 		break;
 
 	case INTERRUPT_CAUSE_TIMER:
+		/* TODO: add clock evnet */
 		printk("timer irq!\n");
 		break;
 

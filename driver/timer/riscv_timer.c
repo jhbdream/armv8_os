@@ -2,9 +2,13 @@
 #include <asm/csr.h>
 #include <io.h>
 
-#define PLIC_BASE 0x60000000
-#define CLINT_OFFSET 0x04000000
-#define TIME_CMP_OFFSET 0x4000
+#if 1
+/* C910 */
+#define TIMECMP_BASE 0x64004000
+#else
+/* qemu */
+#define TIMECMP_BASE 0x02004000
+#endif
 
 static u64 get_ticks(void)
 {
@@ -14,14 +18,14 @@ static u64 get_ticks(void)
 	return n;
 }
 
-void riscv_timer_start(void)
+void riscv_timer_init(void)
 {
 	u64 val = -1ULL;
 	u32 mask = -1U;
 	void *addr;
 
 	/* init compare val */
-	addr = (void *)(PLIC_BASE + CLINT_OFFSET + TIME_CMP_OFFSET);
+	addr = (void *)(TIMECMP_BASE);
 	writel(val & mask, addr);
 	writel(val >> 32, addr + 4);
 
