@@ -1,8 +1,10 @@
+#include "driver/interrupt.h"
 #include <io.h>
 #include <config.h>
 #include <driver/console.h>
 #include <driver/uart.h>
 #include <stddef.h>
+#include <ee/irqflags.h>
 
 #define UART_RBR_OFFSET		0	/* In:  Recieve Buffer Register */
 #define UART_THR_OFFSET		0	/* Out: Transmitter Holding Register */
@@ -75,6 +77,125 @@ static int uart8250_getc(void)
 	return -1;
 }
 
+#include <circ_buf.h>
+#include <string.h>
+
+#define UART_XMIT_SIZE 4096
+
+#define uart_circ_empty(circ)		((circ)->head == (circ)->tail)
+#define uart_circ_clear(circ)		((circ)->head = (circ)->tail = 0)
+
+#define uart_circ_chars_pending(circ)	\
+	(CIRC_CNT((circ)->head, (circ)->tail, UART_XMIT_SIZE))
+
+#define uart_circ_chars_free(circ)	\
+	(CIRC_SPACE((circ)->head, (circ)->tail, UART_XMIT_SIZE))
+
+struct circ_buf _recv;
+struct circ_buf *recv = &_recv;
+
+struct circ_buf _xmit;
+struct circ_buf *xmit = &_xmit;
+
+void uart_port_init(void)
+{
+	static char xmit_buf[UART_XMIT_SIZE];
+	xmit->buf = xmit_buf;
+	uart_circ_clear(xmit);
+
+	static char recv_buf[UART_XMIT_SIZE];
+	recv->buf = recv_buf;
+	uart_circ_clear(recv);
+}
+
+int uart_write(const unsigned char *buf, int count)
+{
+	struct circ_buf *circ = xmit;
+	int c;
+
+	c = CIRC_SPACE_TO_END(circ->head, circ->tail, UART_XMIT_SIZE);
+	if (count < c)
+		c = count;
+	if (c <= 0)
+		return -1;
+
+	memcpy(circ->buf + circ->head, buf, c);
+	circ->head = (circ->head + c) & (UART_XMIT_SIZE - 1);
+
+	/* start write enable irq */
+	writel(0x3, (void *)0x40807004);
+
+	return 0;
+}
+
+int uart_read(char *buf)
+{
+	struct circ_buf *circ = recv;
+	int c;
+	int count;
+
+	c = CIRC_CNT_TO_END(circ->head, circ->tail, UART_XMIT_SIZE);
+
+	memcpy(buf, circ->buf + circ->tail, c);
+	circ->tail = (circ->tail + c) & (UART_XMIT_SIZE - 1);
+	return c;
+}
+
+void uart_interrupt(struct irq_desc *desc)
+{
+	u32 status = get_reg(UART_IIR_OFFSET);
+
+	if(status == 0x01)
+	{
+		return;
+	}
+	else if(status == 0x06)
+	{
+		get_reg(UART_LSR_OFFSET);
+	}
+	else if(status == 0x04)
+	{
+		/* uart recv data */
+		u32 data = get_reg(UART_RBR_OFFSET);
+		struct circ_buf *circ = recv;
+		int count = 1;
+		int c = CIRC_SPACE_TO_END(circ->head, circ->tail, UART_XMIT_SIZE);
+		if (count < c)
+			c = count;
+		if (c <= 0)
+			return;
+
+		memcpy(circ->buf + circ->head, &data, c);
+		circ->head = (circ->head + c) & (UART_XMIT_SIZE - 1);
+	}
+	else if(status == 0x02)
+	{
+		if(uart_circ_empty(xmit))
+		{
+			set_reg(UART_IER_OFFSET, 0x01);
+			return;
+		}
+
+		set_reg(UART_THR_OFFSET, xmit->buf[xmit->tail]);
+        xmit->tail = (xmit->tail + 1) & (UART_XMIT_SIZE - 1);
+
+		if(uart_circ_empty(xmit))
+		{
+			set_reg(UART_IER_OFFSET, 0x01);
+		}
+	}
+	else if(status == 0x07)
+	{
+
+	}
+}
+
+void uart_thr_test(void)
+{
+	set_reg(UART_IER_OFFSET, 0x03);
+	set_reg(UART_THR_OFFSET, 'b');
+}
+
 int uart8250_init(unsigned long base, u32 in_freq, u32 baudrate, u32 reg_shift,
 		  u32 reg_width, u32 reg_offset)
 {
@@ -102,16 +223,34 @@ int uart8250_init(unsigned long base, u32 in_freq, u32 baudrate, u32 reg_shift,
 
 	/* 8 bits, no parity, one stop bit */
 	set_reg(UART_LCR_OFFSET, 0x03);
-	/* Enable FIFO */
-	set_reg(UART_FCR_OFFSET, 0x01);
-	/* No modem control DTR RTS */
-	set_reg(UART_MCR_OFFSET, 0x00);
 	/* Clear line status */
 	get_reg(UART_LSR_OFFSET);
 	/* Read receive buffer */
 	get_reg(UART_RBR_OFFSET);
-	/* Set scratchpad */
-	set_reg(UART_SCR_OFFSET, 0x00);
+
+#if 0
+	/* Enable interrupt */
+	set_reg(UART_IER_OFFSET, 0x01);
+
+	request_irq(28, uart_interrupt, 0x00, "8250uart", NULL);
+
+	static char buff[4096];
+	uart_port_init();
+
+	while(1)
+	{
+		local_irq_disable();
+
+		int cnt;
+		cnt = uart_read(buff);
+		if(cnt > 0)
+		{
+			uart_write(buff, cnt);
+		}
+
+		local_irq_enable();
+	}
+#endif
 
 	return 0;
 }
@@ -133,5 +272,4 @@ static void _write(struct console *con, const char *s, unsigned n)
 		uart8250_putc(*s);
 	}
 }
-
 CONSOLE_DECLARE(uart8250, NULL, _init, _write, NULL);
