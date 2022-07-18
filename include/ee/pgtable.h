@@ -1,8 +1,7 @@
 #ifndef _EE_PGTABLE_H
 #define _EE_PGTABLE_H
 
-#include <asm/pgtable_type.h>
-#include <asm/pgtable_hwdef.h>
+#include <asm/pgtable.h>
 
 #define pgd_index(a)  (((a) >> PGDIR_SHIFT) & (PTRS_PER_PGD - 1))
 #define pud_index(a)  (((a) >> PUD_SHIFT) & (PTRS_PER_PUD - 1))

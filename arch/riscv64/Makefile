@@ -4,3 +4,4 @@ ARCH_LDFLAGS +=
 
 core-y += arch/riscv64/boot/
 core-y += arch/riscv64/ld_script/
+core-y += arch/riscv64/mm/
