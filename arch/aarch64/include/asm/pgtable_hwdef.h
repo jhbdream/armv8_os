@@ -12,11 +12,7 @@
 #define __ASM_PGTABLE_HWDEF_H
 
 #include <asm/memory.h>
-#include <const.h>
-
-#define PAGE_SHIFT      (12)
-#define PAGE_SIZE       (_AC(1, UL) << PAGE_SHIFT)
-#define PAGE_MASK       (~(PAGE_SIZE-1))
+#include <asm/page-def.h>
 
 /*
  * Number of page-table levels required to address 'va_bits' wide
