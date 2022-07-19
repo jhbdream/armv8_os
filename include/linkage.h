@@ -1,7 +1,11 @@
 #ifndef __LINK_AGE_H
 #define __LINK_AGE_H
 
+#include <compiler_attribute.h>
 #include <asm/linkage.h>
+
+#define __page_aligned_data	__section(".data..page_aligned") __aligned(PAGE_SIZE)
+#define __page_aligned_bss	__section(".bss..page_aligned") __aligned(PAGE_SIZE)
 
 /* Some toolchains use other characters (e.g. '`') to mark new line in macro */
 #ifndef ASM_NL
