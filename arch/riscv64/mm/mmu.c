@@ -1,4 +1,4 @@
-#include <asm/page.h>
+#include <asm/pgtable.h>
 #include <type.h>
 
 void create_pgd_mapping(pgd_t *pgdp,
