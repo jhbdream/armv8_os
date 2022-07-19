@@ -21,4 +21,8 @@
 #define __PASTE(a,b) ___PASTE(a,b)
 #define __UNIQUE_ID(prefix) __PASTE(__PASTE(__UNIQUE_ID_, prefix), __COUNTER__)
 
+#ifndef barrier_before_unreachable
+# define barrier_before_unreachable() do { } while (0)
+#endif
+
 #endif /* __LINUX_COMPILER_TYPES_H */
