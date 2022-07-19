@@ -6,6 +6,7 @@
 #include <type.h>
 #include <linkage.h>
 #include <mm/memblock.h>
+#include <asm/memory.h>
 
 /* early pgd */
 pgd_t early_pg_dir[PTRS_PER_PGD] __aligned(PAGE_SIZE);
@@ -109,5 +110,8 @@ void setup_vm(void)
 	pt_ops.get_pte_virt = NULL;
 	pt_ops.alloc_pmd = alloc_pmd_early;
 	pt_ops.get_pmd_virt = get_pmd_virt_early;
+
+	create_pgd_mapping(early_pg_dir, FIXADDR_START,
+			   (uintptr_t)fixmap_pmd, PGDIR_SIZE, PAGE_TABLE);
 
 }

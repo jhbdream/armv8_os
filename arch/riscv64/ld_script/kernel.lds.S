@@ -4,10 +4,12 @@ ENTRY(_startup)
 
 STACK_SIZE = 0x10000;
 
+#include <asm/memory.h>
+
 SECTIONS
 {
-	/* qemu riscv64 entry point */
-	. = 0x80000000;
+    . = KIMAGE_VADDR;
+    PROVIDE(__kimage_start = .);
 
 	.startup :
     {
@@ -53,4 +55,7 @@ SECTIONS
         . = ALIGN(16);
         __stack_top = .;
     }
+
+    . = ALIGN(4096);
+    PROVIDE(__kimage_end = .);
 }

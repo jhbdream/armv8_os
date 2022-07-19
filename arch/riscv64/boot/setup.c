@@ -3,6 +3,9 @@
 
 void setup_arch(void)
 {
+	extern void setup_vm(void);
+	setup_vm();
+
 	extern void riscv_plic_init(void);
 	riscv_plic_init();
 	local_irq_enable();
