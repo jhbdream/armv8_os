@@ -1,4 +1,7 @@
 menu "RISCV32 architecture"
     depends on ARCH_RISCV32
 
+config 32BIT
+	def_bool y
+
 endmenu

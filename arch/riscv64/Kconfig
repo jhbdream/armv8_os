@@ -1,4 +1,7 @@
 menu "RISCV64 architecture"
     depends on ARCH_RISCV64
 
+config 64BIT
+	def_bool y
+
 endmenu

@@ -1,6 +1,9 @@
 menu "ARM architecture"
     depends on ARCH_AARCH64
 
+config 64BIT
+	def_bool y
+
 choice
     prompt "Physical address space size"
     default ARM64_PA_BITS_48
