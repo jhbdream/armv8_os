@@ -2,6 +2,7 @@
 #define _ASM_RISCV_PGTABLE_H
 
 #include <const.h>
+#include <asm/pgtable-bits.h>
 
 #define PAGE_SHIFT	(12)
 #define PAGE_SIZE	(_AC(1, UL) << PAGE_SHIFT)
@@ -47,7 +48,7 @@ typedef struct {
 } pgprot_t;
 
 #define pte_val(x)	((x).pte)
-#define pmd_val(x)	((x).md)
+#define pmd_val(x)	((x).pmd)
 #define pgd_val(x)	((x).pgd)
 #define pgprot_val(x)	((x).pgprot)
 
@@ -57,7 +58,101 @@ typedef struct {
 #define __pgprot(x)	((pgprot_t) { (x) })
 
 #include <asm-generic/pgtable-nopud.h>
-#endif
 
+static inline pgd_t pfn_pgd(unsigned long pfn, pgprot_t prot)
+{
+	return __pgd((pfn << _PAGE_PFN_SHIFT) | pgprot_val(prot));
+}
+
+static inline unsigned long _pgd_pfn(pgd_t pgd)
+{
+	return pgd_val(pgd) >> _PAGE_PFN_SHIFT;
+}
+
+static inline pmd_t pfn_pmd(unsigned long pfn, pgprot_t prot)
+{
+	return __pmd((pfn << _PAGE_PFN_SHIFT) | pgprot_val(prot));
+}
+
+static inline unsigned long _pmd_pfn(pmd_t pmd)
+{
+	return pmd_val(pmd) >> _PAGE_PFN_SHIFT;
+}
+
+/* Yields the page frame number (PFN) of a page table entry */
+static inline unsigned long pte_pfn(pte_t pte)
+{
+	return (pte_val(pte) >> _PAGE_PFN_SHIFT);
+}
+
+#define pte_page(x)     pfn_to_page(pte_pfn(x))
+
+/* Constructs a page table entry */
+static inline pte_t pfn_pte(unsigned long pfn, pgprot_t prot)
+{
+	return __pte((pfn << _PAGE_PFN_SHIFT) | pgprot_val(prot));
+}
+
+/* Page protection bits */
+#define _PAGE_BASE	(_PAGE_PRESENT | _PAGE_ACCESSED | _PAGE_USER)
+
+#define PAGE_NONE		__pgprot(_PAGE_PROT_NONE)
+#define PAGE_READ		__pgprot(_PAGE_BASE | _PAGE_READ)
+#define PAGE_WRITE		__pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE)
+#define PAGE_EXEC		__pgprot(_PAGE_BASE | _PAGE_EXEC)
+#define PAGE_READ_EXEC		__pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_EXEC)
+#define PAGE_WRITE_EXEC		__pgprot(_PAGE_BASE | _PAGE_READ |	\
+					 _PAGE_EXEC | _PAGE_WRITE)
+
+#define _PAGE_KERNEL		(_PAGE_READ \
+				| _PAGE_WRITE \
+				| _PAGE_PRESENT \
+				| _PAGE_ACCESSED \
+				| _PAGE_DIRTY \
+				| _PAGE_GLOBAL)
+
+#define PAGE_KERNEL		__pgprot(_PAGE_KERNEL)
+#define PAGE_KERNEL_READ	__pgprot(_PAGE_KERNEL & ~_PAGE_WRITE)
+#define PAGE_KERNEL_EXEC	__pgprot(_PAGE_KERNEL | _PAGE_EXEC)
+#define PAGE_KERNEL_READ_EXEC	__pgprot((_PAGE_KERNEL & ~_PAGE_WRITE) \
+					 | _PAGE_EXEC)
+#define PAGE_TABLE		__pgprot(_PAGE_TABLE)
+
+static inline int pmd_present(pmd_t pmd)
+{
+	return (pmd_val(pmd) & (_PAGE_PRESENT | _PAGE_PROT_NONE));
+}
+
+static inline int pmd_none(pmd_t pmd)
+{
+	return (pmd_val(pmd) == 0);
+}
+
+static inline int pmd_bad(pmd_t pmd)
+{
+	return !pmd_present(pmd) || (pmd_val(pmd) & _PAGE_LEAF);
+}
+
+static inline int pte_present(pte_t pte)
+{
+	return (pte_val(pte) & (_PAGE_PRESENT | _PAGE_PROT_NONE));
+}
+
+static inline int pte_none(pte_t pte)
+{
+	return (pte_val(pte) == 0);
+}
+
+static inline int pte_write(pte_t pte)
+{
+	return pte_val(pte) & _PAGE_WRITE;
+}
+
+static inline int pte_exec(pte_t pte)
+{
+	return pte_val(pte) & _PAGE_EXEC;
+}
+
+#endif
 #endif
 
