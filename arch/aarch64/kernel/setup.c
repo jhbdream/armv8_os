@@ -21,11 +21,11 @@ void setup_arch(void)
     paging_init();
     memblock_dump_all();
 
-extern int buddy_page_init(unsigned long mem_start, unsigned long mem_end);
     u64 base = 0x40080000;
     u64 size = 0x20000000;
 
-	buddy_page_init(base, base + size);
+	extern int vmemmap_page_init(unsigned long mem_start, unsigned long mem_end);
+	vmemmap_page_init(base, base + size);
 #if 0
  	extern int arm_gicv3_interrupu_init(void *dist_base, void *rdist_base, uint32_t nr_redist_regions);
 	// for qemu hardware address
