@@ -1,3 +1,4 @@
+#include "asm/pgtable.h"
 #include "stddef.h"
 #include <ee/pgtable.h>
 #include <ee/pfn.h>
@@ -8,12 +9,17 @@
 #include <mm/memblock.h>
 #include <asm/memory.h>
 
+extern char __kimage_start[];
+extern char __kimage_end[];
+
 /* early pgd */
 pgd_t early_pg_dir[PTRS_PER_PGD] __aligned(PAGE_SIZE);
-
+pgd_t trampoline_pg_dir[PTRS_PER_PGD] __page_aligned_bss;
 static pmd_t trampoline_pmd[PTRS_PER_PMD] __page_aligned_bss;
-static pmd_t fixmap_pmd[PTRS_PER_PMD] __page_aligned_bss;
 static pmd_t early_pmd[PTRS_PER_PMD] __aligned(PAGE_SIZE);
+
+static pmd_t fixmap_pmd[PTRS_PER_PMD] __page_aligned_bss;
+static pte_t fixmap_pte[PTRS_PER_PTE] __page_aligned_bss;
 
 struct pt_alloc_ops {
 	pte_t *(*get_pte_virt)(phys_addr_t pa);
@@ -111,7 +117,54 @@ void setup_vm(void)
 	pt_ops.alloc_pmd = alloc_pmd_early;
 	pt_ops.get_pmd_virt = get_pmd_virt_early;
 
+#if 0
+	/* create fixmap map
+	 * va = FIXADDR_START
+	 * pa = fixmap_pmd
+	 * size = 1G
+	 *
+	 * 因为 fixmap 的页表是定义成了全局变量
+	 * 所以在建立了镜像的代码段和数据段之后
+	 * 就可以直接去访问全局变量fixmap_pte 来修改 fixmap 的页表映射关系
+	 * 可以方便的去做一些临时的 4K 大小的映射
+	 *
+	 */
 	create_pgd_mapping(early_pg_dir, FIXADDR_START,
 			   (uintptr_t)fixmap_pmd, PGDIR_SIZE, PAGE_TABLE);
 
+	/* Setup fixmap PMD */
+	create_pmd_mapping(fixmap_pmd, FIXADDR_START,
+			   (uintptr_t)fixmap_pte, PMD_SIZE, PAGE_TABLE);
+#endif
+	/**
+	 * create temp kernel image map
+	 * va = KIMAGE_VADDR
+	 * pa = load_addr
+	 * size = 2M ? PMD_SIZE
+	 */
+	create_pgd_mapping(trampoline_pg_dir, KIMAGE_VADDR,
+			   (uintptr_t)trampoline_pmd, PGDIR_SIZE, PAGE_TABLE);
+	create_pmd_mapping(trampoline_pmd, KIMAGE_VADDR,
+			  (uintptr_t)&__kimage_start, PMD_SIZE, PAGE_KERNEL_EXEC);
+#if 0
+	/**
+	 * create kernel image map in early_pd_dir
+	 *
+	 */
+	phys_addr_t kernel_image_start = (phys_addr_t)&__kimage_start;
+	phys_addr_t kernel_image_end = (phys_addr_t)&__kimage_end;
+	phys_addr_t kernel_image_size = kernel_image_end - kernel_image_start;
+
+	uintptr_t pa = kernel_image_start;
+	uintptr_t va = KIMAGE_VADDR;
+	uintptr_t va_end = va + kernel_image_size;
+
+	for(; va < va_end; va += PMD_SIZE)
+	{
+		/* pmd = early_pmd */
+		/* size = 1g is enough */
+		create_pgd_mapping(early_pg_dir, va, pa + (va - KIMAGE_VADDR), PMD_SIZE, PAGE_KERNEL_EXEC);
+	}
+#endif
 }
+

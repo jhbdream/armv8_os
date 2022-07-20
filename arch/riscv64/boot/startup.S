@@ -1,4 +1,6 @@
 #include <asm/csr.h>
+#include <asm/memory.h>
+#include <asm/pgtable.h>
 
     .section StartUp, "ax"
     .balign 4
@@ -6,32 +8,55 @@
     .type _startup, "function"
 
 _startup:
-	// 关闭全局中断
-	csrw mie, 0
-	// 清除全局中断状态
-	csrw mip, 0
 
+_machine_mode:
+	csrw mie, 0
+	csrw mip, 0
 	fence.i
-	
+
+	/* trap all interrupt && exception to s-mode */
+	li a0, 0xFFFFFFFFFFFFFFFF
+	csrw mideleg, a0
+	csrw medeleg, a0
+
+	/* riscv pmp need to set before exec mret */
 	li a0, -1
 	csrw pmpaddr0, a0
 	li a0, (PMP_A_NAPOT | PMP_R | PMP_W | PMP_X)
-	csrw pmpcfg0, a0      
+	csrw pmpcfg0, a0
 
-	la a0, pmp_done
-	csrw mtvec, a0
+	/* config swtich to super mode */
+	csrr a0, mstatus
 
-.align 2
-pmp_done:
+	/* set mpp = 1 */
+	li a1, ~(0x3 << 11)
+	and a0, a0, a1
+	li a1, (0x1 << 11)
+	or a0, a0, a1
+
+	/* clear mpie */
+	li a1, ~(0x1 << 7)
+	and a0, a0, a1
+
+	csrw mstatus, a0
+
+	la a0, __supervisor_mode
+	csrw mepc, a0
+	mret
+
+__supervisor_mode:
+	csrw sie, 0
+	csrw sip, 0
+
 	/*
 	 * Disable FPU to detect illegal usage of
 	 * floating point in kernel space
 	 */
-	li t0, SR_FS                                                                                                                              
-	csrc mstatus, t0
+	li t0, SR_FS
+	csrc sstatus, t0
 
 	la t0, handle_exception
-	csrw mtvec, t0	
+	csrw stvec, t0
 
     /* Clear BSS for flat non-ELF images */
     la a3, __bss_start
@@ -42,7 +67,43 @@ clear_bss:
     add a3, a3, 8
     blt a3, a4, clear_bss
 clear_bss_done:
-	la sp, __stack_top 
+
+	la sp, __stack_top
+
+	call setup_vm
+	la a0, early_pg_dir
+
+begin_config_mmu:
+
+	la a3, enable_mmu
+	la a4, __kimage_start
+	li a5, KIMAGE_VADDR
+	sub a5, a5, a4
+	add a3, a3, a5
+
+	/* 设置异常入口地址为 enable_mmu 虚拟地址 */
+	csrw stvec, a3
+
+	/* config satp */
+	li a2, 0
+
+	la a0, trampoline_pg_dir
+	srl a0, a0, PAGE_SHIFT
+	or a2, a2, a0
+
+	/* sv39 page mode */
+	li a1, (0x8 << 60)
+	or a2, a2, a1
+
+	//同步页表更新
+	sfence.vma
+
+	/* 开启mmu 触发异常,跳转到 stvec  */
+	csrw satp, a2
+
+enable_mmu:
+	jal .
+
 	jal start_kernel
 
 _exit:
