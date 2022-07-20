@@ -6,7 +6,8 @@
 #include <type.h>
 
 #define VA_BITS (39)
-#define PAGE_OFFSET (0xffffffe000000000)
+#define _PAGE_OFFSET(va) (-(UL(1) << (va - 1)))
+#define PAGE_OFFSET (_PAGE_OFFSET(VA_BITS))
 #define KIMAGE_VADDR (PAGE_OFFSET + SZ_1G)
 #define FIXADDR_TOP (KIMAGE_VADDR + SZ_1G)
 
