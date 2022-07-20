@@ -18,11 +18,13 @@
 
 #define VA_BITS (CONFIG_ARM64_VA_BITS)
 #define _PAGE_OFFSET(va) (-(UL(1) << (va)))
-#define PAGE_OFFSET (_PAGE_OFFSET(VA_BITS))
-#define KIMAGE_VADDR (PAGE_OFFSET + SZ_1G)
-#define FIXADDR_TOP (KIMAGE_VADDR + SZ_1G)
 #define PHYS_OFFSET (memory_strart)
+#define PAGE_OFFSET  (0xFFFF800000000000)
 
+/* 早期的恒等映射只做了 1G PUD 映射，所以代码段的虚拟地址与实际加载地址在1G的偏移要相同 */
+/* 因为线性映射虚拟地址物理地址转换逻辑 PAGE_OFFSET 需要大于 KIMAGE_VADDR */
+#define KIMAGE_VADDR (0xFFFF000000080000)
+#define FIXADDR_TOP (KIMAGE_VADDR + SZ_512M)
 /*
  * Memory types available.
  *
