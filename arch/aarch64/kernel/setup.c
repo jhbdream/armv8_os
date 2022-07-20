@@ -26,6 +26,9 @@ void setup_arch(void)
 
 	extern int vmemmap_page_init(unsigned long mem_start, unsigned long mem_end);
 	vmemmap_page_init(base, base + size);
+
+	extern void free_memory_core(void);
+	free_memory_core();
 #if 0
  	extern int arm_gicv3_interrupu_init(void *dist_base, void *rdist_base, uint32_t nr_redist_regions);
 	// for qemu hardware address

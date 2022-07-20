@@ -2,7 +2,10 @@
 #ifndef _LINUX_PFN_H_                                                                                                                                                                  
 #define _LINUX_PFN_H_
 
+#include <asm/pgtable.h>
+
 #ifndef __ASSEMBLY__
+
 #include <type.h>
 
 /*

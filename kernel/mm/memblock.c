@@ -18,6 +18,8 @@
 #include <printk.h>
 #include <limits.h>
 #include <asm/memory.h>
+#include <ee/pfn.h>
+#include <mm/page_alloc.h>
 
 #define INIT_MEMBLOCK_REGIONS           128
 #define INIT_PHYSMEM_REGIONS            4
@@ -517,6 +519,49 @@ void memblock_free(void *ptr, size_t size)
 {
     if(ptr)
         memblock_phys_free(__pa(ptr), size);
+}
+
+void __free_mem_core(phys_addr_t start, phys_addr_t end)
+{
+	int order;
+	unsigned long start_pfn = PFN_UP(start);
+	unsigned long end_pfn = PFN_DOWN(end);
+
+	printk("pfn range: [0x%x - 0x%x]\n", start, end);
+	
+	if(start_pfn >= end_pfn)
+		return;
+	
+	while(start_pfn < end_pfn)
+	{
+		/* 内核使用 MAX_ORDER - 1. 没有想清楚是因为什么 */
+		/* 难道是因为这个是指 阶 的个数 (0 - 10) 一共有11个阶 */
+		order = min(MAX_ORDER - 1, __builtin_ctzl(start));
+
+		while((start_pfn + (1 << order)) > end_pfn)
+		{
+			order--;
+		}
+		
+		printk("free page order is %d [0x%x - 0x%x]\n", order, start_pfn, start_pfn + (1 << order));
+		
+		start_pfn += (1 << order);
+	}
+}
+
+/*
+ * free memblock free memory to buddy page
+ */
+void free_memory_core(void)
+{
+	u64 i;
+	phys_addr_t start, end;
+
+	for_each_free_mem_range(i, &start, &end)
+	{
+		printk("index[%d]: [0x%x - 0x%x]\n", i, start, end);	
+		__free_mem_core(start, end);
+	}
 }
 
 static void memblock_dump(struct memblock_type *type)

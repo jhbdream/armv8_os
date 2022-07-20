@@ -15,4 +15,6 @@ extern struct page *page_base;
 #define pfn_to_page __pfn_to_page
 #define page_to_pfn __page_to_pfn
 
+#define MAX_ORDER 11
+
 #endif
