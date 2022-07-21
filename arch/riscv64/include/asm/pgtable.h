@@ -153,6 +153,16 @@ static inline int pte_exec(pte_t pte)
 	return pte_val(pte) & _PAGE_EXEC;
 }
 
+/*
+ * Certain architectures need to do special things when PTEs within
+ * a page table are directly modified.  Thus, the following hook is
+ * made available.
+ */
+static inline void set_pte(pte_t *ptep, pte_t pteval)
+{
+	*ptep = pteval;
+}
+
 #endif
 #endif
 

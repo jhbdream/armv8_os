@@ -8,6 +8,8 @@
 #include <linkage.h>
 #include <mm/memblock.h>
 #include <asm/memory.h>
+#include <asm/fixmap.h>
+#include <asm/tlbflush.h>
 
 extern char __kimage_start[];
 extern char __kimage_end[];
@@ -21,6 +23,23 @@ static pmd_t early_pmd[PTRS_PER_PMD] __aligned(PAGE_SIZE);
 
 static pmd_t fixmap_pmd[PTRS_PER_PMD] __page_aligned_bss;
 static pte_t fixmap_pte[PTRS_PER_PTE] __page_aligned_bss;
+
+void __set_fixmap(enum fixed_addresses idx, phys_addr_t phys, pgprot_t prot)
+{
+	unsigned long addr = __fix_to_virt(idx);
+	pte_t *ptep;
+
+	BUG_ON(idx <= FIX_HOLE || idx >= __end_of_fixed_addresses);
+
+	ptep = &fixmap_pte[pte_index(addr)];
+
+	if (pgprot_val(prot)) {
+		set_pte(ptep, pfn_pte(phys >> PAGE_SHIFT, prot));
+	} else {
+		set_pte(ptep, __pte(0));
+		local_flush_tlb_page(addr);
+	}
+}
 
 static pte_t *get_pte_virt(phys_addr_t pa)
 {
@@ -175,6 +194,14 @@ void setup_vm(void)
 	}
 }
 
+/**
+ * 1. 创建正式内核页表 swapper_pg_dir
+ * 2. 映射 FIXMAP
+ * 3. 映射 mem
+ * 4. 映射 kernel
+ * 5. 页表切换
+ *
+ */
 void setup_vm_final(void)
 {
 
