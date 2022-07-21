@@ -1,3 +1,4 @@
+#include "asm-generic/fixmap.h"
 #include "asm/pgtable.h"
 #include "stddef.h"
 #include <ee/pgtable.h>
@@ -45,7 +46,8 @@ static pte_t *get_pte_virt(phys_addr_t pa)
 {
 	if(mmu_enabled)
 	{
-		return 0;
+		clear_fixmap(FIX_PTE);
+		return (pte_t *)set_fixmap_offset(FIX_PTE, pa);
 	}
 	/* Before MMU is enabled */
 	return (pte_t *)(0);
@@ -66,7 +68,8 @@ static pmd_t *get_pmd_virt(phys_addr_t pa)
 {
 	if(mmu_enabled)
 	{
-		return 0;
+		clear_fixmap(FIX_PMD);
+		return (pmd_t *)set_fixmap_offset(FIX_PMD, pa);
 	}
 
 	/* Before MMU is enabled */
@@ -204,5 +207,8 @@ void setup_vm(void)
  */
 void setup_vm_final(void)
 {
+	mmu_enabled = 1;
 
+
+	while(1);
 }
