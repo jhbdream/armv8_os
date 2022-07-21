@@ -92,18 +92,6 @@ static inline phys_addr_t pte_page_paddr(pte_t pte)
     return __pte_to_phys(pte);
 }
 
-/* Return a pointer with offset calculated */
-#define __set_fixmap_offset(idx, phys, flags)               \
-({                                  \
-    unsigned long ________addr;                 \
-    __set_fixmap(idx, phys, flags);                 \
-    ________addr = fix_to_virt(idx) + ((phys) & (PAGE_SIZE - 1));   \
-    ________addr;                           \
-})
-
-#define set_fixmap_offset(idx, phys) \
-    __set_fixmap_offset(idx, phys, PAGE_KERNEL)
-
 #define pud_offset_phys(dir, addr) (__pgd_to_phys((*dir)) + pud_index(addr) * sizeof(pud_t))
 #define pmd_offset_phys(dir, addr) (__pud_to_phys((*dir)) + pmd_index(addr) * sizeof(pmd_t))
 #define pte_offset_phys(dir, addr) (__pmd_to_phys((*dir)) + pte_index(addr) * sizeof(pte_t))
