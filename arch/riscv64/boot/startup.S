@@ -110,6 +110,13 @@ begin_config_mmu:
 enable_mmu:
 	/* begin run in virt address space */
 	la sp, __stack_top
+	la a0, __early_exception
+	csrw stvec, a0
+
+	jal .
+	nop
+
+	call setup_vm_final
 
 	jal .
 
@@ -118,3 +125,5 @@ enable_mmu:
 _exit:
 	jal _exit
 
+__early_exception:
+	jal .

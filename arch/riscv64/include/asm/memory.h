@@ -5,8 +5,12 @@
 #include <ee/sizes.h>
 #include <type.h>
 
+
 #define VA_BITS (39)
 #define _PAGE_OFFSET(va) (-(UL(1) << (va - 1)))
+
+/* phys memory start */
+#define PHYS_OFFSET (memory_start)
 
 /*riscv mmu bit[64:39] need to same to bit[38]*/
 /* +256G */
@@ -20,9 +24,25 @@
 
 #ifndef __ASSEMBLY__
 
+/* mm page_va - mm phys_pa */
+extern unsigned long va_pa_offset;
 
-#define __phys_to_virt(x) (x)
-#define __virt_to_phys(x) (x)
+/* kernel_image_start_va - load_pa */
+extern unsigned long kimage_voffset;
+
+extern signed long memory_start;
+
+#define __phys_to_kimg(x) ((unsigned long)((x) + kimage_voffset))
+#define __kimg_to_phys(addr)    ((addr) - kimage_voffset)
+#define __phys_addr_symbol(x) __kimg_to_phys((phys_addr_t)(x))
+
+#define __pa(x)     ((unsigned long)(x))
+#define __pa_symbol(x) __phys_addr_symbol(x)
+#define __lm_to_phys(addr)  (((addr) - PAGE_OFFSET) + PHYS_OFFSET)
+#define __is_lm_address(addr)   (((u64)(addr) >= PAGE_OFFSET))
+
+#define __phys_to_virt(x) ((x - PHYS_OFFSET) | PAGE_OFFSET)
+#define __virt_to_phys(x) (__is_lm_address(x) ? __lm_to_phys(x) : __kimg_to_phys(x))
 
 #define virt_to_phys virt_to_phys
 static inline phys_addr_t virt_to_phys(const volatile void *x)
@@ -35,9 +55,6 @@ static inline void *phys_to_virt(phys_addr_t x)
 {
     return (void *)(__phys_to_virt(x));
 }
-
-#define __pa(x)     ((unsigned long)(x))
-#define __pa_symbol(x) __phys_addr_symbol(x)
 
 #endif /* #ifndef __ASSEMBLY__ */
 #endif

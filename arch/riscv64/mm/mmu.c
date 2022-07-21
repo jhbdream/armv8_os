@@ -15,10 +15,18 @@
 extern char __kimage_start[];
 extern char __kimage_end[];
 
+signed long memory_start;
+
+/* mm page_va - mm phys_pa */
 unsigned long va_pa_offset;
+
+/* kernel_image_start_va - load_pa */
+unsigned long kimage_voffset;
+
 static int mmu_enabled;
 
 /* early pgd */
+pgd_t swapper_pg_dir[PTRS_PER_PGD] __aligned(PAGE_SIZE);
 pgd_t early_pg_dir[PTRS_PER_PGD] __aligned(PAGE_SIZE);
 static pmd_t early_pmd[PTRS_PER_PMD] __aligned(PAGE_SIZE);
 
@@ -154,25 +162,28 @@ void create_pgd_mapping(pgd_t *pgdp,
 	create_pmd_mapping(pmdp, va, pa, sz, prot);
 }
 
+static uintptr_t best_map_size(phys_addr_t base, phys_addr_t size)
+{
+	/* Upgrade to PMD_SIZE mappings whenever possible */
+	if ((base & (PMD_SIZE - 1)) || (size & (PMD_SIZE - 1)))
+		return PAGE_SIZE;
+
+	return PMD_SIZE;
+}
+
 void setup_vm(void)
 {
-	/* create fixmap map
-	 * va = FIXADDR_START
-	 * pa = fixmap_pmd
-	 * size = 1G
-	 *
-	 * 因为 fixmap 的页表是定义成了全局变量
-	 * 所以在建立了镜像的代码段和数据段之后
-	 * 就可以直接去访问全局变量fixmap_pte 来修改 fixmap 的页表映射关系
-	 * 可以方便的去做一些临时的 4K 大小的映射
-	 *
-	 */
-	create_pgd_mapping(early_pg_dir, FIXADDR_START,
-			   (uintptr_t)fixmap_pmd, PGDIR_SIZE, PAGE_TABLE);
 
-	/* Setup fixmap PMD */
-	create_pmd_mapping(fixmap_pmd, FIXADDR_START,
-			   (uintptr_t)fixmap_pte, PMD_SIZE, PAGE_TABLE);
+#if 0
+	/* early map fixmap */
+	create_pgd_mapping(early_pg_dir,
+			FIXADDR_START, (uintptr_t)fixmap_pmd,
+			PGDIR_SIZE, PAGE_TABLE);
+
+	create_pmd_mapping(fixmap_pmd,
+			FIXADDR_START, (uintptr_t)fixmap_pte,
+			PMD_SIZE, PAGE_KERNEL_EXEC);
+#endif
 
 	/**
 	 * create kernel image map in early_pd_dir
@@ -187,6 +198,8 @@ void setup_vm(void)
 	uintptr_t va_end = va + kernel_image_size;
 
 	va_pa_offset = PAGE_OFFSET - pa;
+	kimage_voffset = KIMAGE_VADDR - pa;
+
 	BUG_ON((pa % PMD_SIZE) != 0);
 
 	for(; va < va_end; va += PMD_SIZE)
@@ -209,6 +222,46 @@ void setup_vm_final(void)
 {
 	mmu_enabled = 1;
 
+	/* FIXMAP */
+	create_pgd_mapping(swapper_pg_dir,
+			FIXADDR_START, __pa_symbol(fixmap_pmd),
+			PGDIR_SIZE, PAGE_TABLE);
+
+	create_pmd_mapping(fixmap_pmd,
+			FIXADDR_START, __pa_symbol(fixmap_pte),
+			PMD_SIZE, PAGE_KERNEL_EXEC);
+
+	/* KERNEL */
+	uintptr_t va, pa;
+	uintptr_t kimage_start, kimage_end;
+
+	kimage_start = (uintptr_t)&__kimage_start;
+	kimage_end = (uintptr_t)&__kimage_end;
+
+	va = KIMAGE_VADDR;
+	pa = __pa_symbol(kimage_start);
+
+	for(; va < kimage_end; va += PMD_SIZE, pa += PMD_SIZE)
+	{
+		create_pgd_mapping(swapper_pg_dir, va, pa, PMD_SIZE, PAGE_KERNEL_EXEC);
+	}
+
+	/* MEM */
+	/* from memblock */
+	u64 i, size;
+	phys_addr_t start, end;
+	va = PAGE_OFFSET;
+
+	for_each_mem_range(i, &start, &end)
+	{
+		pa = start;
+		size = best_map_size(start, end - start);
+		for(pa = start; pa < end; pa += size)
+		{
+			va = (uintptr_t)phys_to_virt(pa);
+			create_pgd_mapping(swapper_pg_dir, va, pa, size, PAGE_KERNEL);
+		}
+	}
 
 	while(1);
 }
