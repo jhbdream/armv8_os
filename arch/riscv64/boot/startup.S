@@ -108,6 +108,9 @@ begin_config_mmu:
 	csrw satp, a0
 
 enable_mmu:
+	/* begin run in virt address space */
+	la sp, __stack_top
+
 	jal .
 
 	jal start_kernel

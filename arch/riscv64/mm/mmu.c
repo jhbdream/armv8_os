@@ -13,25 +13,56 @@ extern char __kimage_start[];
 extern char __kimage_end[];
 
 unsigned long va_pa_offset;
+static int mmu_enabled;
 
 /* early pgd */
 pgd_t early_pg_dir[PTRS_PER_PGD] __aligned(PAGE_SIZE);
-pgd_t trampoline_pg_dir[PTRS_PER_PGD] __page_aligned_bss;
-static pmd_t trampoline_pmd[PTRS_PER_PMD] __page_aligned_bss;
 static pmd_t early_pmd[PTRS_PER_PMD] __aligned(PAGE_SIZE);
 
 static pmd_t fixmap_pmd[PTRS_PER_PMD] __page_aligned_bss;
 static pte_t fixmap_pte[PTRS_PER_PTE] __page_aligned_bss;
 
-struct pt_alloc_ops {
-	pte_t *(*get_pte_virt)(phys_addr_t pa);
-	phys_addr_t (*alloc_pte)(uintptr_t va);
-	pmd_t *(*get_pmd_virt)(phys_addr_t pa);
-	phys_addr_t (*alloc_pmd)(uintptr_t va);
-};
+static pte_t *get_pte_virt(phys_addr_t pa)
+{
+	if(mmu_enabled)
+	{
+		return 0;
+	}
+	/* Before MMU is enabled */
+	return (pte_t *)(0);
+}
 
-static struct pt_alloc_ops _pt_ops;
-#define pt_ops _pt_ops
+static phys_addr_t alloc_pte(uintptr_t va)
+{
+	if(mmu_enabled)
+	{
+		return memblock_phys_alloc_align(PAGE_SIZE, PAGE_SIZE);
+	}
+
+	/* BUG: only used when mmu_enable */
+	return 0;
+}
+
+static pmd_t *get_pmd_virt(phys_addr_t pa)
+{
+	if(mmu_enabled)
+	{
+		return 0;
+	}
+
+	/* Before MMU is enabled */
+	return (pmd_t *)((uintptr_t)pa);
+}
+
+static phys_addr_t alloc_pmd(uintptr_t va)
+{
+	if(mmu_enabled)
+	{
+		return memblock_phys_alloc_align(PAGE_SIZE, PAGE_SIZE);
+	}
+
+	return (phys_addr_t)early_pmd;
+}
 
 static void create_pte_mapping(pte_t *ptep,
 				      uintptr_t va, phys_addr_t pa,
@@ -60,13 +91,13 @@ static void create_pmd_mapping(pmd_t *pmdp,
 	}
 
 	if (pmd_none(pmdp[pmd_idx])) {
-		pte_phys = pt_ops.alloc_pte(va);
+		pte_phys = alloc_pte(va);
 		pmdp[pmd_idx] = pfn_pmd(PFN_DOWN(pte_phys), PAGE_TABLE);
-		ptep = pt_ops.get_pte_virt(pte_phys);
+		ptep = get_pte_virt(pte_phys);
 		memset(ptep, 0, PAGE_SIZE);
 	} else {
 		pte_phys = PFN_PHYS(_pmd_pfn(pmdp[pmd_idx]));
-		ptep = pt_ops.get_pte_virt(pte_phys);
+		ptep = get_pte_virt(pte_phys);
 	}
 
 	create_pte_mapping(ptep, va, pa, sz, prot);
@@ -88,36 +119,21 @@ void create_pgd_mapping(pgd_t *pgdp,
 		return;
 	}
 
-	if (pgd_val(pgdp[pgd_idx]) == 0) { next_phys = pt_ops.alloc_pmd(va);
+	if (pgd_val(pgdp[pgd_idx]) == 0) {
+		next_phys = alloc_pmd(va);
 		pgdp[pgd_idx] = pfn_pgd(PFN_DOWN(next_phys), PAGE_TABLE);
-		pmdp = pt_ops.get_pmd_virt(next_phys);
+		pmdp = get_pmd_virt(next_phys);
 		memset(pmdp, 0, PAGE_SIZE);
 	} else {
 		next_phys = PFN_PHYS(_pgd_pfn(pgdp[pgd_idx]));
-		pmdp = pt_ops.get_pmd_virt(next_phys);
+		pmdp = get_pmd_virt(next_phys);
 	}
 
 	create_pmd_mapping(pmdp, va, pa, sz, prot);
 }
 
-static pmd_t *get_pmd_virt_early(phys_addr_t pa)
-{
-	/* Before MMU is enabled */
-	return (pmd_t *)((uintptr_t)pa);
-}
-
-static phys_addr_t alloc_pmd_early(uintptr_t va)
-{
-	return (uintptr_t)early_pmd;
-}
-
 void setup_vm(void)
 {
-	pt_ops.alloc_pte = NULL;
-	pt_ops.get_pte_virt = NULL;
-	pt_ops.alloc_pmd = alloc_pmd_early;
-	pt_ops.get_pmd_virt = get_pmd_virt_early;
-
 	/* create fixmap map
 	 * va = FIXADDR_START
 	 * pa = fixmap_pmd
@@ -144,7 +160,6 @@ void setup_vm(void)
 	phys_addr_t kernel_image_end = (phys_addr_t)&__kimage_end;
 	phys_addr_t kernel_image_size = kernel_image_end - kernel_image_start;
 
-
 	uintptr_t pa = kernel_image_start;
 	uintptr_t va = KIMAGE_VADDR;
 	uintptr_t va_end = va + kernel_image_size;
@@ -160,3 +175,7 @@ void setup_vm(void)
 	}
 }
 
+void setup_vm_final(void)
+{
+
+}
