@@ -81,35 +81,31 @@ clear_bss_done:
 	la sp, __stack_top
 
 	call setup_vm
-	la a0, early_pg_dir
 
 begin_config_mmu:
 
-	la a3, enable_mmu
-	la a4, __kimage_start
-	li a5, KIMAGE_VADDR
-	sub a5, a5, a4
-	add a3, a3, a5
+	la a0, __kimage_start
+	li a1, KIMAGE_VADDR
+	sub a1, a1, a0
 
 	/* 设置异常入口地址为 enable_mmu 虚拟地址 */
-	csrw stvec, a3
+	la a0, enable_mmu
+	add a0, a0, a1
+	csrw stvec, a0
 
 	/* config satp */
-	li a2, 0
-
-	la a0, trampoline_pg_dir
-	srl a0, a0, PAGE_SHIFT
-	or a2, a2, a0
+	la a1, early_pg_dir
+	srl a0, a1, PAGE_SHIFT
 
 	/* sv39 page mode */
 	li a1, (0x8 << 60)
-	or a2, a2, a1
+	or a0, a1, a0
 
 	//同步页表更新
 	sfence.vma
 
 	/* 开启mmu 触发异常,跳转到 stvec  */
-	csrw satp, a2
+	csrw satp, a0
 
 enable_mmu:
 	jal .

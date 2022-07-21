@@ -12,6 +12,8 @@
 extern char __kimage_start[];
 extern char __kimage_end[];
 
+unsigned long va_pa_offset;
+
 /* early pgd */
 pgd_t early_pg_dir[PTRS_PER_PGD] __aligned(PAGE_SIZE);
 pgd_t trampoline_pg_dir[PTRS_PER_PGD] __page_aligned_bss;
@@ -86,8 +88,7 @@ void create_pgd_mapping(pgd_t *pgdp,
 		return;
 	}
 
-	if (pgd_val(pgdp[pgd_idx]) == 0) {
-		next_phys = pt_ops.alloc_pmd(va);
+	if (pgd_val(pgdp[pgd_idx]) == 0) { next_phys = pt_ops.alloc_pmd(va);
 		pgdp[pgd_idx] = pfn_pgd(PFN_DOWN(next_phys), PAGE_TABLE);
 		pmdp = pt_ops.get_pmd_virt(next_phys);
 		memset(pmdp, 0, PAGE_SIZE);
@@ -117,7 +118,6 @@ void setup_vm(void)
 	pt_ops.alloc_pmd = alloc_pmd_early;
 	pt_ops.get_pmd_virt = get_pmd_virt_early;
 
-#if 0
 	/* create fixmap map
 	 * va = FIXADDR_START
 	 * pa = fixmap_pmd
@@ -135,18 +135,7 @@ void setup_vm(void)
 	/* Setup fixmap PMD */
 	create_pmd_mapping(fixmap_pmd, FIXADDR_START,
 			   (uintptr_t)fixmap_pte, PMD_SIZE, PAGE_TABLE);
-#endif
-	/**
-	 * create temp kernel image map
-	 * va = KIMAGE_VADDR
-	 * pa = load_addr
-	 * size = 2M ? PMD_SIZE
-	 */
-	create_pgd_mapping(trampoline_pg_dir, KIMAGE_VADDR,
-			   (uintptr_t)trampoline_pmd, PGDIR_SIZE, PAGE_TABLE);
-	create_pmd_mapping(trampoline_pmd, KIMAGE_VADDR,
-			  (uintptr_t)&__kimage_start, PMD_SIZE, PAGE_KERNEL_EXEC);
-#if 0
+
 	/**
 	 * create kernel image map in early_pd_dir
 	 *
@@ -155,9 +144,13 @@ void setup_vm(void)
 	phys_addr_t kernel_image_end = (phys_addr_t)&__kimage_end;
 	phys_addr_t kernel_image_size = kernel_image_end - kernel_image_start;
 
+
 	uintptr_t pa = kernel_image_start;
 	uintptr_t va = KIMAGE_VADDR;
 	uintptr_t va_end = va + kernel_image_size;
+
+	va_pa_offset = PAGE_OFFSET - pa;
+	BUG_ON((pa % PMD_SIZE) != 0);
 
 	for(; va < va_end; va += PMD_SIZE)
 	{
@@ -165,6 +158,5 @@ void setup_vm(void)
 		/* size = 1g is enough */
 		create_pgd_mapping(early_pg_dir, va, pa + (va - KIMAGE_VADDR), PMD_SIZE, PAGE_KERNEL_EXEC);
 	}
-#endif
 }
 
