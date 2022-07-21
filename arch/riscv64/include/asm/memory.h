@@ -7,8 +7,12 @@
 
 #define VA_BITS (39)
 #define _PAGE_OFFSET(va) (-(UL(1) << (va - 1)))
-#define PAGE_OFFSET (_PAGE_OFFSET(VA_BITS))
-#define KIMAGE_VADDR (PAGE_OFFSET + SZ_1G)
+
+/*riscv mmu bit[64:39] need to same to bit[38]*/
+/* +256G */
+#define PAGE_OFFSET  (0xFFFFFFE000000000)
+/* +0G */
+#define KIMAGE_VADDR (0xFFFFFFC000000000)
 #define FIXADDR_TOP (KIMAGE_VADDR + SZ_1G)
 
 #define FIXADDR_SIZE     PMD_SIZE
