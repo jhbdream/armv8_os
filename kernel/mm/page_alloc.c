@@ -37,7 +37,7 @@ int vmemmap_page_init(unsigned long mem_start, unsigned long mem_end)
 	printk("buddy init mem range: [0x%08x - 0x%08x]\n", mem_start, mem_end);
 	printk("total page count: [x%x]\n", page_count);
 	printk("total page size: [0x%x]\n", size);
-	
+
 	page = memblock_alloc(size, PAGE_SIZE);
 	if(!page)
 	{
@@ -56,11 +56,18 @@ int buddy_init(void)
 {
 	int ret = 0;
 
-	return ret;	
+	return ret;
 }
 
 void free_pages(struct page *page, unsigned int order)
 {
+
+}
+
+/* 将 membloc 空闲内存加入到buddy */
+void memblock_free_pages(unsigned long pfn, unsigned int order)
+{
+	printk("[%s]: pfn 0x%x order %d\n", __func__, pfn, order);
 
 }
 

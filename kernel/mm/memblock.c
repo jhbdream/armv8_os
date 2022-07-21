@@ -543,8 +543,7 @@ void __free_mem_core(phys_addr_t start, phys_addr_t end)
 			order--;
 		}
 		
-		printk("free page order is %d [0x%x - 0x%x]\n", order, start_pfn, start_pfn + (1 << order));
-		
+		memblock_free_pages(start_pfn, order);
 		start_pfn += (1 << order);
 	}
 }

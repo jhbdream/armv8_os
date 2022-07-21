@@ -17,4 +17,6 @@ extern struct page *page_base;
 
 #define MAX_ORDER 11
 
+void memblock_free_pages(unsigned long pfn, unsigned int order);
+
 #endif
