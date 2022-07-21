@@ -2,11 +2,13 @@
 #ifndef __LINUX_BITS_H
 #define __LINUX_BITS_H
 
-#if defined(__aarch64__)
+#include <config.h>
+
+#ifdef CONFIG_64BIT
 #define BITS_PER_LONG 64
 #else
 #define BITS_PER_LONG 32
-#endif
+#endif /* CONFIG_64BIT */
 
 #ifndef BITS_PER_LONG_LONG
 #define BITS_PER_LONG_LONG 64

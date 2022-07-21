@@ -20,6 +20,7 @@
 #include <asm/memory.h>
 #include <ee/pfn.h>
 #include <mm/page_alloc.h>
+#include <bitops.h>
 
 #define INIT_MEMBLOCK_REGIONS           128
 #define INIT_PHYSMEM_REGIONS            4
@@ -528,21 +529,21 @@ void __free_mem_core(phys_addr_t start, phys_addr_t end)
 	unsigned long end_pfn = PFN_DOWN(end);
 
 	printk("pfn range: [0x%x - 0x%x]\n", start, end);
-	
+
 	if(start_pfn >= end_pfn)
 		return;
-	
+
 	while(start_pfn < end_pfn)
 	{
 		/* 内核使用 MAX_ORDER - 1. 没有想清楚是因为什么 */
 		/* 难道是因为这个是指 阶 的个数 (0 - 10) 一共有11个阶 */
-		order = min(MAX_ORDER - 1, __builtin_ctzl(start));
+		order = min(MAX_ORDER - 1, __ffs(start));
 
 		while((start_pfn + (1 << order)) > end_pfn)
 		{
 			order--;
 		}
-		
+
 		memblock_free_pages(start_pfn, order);
 		start_pfn += (1 << order);
 	}
@@ -558,7 +559,7 @@ void free_memory_core(void)
 
 	for_each_free_mem_range(i, &start, &end)
 	{
-		printk("index[%d]: [0x%x - 0x%x]\n", i, start, end);	
+		printk("index[%d]: [0x%x - 0x%x]\n", i, start, end);
 		__free_mem_core(start, end);
 	}
 }

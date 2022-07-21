@@ -5,6 +5,8 @@
 #include <bits.h>
 #include <round.h>
 
+#include <asm-generic/bitops/__ffs.h>
+
 #define BITS_PER_TYPE(type) (sizeof(type) * BITS_PER_BYTE)
 #define BITS_TO_LONGS(nr)	DIV_ROUND_UP(nr, BITS_PER_TYPE(long))
 
