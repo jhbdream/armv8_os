@@ -18,7 +18,7 @@
 
 #define VA_BITS (CONFIG_ARM64_VA_BITS)
 #define _PAGE_OFFSET(va) (-(UL(1) << (va)))
-#define PHYS_OFFSET (memory_strart)
+#define PHYS_OFFSET (memory_start)
 #define PAGE_OFFSET  (0xFFFF800000000000)
 
 /* 早期的恒等映射只做了 1G PUD 映射，所以代码段的虚拟地址与实际加载地址在1G的偏移要相同 */
@@ -40,7 +40,7 @@
 
 #ifndef __ASSEMBLY__
 
-extern s64 memory_strart;
+extern s64 memory_start;
 extern uint64_t kimage_voffset;
 
 #define __lm_to_phys(addr)  (((addr) - PAGE_OFFSET) + PHYS_OFFSET)

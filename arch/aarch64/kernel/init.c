@@ -2,7 +2,7 @@
 #include "init.h"
 #include "asm/memory.h"
 
-s64 memory_strart = -1;
+s64 memory_start = -1;
 
 void arm64_memblock_init(void)
 {
@@ -15,7 +15,7 @@ void arm64_memblock_init(void)
     // add total memory to manager by memblock
     // 0x50000000 - 0x70000000
     memblock_add(base, size);
-    memory_strart = base;
+    memory_start = base;
 
     // TODO: add kernel image reserve
     phys_addr_t kimage_start;
