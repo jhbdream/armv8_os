@@ -1,13 +1,19 @@
 #ifndef __ASM_GENERIC_FIXMAP_H
 #define __ASM_GENERIC_FIXMAP_H
 
+#include <eeos.h>
 #include <pgtable.h>
 #include <asm/memory.h>
+#include <asm/fixmap.h>
 
 #define __fix_to_virt(x)    (FIXADDR_TOP - ((x) << PAGE_SHIFT))
 #define __virt_to_fix(x)    ((FIXADDR_TOP - ((x)&PAGE_MASK)) >> PAGE_SHIFT)
 
 #ifndef __ASSEMBLY__
+
+extern void __set_fixmap(enum fixed_addresses idx,
+                  phys_addr_t phys, pgprot_t flags);
+
 static inline unsigned long fix_to_virt(const unsigned int idx)
 {
     return __fix_to_virt(idx);

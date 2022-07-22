@@ -2,6 +2,7 @@
 #define _ASM_RISCV_FIXMAP_H
 
 #include <asm/pgtable.h>
+#include <ee/sizes.h>
 
 /*
  * Here we define all the compile-time 'special' virtual addresses.
