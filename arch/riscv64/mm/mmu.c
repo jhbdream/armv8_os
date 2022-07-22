@@ -11,6 +11,7 @@
 #include <asm/memory.h>
 #include <asm/fixmap.h>
 #include <asm/tlbflush.h>
+#include <asm/csr.h>
 
 extern char __kimage_start[];
 extern char __kimage_end[];
@@ -259,5 +260,15 @@ void setup_vm_final(void)
 		}
 	}
 
+	/* Clear fixmap PTE and PMD mappings */
+	clear_fixmap(FIX_PTE);
+	clear_fixmap(FIX_PMD);
+
+	asm("jal .");
+	asm("nop");
+
+	/* Move to swapper page table */
+	csr_write(satp, PFN_DOWN(__pa_symbol(swapper_pg_dir)) | (0x08UL << 60));
+	local_flush_tlb_all();
 	while(1);
 }
