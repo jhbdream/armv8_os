@@ -43,5 +43,9 @@ typedef unsigned long       uintptr_t;
 
 typedef u64 phys_addr_t;
 
+struct list_head {
+    struct list_head *next, *prev;
+};
+
 #endif /* #ifndef __ASSEMBLY__*/
 #endif
