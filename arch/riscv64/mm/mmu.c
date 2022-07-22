@@ -15,7 +15,6 @@
 extern char __kimage_start[];
 extern char __kimage_end[];
 
-signed long memory_start;
 
 /* mm page_va - mm phys_pa */
 unsigned long va_pa_offset;
@@ -173,8 +172,6 @@ static uintptr_t best_map_size(phys_addr_t base, phys_addr_t size)
 
 void setup_vm(void)
 {
-
-#if 0
 	/* early map fixmap */
 	create_pgd_mapping(early_pg_dir,
 			FIXADDR_START, (uintptr_t)fixmap_pmd,
@@ -182,8 +179,7 @@ void setup_vm(void)
 
 	create_pmd_mapping(fixmap_pmd,
 			FIXADDR_START, (uintptr_t)fixmap_pte,
-			PMD_SIZE, PAGE_KERNEL_EXEC);
-#endif
+			PMD_SIZE, PAGE_TABLE);
 
 	/**
 	 * create kernel image map in early_pd_dir
