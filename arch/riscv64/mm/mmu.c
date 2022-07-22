@@ -4,6 +4,7 @@
 #include <ee/pgtable.h>
 #include <ee/pfn.h>
 #include <asm-generic/bug.h>
+#include <stdint.h>
 #include <string.h>
 #include <type.h>
 #include <linkage.h>
@@ -224,10 +225,6 @@ void setup_vm_final(void)
 			FIXADDR_START, __pa_symbol(fixmap_pmd),
 			PGDIR_SIZE, PAGE_TABLE);
 
-	create_pmd_mapping(fixmap_pmd,
-			FIXADDR_START, __pa_symbol(fixmap_pte),
-			PMD_SIZE, PAGE_KERNEL_EXEC);
-
 	/* KERNEL */
 	uintptr_t va, pa;
 	uintptr_t kimage_start, kimage_end;
@@ -264,11 +261,13 @@ void setup_vm_final(void)
 	clear_fixmap(FIX_PTE);
 	clear_fixmap(FIX_PMD);
 
-	asm("jal .");
-	asm("nop");
-
 	/* Move to swapper page table */
 	csr_write(satp, PFN_DOWN(__pa_symbol(swapper_pg_dir)) | (0x08UL << 60));
 	local_flush_tlb_all();
-	while(1);
+
+#if 0
+	asm("jal .");
+	asm("nop");
+	uint64_t fix_va = set_fixmap_offset(FIX_EARLYCON_MEM_BASE, 0x10000000);
+#endif
 }
