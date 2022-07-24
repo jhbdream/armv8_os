@@ -165,7 +165,12 @@ int buddy_init(void)
 	return ret;
 }
 
-void free_pages(struct page *page, unsigned int order)
+struct page *alloc_pages(unsigned int order)
+{
+	return NULL;
+}
+
+void __free_pages(struct page *page, unsigned int order)
 {
 	unsigned long pfn;
 	unsigned long buddy_pfn;
@@ -229,11 +234,16 @@ void free_pages(struct page *page, unsigned int order)
 	add_to_free_list(page, order);
 }
 
+void free_pages(unsigned long addr, unsigned int order)
+{
+
+}
+
 /* 将 membloc 空闲内存加入到buddy */
 void memblock_free_pages(unsigned long pfn, unsigned int order)
 {
 	struct page *page = pfn_to_page(pfn);
 
 	printk("%s: pfn start[0x%x]  order[%d]\n", __func__, pfn, order);
-	free_pages(page, order);
+	__free_pages(page, order);
 }
