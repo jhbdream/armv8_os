@@ -43,6 +43,9 @@
 extern s64 memory_start;
 extern uint64_t kimage_voffset;
 
+#define PHYS_PFN_OFFSET (PHYS_OFFSET >> PAGE_SHIFT)
+#define ARCH_PFN_OFFSET     ((unsigned long)PHYS_PFN_OFFSET)
+
 #define __lm_to_phys(addr)  (((addr) - PAGE_OFFSET) + PHYS_OFFSET)
 #define __kimg_to_phys(addr)    ((addr) - kimage_voffset)
 #define __is_lm_address(addr)   (((u64)(addr) >= PAGE_OFFSET))
