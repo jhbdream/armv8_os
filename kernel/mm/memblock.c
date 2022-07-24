@@ -528,7 +528,7 @@ void __free_mem_core(phys_addr_t start, phys_addr_t end)
 	unsigned long start_pfn = PFN_UP(start);
 	unsigned long end_pfn = PFN_DOWN(end);
 
-	printk("pfn range: [0x%x - 0x%x]\n", start, end);
+	printk("pfn range: [0x%x - 0x%x]\n", start_pfn, end_pfn);
 
 	if(start_pfn >= end_pfn)
 		return;

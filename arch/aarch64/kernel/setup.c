@@ -27,6 +27,9 @@ void setup_arch(void)
 	extern int vmemmap_page_init(unsigned long mem_start, unsigned long mem_end);
 	vmemmap_page_init(base, base + size);
 
+	extern int buddy_init(void);
+	buddy_init();
+
 	extern void free_memory_core(void);
 	free_memory_core();
 #if 0
