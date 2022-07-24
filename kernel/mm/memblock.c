@@ -528,8 +528,6 @@ void __free_mem_core(phys_addr_t start, phys_addr_t end)
 	unsigned long start_pfn = PFN_UP(start);
 	unsigned long end_pfn = PFN_DOWN(end);
 
-	printk("pfn range: [0x%x - 0x%x]\n", start_pfn, end_pfn);
-
 	if(start_pfn >= end_pfn)
 		return;
 
@@ -559,7 +557,6 @@ void free_memory_core(void)
 
 	for_each_free_mem_range(i, &start, &end)
 	{
-		printk("index[%d]: [0x%x - 0x%x]\n", i, start, end);
 		__free_mem_core(start, end);
 	}
 }

@@ -232,8 +232,8 @@ void free_pages(struct page *page, unsigned int order)
 /* 将 membloc 空闲内存加入到buddy */
 void memblock_free_pages(unsigned long pfn, unsigned int order)
 {
-	printk("[%s]: pfn 0x%x order %d\n", __func__, pfn, order);
 	struct page *page = pfn_to_page(pfn);
-	printk("page: [0x%016lx]\n", page);
+
+	printk("%s: pfn start[0x%x]  order[%d]\n", __func__, pfn, order);
 	free_pages(page, order);
 }
