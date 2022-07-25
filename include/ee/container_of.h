@@ -1,6 +1,8 @@
 #ifndef _LINUX_CONTAINER_OF_H
 #define _LINUX_CONTAINER_OF_H
 
+#include <stddef.h>
+
 #define typeof_member(T, m) typeof(((T*)0)->m)
 
 /**
