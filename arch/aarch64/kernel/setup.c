@@ -32,6 +32,10 @@ void setup_arch(void)
 
 	extern void free_memory_core(void);
 	free_memory_core();
+
+	extern void buddy_page_test(void);
+	buddy_page_test();
+
 #if 0
  	extern int arm_gicv3_interrupu_init(void *dist_base, void *rdist_base, uint32_t nr_redist_regions);
 	// for qemu hardware address

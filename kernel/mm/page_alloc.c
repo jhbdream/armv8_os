@@ -6,6 +6,7 @@
 #include <mm/page_flag.h>
 #include <ee/pgtable.h>
 #include <round.h>
+#include <stddef.h>
 #include <asm-generic/bug.h>
 #include <list.h>
 
@@ -122,6 +123,12 @@ static inline bool page_is_buddy(struct page *buddy,
     return true;
 }
 
+
+static inline struct page *get_page_from_free_arem(struct free_area *area)
+{
+	return list_first_entry_or_null(&area->free_list, struct page, node);
+}
+
 /* Used for pages not on another list */
 static inline void add_to_free_list(struct page *page,
                     unsigned int order)
@@ -150,6 +157,20 @@ static inline void del_page_from_free_list(struct page *page, unsigned int order
 	zone_get()->free_area[order].nr_free--;
 }
 
+static inline void expand(struct page *page, int low, int high)
+{
+	unsigned long size = (1 << high);
+
+	while(high > low)
+	{
+		high--;
+		size = size >> 1;
+
+		add_to_free_list(&page[size], high);
+		set_buddy_order(&page[size], high);
+	}
+}
+
 int buddy_init(void)
 {
 	int ret = 0;
@@ -165,8 +186,31 @@ int buddy_init(void)
 	return ret;
 }
 
-struct page *alloc_pages(unsigned int order)
+struct page *__alloc_pages(unsigned int order)
 {
+	unsigned int current_order;
+	struct free_area *area;
+	struct page *page;
+
+	for(current_order = order; current_order < MAX_ORDER; ++current_order)
+	{
+		/* 从当前 order 获取page 默认从链表头摘取 */
+		area = &zone_get()->free_area[current_order];
+		page = get_page_from_free_arem(area);
+
+		/* 如果当前链表中不存在页 则需要增加阶 */
+		if(!page)
+		{
+			continue;
+		}
+
+		/* 如果当前 order 存在空闲页 */
+		del_page_from_free_list(page, current_order);
+		expand(page, order, current_order);
+
+		return page;
+	}
+
 	return NULL;
 }
 
@@ -246,4 +290,24 @@ void memblock_free_pages(unsigned long pfn, unsigned int order)
 
 	printk("%s: pfn start[0x%x]  order[%d]\n", __func__, pfn, order);
 	__free_pages(page, order);
+}
+
+void buddy_page_test(void)
+{
+#define CYCLE 64
+#define TEST_ORDER 2
+	int i;
+	void * paddr[CYCLE];
+
+	for(i = 0; i < CYCLE; i++)
+	{
+		paddr[i] = __alloc_pages(TEST_ORDER);
+		printk("[%d] alloc pages 0x%016lx\n", i, paddr[i]);
+	}
+
+	for(i = 0; i < CYCLE; i++)
+	{
+		__free_pages(paddr[i], TEST_ORDER);
+		printk("[%d] free pages 0x%016lx\n", i, paddr[i]);
+	}
 }
