@@ -306,4 +306,19 @@ static inline int list_empty(const struct list_head *head)
          !list_entry_is_head(pos, head, member);            \
          pos = n, n = list_next_entry(n, member))
 
+/**
+ * list_first_entry_or_null - get the first element from a list
+ * @ptr:    the list head to take the element from.
+ * @type:   the type of the struct this is embedded in.
+ * @member: the name of the list_head within the struct.
+ *
+ * Note that if the list is empty, it returns NULL.
+ */
+#define list_first_entry_or_null(ptr, type, member) ({ \
+    struct list_head *head__ = (ptr); \
+    struct list_head *pos__ = (head__->next); \
+    pos__ != head__ ? list_entry(pos__, type, member) : NULL; \
+})
+
+
 #endif
