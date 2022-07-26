@@ -316,4 +316,24 @@ void buddy_page_test(void)
 		free_pages((unsigned long)paddr[i], TEST_ORDER);
 		printk("[%d] free pages 0x%016lx\n", i, paddr[i]);
 	}
+	buddyinfo_dump();
+}
+
+void buddyinfo_dump(void)
+{
+	unsigned int order;
+
+	printk("order: ");
+	for(order = 0; order < MAX_ORDER; order++)
+	{
+		printk("[%4lu] ", order);
+	}
+	printk("\n");
+
+	printk("count: ");
+	for(order = 0; order < MAX_ORDER; order++)
+	{
+		printk("%6lu ", zone_get()->free_area[order].nr_free);
+	}
+	printk("\n");
 }

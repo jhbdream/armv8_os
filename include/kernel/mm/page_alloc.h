@@ -99,5 +99,6 @@ void *alloc_pages(unsigned int order);
  *
  */
 void free_pages(unsigned long addr, unsigned int order);
+void buddyinfo_dump(void);
 
 #endif
