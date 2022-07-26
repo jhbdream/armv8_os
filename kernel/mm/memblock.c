@@ -21,6 +21,7 @@
 #include <ee/pfn.h>
 #include <mm/page_alloc.h>
 #include <bitops.h>
+#include <mm/page_alloc.h>
 
 #define INIT_MEMBLOCK_REGIONS           128
 #define INIT_PHYSMEM_REGIONS            4

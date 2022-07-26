@@ -5,6 +5,7 @@
 #include <asm/pgtable_prot.h>
 #include <mm/memblock.h>
 #include <driver/console.h>
+#include <mm/page_alloc.h>
 
 extern pgd_t __init_pg_dir_start[512];
 
@@ -24,13 +25,8 @@ void setup_arch(void)
     u64 base = 0x40080000;
     u64 size = 0x20000000;
 
-	extern int vmemmap_page_init(unsigned long mem_start, unsigned long mem_end);
 	vmemmap_page_init(base, base + size);
-
-	extern int buddy_init(void);
-	buddy_init();
-
-	extern void free_memory_core(void);
+	buddy_zone_init();
 	free_memory_core();
 
 	extern void buddy_page_test(void);

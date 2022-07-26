@@ -11,7 +11,7 @@
 #include <list.h>
 
 /* use buddy page alloc */
-struct zone _zone;
+static struct zone _zone;
 struct page *page_base = NULL;
 
 static struct zone *zone_get(void)
@@ -171,7 +171,7 @@ static inline void expand(struct page *page, int low, int high)
 	}
 }
 
-int buddy_init(void)
+int buddy_zone_init(void)
 {
 	int ret = 0;
 
@@ -186,7 +186,7 @@ int buddy_init(void)
 	return ret;
 }
 
-struct page *__alloc_pages(unsigned int order)
+static struct page *__alloc_pages(unsigned int order)
 {
 	unsigned int current_order;
 	struct free_area *area;
@@ -214,7 +214,13 @@ struct page *__alloc_pages(unsigned int order)
 	return NULL;
 }
 
-void __free_pages(struct page *page, unsigned int order)
+void *alloc_pages(unsigned int order)
+{
+	struct page *page = __alloc_pages(order);
+	return page_to_virt(page);
+}
+
+static void __free_pages(struct page *page, unsigned int order)
 {
 	unsigned long pfn;
 	unsigned long buddy_pfn;
@@ -280,7 +286,7 @@ void __free_pages(struct page *page, unsigned int order)
 
 void free_pages(unsigned long addr, unsigned int order)
 {
-
+	__free_pages(virt_to_page(addr), order);
 }
 
 /* 将 membloc 空闲内存加入到buddy */
@@ -301,13 +307,13 @@ void buddy_page_test(void)
 
 	for(i = 0; i < CYCLE; i++)
 	{
-		paddr[i] = __alloc_pages(TEST_ORDER);
+		paddr[i] = alloc_pages(TEST_ORDER);
 		printk("[%d] alloc pages 0x%016lx\n", i, paddr[i]);
 	}
 
 	for(i = 0; i < CYCLE; i++)
 	{
-		__free_pages(paddr[i], TEST_ORDER);
+		free_pages((unsigned long)paddr[i], TEST_ORDER);
 		printk("[%d] free pages 0x%016lx\n", i, paddr[i]);
 	}
 }
