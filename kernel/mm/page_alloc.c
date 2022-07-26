@@ -298,12 +298,34 @@ void memblock_free_pages(unsigned long pfn, unsigned int order)
 	__free_pages(page, order);
 }
 
+unsigned long get_free_pages_count(void)
+{
+	unsigned long page_count = 0;
+	for(unsigned int order = 0; order < MAX_ORDER; order++)
+	{
+		page_count += (1 << order) * zone_get()->free_area[order].nr_free;
+	}
+
+	return page_count;
+}
+
+unsigned long get_free_pages_size(void)
+{
+	unsigned long size = 0;
+
+	size = get_free_pages_count() * PAGE_SIZE;
+	return size;
+}
+
 void buddy_page_test(void)
 {
 #define CYCLE 64
 #define TEST_ORDER 2
 	int i;
 	void * paddr[CYCLE];
+
+	printk("free mem: 0x%x 0x%x\n", get_free_pages_count(), get_free_pages_size());
+	buddyinfo_dump();
 
 	for(i = 0; i < CYCLE; i++)
 	{
@@ -316,8 +338,11 @@ void buddy_page_test(void)
 		free_pages((unsigned long)paddr[i], TEST_ORDER);
 		printk("[%d] free pages 0x%016lx\n", i, paddr[i]);
 	}
+
+	printk("free mem: 0x%x 0x%x\n", get_free_pages_count(), get_free_pages_size());
 	buddyinfo_dump();
 }
+
 
 void buddyinfo_dump(void)
 {
