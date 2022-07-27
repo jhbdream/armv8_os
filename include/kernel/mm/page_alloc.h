@@ -89,9 +89,20 @@ int buddy_zone_init(void);
 
 /**
  * alloc pages
- * return virt addr
+ * return page
  */
-void *alloc_pages(unsigned int order);
+struct page * alloc_pages(unsigned int order);
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brife
+ *
+ * @Param order
+ *
+ * @Returns virt address
+ */
+/* ----------------------------------------------------------------------------*/
+void *__get_free_pages(unsigned int order);
 
 /**
  * free pages

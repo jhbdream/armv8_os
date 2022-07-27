@@ -214,9 +214,14 @@ static struct page *__alloc_pages(unsigned int order)
 	return NULL;
 }
 
-void *alloc_pages(unsigned int order)
+struct page * alloc_pages(unsigned int order)
 {
-	struct page *page = __alloc_pages(order);
+	return __alloc_pages(order);
+}
+
+void *__get_free_pages(unsigned int order)
+{
+	struct page *page = alloc_pages(order);
 	return page_to_virt(page);
 }
 
@@ -329,7 +334,7 @@ void buddy_page_test(void)
 
 	for(i = 0; i < CYCLE; i++)
 	{
-		paddr[i] = alloc_pages(TEST_ORDER);
+		paddr[i] = __get_free_pages(TEST_ORDER);
 		printk("[%d] alloc pages 0x%016lx\n", i, paddr[i]);
 	}
 
