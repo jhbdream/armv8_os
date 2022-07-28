@@ -24,6 +24,9 @@
 #define FIXADDR_SIZE     PMD_SIZE
 #define FIXADDR_START    (FIXADDR_TOP - FIXADDR_SIZE)
 
+#define PHYS_PFN_OFFSET (PHYS_OFFSET >> PAGE_SHIFT)
+#define ARCH_PFN_OFFSET     ((unsigned long)PHYS_PFN_OFFSET)
+
 #ifndef __ASSEMBLY__
 
 /* mm page_va - mm phys_pa */

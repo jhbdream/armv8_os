@@ -2,6 +2,8 @@
 #include "printk.h"
 #include <ee/irqflags.h>
 #include <type.h>
+#include <mm/memblock.h>
+#include <mm/page_alloc.h>
 
 void setup_arch(void)
 {
@@ -20,6 +22,18 @@ void setup_arch(void)
 	console_init();
 
 	printk("hello world\n");
+
+    memblock_dump_all();
+
+	u64 base = 0x80000000;
+    u64 size = 0x40000000;
+
+	vmemmap_page_init(base, base + size);
+	buddy_zone_init();
+	free_memory_core();
+
+	extern void buddy_page_test(void);
+	buddy_page_test();
 
 	while(1);
 
