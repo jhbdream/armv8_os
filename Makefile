@@ -32,6 +32,13 @@ ifndef O_LEVEL
 	O_LEVEL = 0
 endif
 
+ifeq ("$(origin GDB)", "command line")
+	DEBUG_USE_GDB = $(GDB)
+endif
+ifndef DEBUG_USE_GDB
+	DEBUG_USE_GDB = 0
+endif
+
 export quiet Q MBUILD_VERBOSE
 
 srctree 	:= .
@@ -96,7 +103,7 @@ EEOSINCLUDE    := \
 		-I$(objtree)/include/ee
 
 CSTD_FLAG := -std=gnu11
-MBUILD_DEFINE := -D__KERNEL__
+MBUILD_DEFINE := -D__KERNEL__ -D__DEBUG_USE_GDB__=$(DEBUG_USE_GDB)
 NOSTDINC_FLAGS += -nostdinc
 
 MBUILD_CFLAGS   := 	-Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
@@ -283,16 +290,24 @@ genconfig:
 	$(Q) python $(srctree)/scripts/Kconfiglib/defconfig.py $(Kconfig) configs/$@
 
 PHONY += qemu
-qemu: $(MBUILD_IMAGE_ELF)
+
+ifeq ("$(DEBUG_USE_GDB)", "1")
+	QEMU_FLAG = -S -s
+else
+	QEMU_FLAG =
+endif
+
+qemu: eeos
 ifeq ("$(SRCARCH)", "aarch64")
-	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 2048 -nographic -serial mon:stdio -kernel $(MBUILD_IMAGE) -S -s
+	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 2048 -nographic -serial mon:stdio -kernel $(MBUILD_IMAGE) $(QEMU_FLAG)
 endif
 ifeq ("$(SRCARCH)", "riscv64")
-	qemu-system-riscv64 -machine virt -smp 1 -m 1024 -nographic -serial mon:stdio -bios $(MBUILD_IMAGE_ELF) -S -s
+	qemu-system-riscv64 -machine virt -smp 1 -m 1024 -nographic -serial mon:stdio -bios $(MBUILD_IMAGE) $(QEMU_FLAG)
 endif
 ifeq ("$(SRCARCH)", "riscv32")
-	qemu-system-riscv32 -machine virt -smp 1 -m 1024 -nographic -serial mon:stdio -bios $(MBUILD_IMAGE_ELF)
+	qemu-system-riscv32 -machine virt -smp 1 -m 1024 -nographic -serial mon:stdio -bios $(MBUILD_IMAGE_ELF) $(QEMU_FLAG)
 endif
+
 PHONY += FORCE
 FORCE:
 

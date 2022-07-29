@@ -113,7 +113,7 @@ enable_mmu:
 	la a0, __early_exception
 	csrw stvec, a0
 
-#if 1
+#if __DEBUG_USE_GDB__ == 1
 	jal .
 	nop
 #endif

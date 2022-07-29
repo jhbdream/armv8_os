@@ -269,7 +269,7 @@ memset_loop:
     adr x8, __stack_top
     mov sp, x8
 
-#if 0
+#if __DEBUG_USE_GDB__ == 1
     b .
     nop
 #endif
