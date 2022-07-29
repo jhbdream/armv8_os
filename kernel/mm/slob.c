@@ -8,6 +8,7 @@
 #include <round.h>
 #include <asm/pgtable.h>
 #include <ee/align.h>
+#include <asm-generic/bug.h>
 
 typedef s16 slobidx_t;
 
@@ -242,6 +243,77 @@ static void *slob_alloc(size_t size, int align, int align_offset)
 	}
 
 	return b;
+}
+
+void slob_free_pages(void *block, int order)
+{
+	free_pages((unsigned long)block, order);
+}
+
+void slob_free(void *block, int size)
+{
+	struct page *slob_page;
+	slob_t *prev, *next, *b = (slob_t *)block;
+	slobidx_t units = SLOB_UNITS(size);
+
+	if(block == NULL)
+		return;
+
+	BUG_ON(!size);
+
+	slob_page = virt_to_page(block);
+
+	if((slob_page->units + units) == SLOB_UNITS(PAGE_SIZE))
+	{
+		slob_free_pages(block, SLOB_ORDER);
+		return;
+	}
+
+	slob_page->units += units;
+
+	/* 要释放的位置在前面 */
+	if(b < (slob_t *)slob_page->freelist)
+	{
+		/* 是否可以合并块 */
+		if(b + units == (slob_t *)slob_page->freelist)
+		{
+			units += slob_units(slob_page->freelist);
+			slob_page->freelist = slob_next(slob_page->freelist);
+		}
+		set_slob(b, units, slob_page->freelist);
+		slob_page->freelist = b;
+	}
+	else
+	{
+		prev = (slob_t *)slob_page->freelist;
+		next = slob_next(prev);
+
+		while(b > next)
+		{
+			prev = next;
+			next = slob_next(prev);
+		}
+
+		if(!slab_last(prev) && (b + units == next))
+		{
+			units += slob_units(next);
+			set_slob(b, units, slob_next(next));
+		}
+		else
+		{
+			set_slob(b, units, next);
+		}
+
+		if(prev + slob_units(prev) == b)
+		{
+			units = slob_units(prev) + slob_units(b);
+			set_slob(prev, units, slob_next(b));
+		}
+		else
+		{
+			set_slob(prev, slob_units(prev), b);
+		}
+	}
 }
 
 void slob_test(void)
