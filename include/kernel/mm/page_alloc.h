@@ -17,10 +17,21 @@ struct page
 {
 	union
 	{
+		/* used for buddy page */
 		struct
 		{
 			struct list_head node;
 			unsigned long private;
+		};
+
+		/* used for slob */
+		struct
+		{
+			struct list_head slob_node;
+			/* 空闲单元个数 */
+			unsigned int units;
+			/* 第一个空闲单元地址  */
+			void *freelist;
 		};
 	};
 
@@ -45,7 +56,7 @@ extern struct page *page_base;
 #define page_to_pfn __page_to_pfn
 
 #define __virt_to_page(x) ({ \
-		unsigned long __idx = (x - PAGE_OFFSET) / PAGE_SIZE; \
+		unsigned long __idx = ((unsigned long)x - PAGE_OFFSET) / PAGE_SIZE; \
 		unsigned long __page = ((unsigned long)page_base + (__idx * (sizeof(struct page)))); \
 		(struct page *)__page; \
 		})
