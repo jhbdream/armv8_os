@@ -35,6 +35,9 @@ void setup_arch(void)
 	extern void buddy_page_test(void);
 	buddy_page_test();
 
+	extern void slob_test(void);
+	slob_test();
+
 	while(1);
 
 	extern void riscv_timer_init(void);

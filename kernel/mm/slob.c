@@ -1,3 +1,4 @@
+#include "printk.h"
 #include "type.h"
 #include <mm/slob.h>
 #include <stddef.h>
@@ -88,7 +89,7 @@ static slob_t *slob_next(slob_t *s)
 	}
 	else
 	{
-		return base + s->units;
+		return base + (-s->units);
 	}
 }
 
@@ -162,7 +163,6 @@ static void *slob_page_alloc(struct page *slob_page, size_t size,
 				{
 					slob_page->freelist = cur + units;
 				}
-				next = cur + units;
 				set_slob(cur + units, avail - units, next);
 			}
 
@@ -244,3 +244,17 @@ static void *slob_alloc(size_t size, int align, int align_offset)
 	return b;
 }
 
+void slob_test(void)
+{
+#define SLOB_TEST_CYCLE 32
+#define SLOB_TEST_SIZE 61
+
+	void *addr[SLOB_TEST_CYCLE];
+	for(int i = 0; i < SLOB_TEST_CYCLE; i++)
+	{
+		addr[i] = slob_alloc(SLOB_TEST_SIZE, 8, 8);
+		printk("[%d] slob alloc addr is: [0x%016lx]\n", i, addr[i]);
+	}
+
+	printk("slob test done!\n");
+}
