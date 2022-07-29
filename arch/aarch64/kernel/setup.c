@@ -20,7 +20,8 @@ void setup_arch(void)
                 0x1000, PAGE_DEVICE, early_pgtable_alloc, 0x00);
 
     paging_init();
-    memblock_dump_all();
+
+	memblock_dump_all();
 
     u64 base = 0x40080000;
     u64 size = 0x20000000;
@@ -31,6 +32,10 @@ void setup_arch(void)
 
 	extern void buddy_page_test(void);
 	buddy_page_test();
+
+	extern void slob_test(void);
+	slob_test();
+
 
 #if 0
  	extern int arm_gicv3_interrupu_init(void *dist_base, void *rdist_base, uint32_t nr_redist_regions);
