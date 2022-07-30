@@ -33,6 +33,12 @@ struct page
 			/* 第一个空闲单元地址  */
 			void *freelist;
 		};
+
+		/* 复合页 如果 order 大于0 在第二个页中保存这些连续页的order */
+		struct
+		{
+			unsigned int compound_order;
+		};
 	};
 
 	unsigned int page_type;
@@ -80,6 +86,7 @@ static inline void set_page_private(struct page *page, unsigned long private)
     page->private = private;
 }
 
+
 /* used for memblock */
 void memblock_free_pages(unsigned long pfn, unsigned int order);
 
@@ -121,6 +128,9 @@ void *__get_free_pages(unsigned int order);
  *
  */
 void free_pages(unsigned long addr, unsigned int order);
+void __free_pages(struct page *page, unsigned int order);
 void buddyinfo_dump(void);
+unsigned int compound_order(struct page *page);
+void set_compound_order(struct page *page, unsigned int order);
 
 #endif

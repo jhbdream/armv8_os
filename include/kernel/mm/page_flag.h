@@ -5,8 +5,10 @@
 #include <mm/page_alloc.h>
 
 #define PAGE_TYPE_BASE  0xf0000000
-#define PG_buddy    0x00000080
-#define PG_table    0x00000200
+#define PG_head     0x00000001
+#define PG_buddy    0x00000010
+#define PG_table    0x00000100
+#define PG_slab     0x00001000
 
 #define PageType(page, flag)                        \
     ((page->page_type & (PAGE_TYPE_BASE | flag)) == PAGE_TYPE_BASE)
@@ -27,5 +29,7 @@ static __always_inline void __ClearPage##uname(struct page *page)   \
 
 PAGE_TYPE_OPS(Buddy, buddy)
 PAGE_TYPE_OPS(Table, table)
+PAGE_TYPE_OPS(Slab, slab)
+PAGE_TYPE_OPS(Head, head)
 
 #endif

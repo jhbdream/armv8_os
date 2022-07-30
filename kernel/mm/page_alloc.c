@@ -186,6 +186,27 @@ int buddy_zone_init(void)
 	return ret;
 }
 
+unsigned int compound_order(struct page *page)
+{
+    if (!PageHead(page))
+        return 0;
+    return page[1].compound_order;
+}
+
+void set_compound_order(struct page *page, unsigned int order)
+{
+    page[1].compound_order = order;
+}
+
+void prep_compound_page(struct page *page, unsigned int order)
+{
+    int i;
+    int nr_pages = 1 << order;
+
+    __SetPageHead(page);
+    set_compound_order(page, order);
+}
+
 static struct page *__alloc_pages(unsigned int order)
 {
 	unsigned int current_order;
@@ -216,7 +237,14 @@ static struct page *__alloc_pages(unsigned int order)
 
 struct page * alloc_pages(unsigned int order)
 {
-	return __alloc_pages(order);
+	struct page *page = __alloc_pages(order);
+
+	if(order)
+	{
+		prep_compound_page(page, order);
+	}
+
+	return page;
 }
 
 void *__get_free_pages(unsigned int order)
@@ -225,11 +253,14 @@ void *__get_free_pages(unsigned int order)
 	return page_to_virt(page);
 }
 
-static void __free_pages(struct page *page, unsigned int order)
+void __free_pages(struct page *page, unsigned int order)
 {
 	unsigned long pfn;
 	unsigned long buddy_pfn;
 	struct page *buddy;
+
+	if(PageHead(page))
+		__ClearPageHead(page);
 
 	pfn = page_to_pfn(page);
 
@@ -291,7 +322,8 @@ static void __free_pages(struct page *page, unsigned int order)
 
 void free_pages(unsigned long addr, unsigned int order)
 {
-	__free_pages(virt_to_page(addr), order);
+	struct page *page = virt_to_page(addr);
+	__free_pages(page, order);
 }
 
 /* 将 membloc 空闲内存加入到buddy */

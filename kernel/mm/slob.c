@@ -1,6 +1,6 @@
+#include "asm/page-def.h"
 #include "printk.h"
 #include "type.h"
-#include <mm/slob.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <list.h>
@@ -9,6 +9,8 @@
 #include <asm/pgtable.h>
 #include <ee/align.h>
 #include <asm-generic/bug.h>
+#include <asm-generic/get_order.h>
+#include <mm/page_flag.h>
 
 typedef s16 slobidx_t;
 
@@ -16,6 +18,9 @@ struct slob_block {
 	slobidx_t units;
 };
 typedef struct slob_block slob_t;
+
+#define SLOB_ALIGN 8
+#define SLOB_ALIGN_OFFSET 8
 
 #define SLOB_ORDER 0
 #define SLOB_BREAK_SMALL 256
@@ -98,7 +103,7 @@ static void *slob_new_page(int order)
 {
 	struct page *page;
 	page = alloc_pages(order);
-
+	__SetPageSlab(page);
 	return page_to_virt(page);
 }
 
@@ -245,12 +250,14 @@ static void *slob_alloc(size_t size, int align, int align_offset)
 	return b;
 }
 
-void slob_free_pages(void *block, int order)
+static void slob_free_pages(void *block, int order)
 {
-	free_pages((unsigned long)block, order);
+	struct page *page = virt_to_page(block);
+	__ClearPageSlab(page);
+	__free_pages(page, order);
 }
 
-void slob_free(void *block, int size)
+static void slob_free(void *block, int size)
 {
 	struct page *slob_page;
 	slob_t *prev, *next, *b = (slob_t *)block;
@@ -313,6 +320,49 @@ void slob_free(void *block, int size)
 		{
 			set_slob(prev, slob_units(prev), b);
 		}
+	}
+}
+
+void *__kmalloc(size_t size)
+{
+	void *m = NULL;
+
+	if(size < PAGE_SIZE - SLOB_ALIGN)
+	{
+		if(!size)
+			return NULL;
+
+		m = slob_alloc(size, SLOB_ALIGN, SLOB_ALIGN_OFFSET);
+		if(!m)
+			return NULL;
+
+		*(unsigned long *)m = size;
+		return m + SLOB_ALIGN_OFFSET;
+	}
+	else
+	{
+		int order = get_order(size);
+		m = slob_new_page(order);
+		return m;
+	}
+}
+
+void __kfree(const void *block)
+{
+	if(!block)
+		return;
+
+	struct page *page = virt_to_page(block);
+
+	if(PageSlab(page))
+	{
+		unsigned long *m = (unsigned long *)(block - SLOB_ALIGN_OFFSET);
+		slob_free(m, *m + SLOB_ALIGN_OFFSET);
+	}
+	else
+	{
+		int order = compound_order(page);
+		__free_pages(page, order);
 	}
 }
 
