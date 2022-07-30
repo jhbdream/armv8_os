@@ -11,6 +11,7 @@
 #include <asm-generic/bug.h>
 #include <asm-generic/get_order.h>
 #include <mm/page_flag.h>
+#include <mm/slab.h>
 
 typedef s16 slobidx_t;
 
@@ -332,7 +333,7 @@ void *__kmalloc(size_t size)
 		if(!size)
 			return NULL;
 
-		m = slob_alloc(size, SLOB_ALIGN, SLOB_ALIGN_OFFSET);
+		m = slob_alloc(size + SLOB_ALIGN_OFFSET, SLOB_ALIGN, SLOB_ALIGN_OFFSET);
 		if(!m)
 			return NULL;
 
@@ -372,10 +373,17 @@ void slob_test(void)
 #define SLOB_TEST_SIZE 61
 
 	void *addr[SLOB_TEST_CYCLE];
-	for(int i = 0; i < SLOB_TEST_CYCLE; i++)
+	int i;
+	for(i = 0; i < SLOB_TEST_CYCLE; i++)
 	{
-		addr[i] = slob_alloc(SLOB_TEST_SIZE, 8, 8);
-		printk("[%d] slob alloc addr is: [0x%016lx]\n", i, addr[i]);
+		addr[i] = kmalloc(i);
+		printk("[%d] kmalloc addr: [0x%016lx]\n", i, addr[i]);
+	}
+
+	for(i = 0; i < SLOB_TEST_CYCLE; i++)
+	{
+		kfree(addr[i]);
+		printk("[%d] kfree addr: [0x%016lx]\n", i, addr[i]);
 	}
 
 	printk("slob test done!\n");

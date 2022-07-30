@@ -4,8 +4,8 @@
 #include <type.h>
 #include <compiler_types.h>
 
-void *__kmalloc(size_t size);
-void __kfree(const void *block);
+extern void *__kmalloc(size_t size);
+extern void __kfree(const void *block);
 
 static __always_inline void *kmalloc(size_t size)
 {
