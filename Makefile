@@ -41,16 +41,21 @@ endif
 
 export quiet Q MBUILD_VERBOSE
 
-srctree 	:= .
-objtree		:= .
-src		:= $(srctree)
-obj		:= $(objtree)
+srctree 	:= $(CURDIR)
+objtree		:= $(CURDIR)
+src			:= $(srctree)
+obj			:= $(objtree)
 
-export srctree objtree
+VPATH		:= $(srctree)
+
+export srctree objtree VPATH
 
 version_h := include/config/version.h
 
 clean-targets := %clean
+
+MCONFIG_CONFIG  ?= .config
+export MCONFIG_CONFIG
 
 -include .config
 include scripts/config.mk
@@ -59,49 +64,49 @@ KERNELVERSION = $(VERSION)$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(S
 export VERSION PATCHLEVEL SUBLEVEL KERNELVERSION
 
 ifeq ($(CONFIG_ARCH_AARCH64), y)
-	ARCH		= aarch64
+	ARCH			= aarch64
 	CROSS_COMPILE 	= aarch64-linux-gnu-
 else ifeq ($(CONFIG_ARCH_RISCV64), y)
-	ARCH		= riscv64
+	ARCH			= riscv64
 	CROSS_COMPILE 	= riscv64-unknown-elf-
 else ifeq ($(CONFIG_ARCH_RISCV32), y)
-	ARCH		= riscv32
+	ARCH			= riscv32
 	CROSS_COMPILE 	= riscv32-unknown-elf-
+else
+	ARCH			= aarch64
+	CROSS_COMPILE 	= aarch64-linux-gnu-
 endif
 
 SRCARCH 	:= $(ARCH)
 
-MCONFIG_CONFIG	?= .config
-export MCONFIG_CONFIG
-
 # Make variables (CC, etc...)
-AS		= $(CROSS_COMPILE)as
-LD		= $(CROSS_COMPILE)ld
-CC		= $(CROSS_COMPILE)gcc
-CPP		= $(CC) -E
-AR		= $(CROSS_COMPILE)ar
-NM		= $(CROSS_COMPILE)nm
+AS			= $(CROSS_COMPILE)as
+LD			= $(CROSS_COMPILE)ld
+CC			= $(CROSS_COMPILE)gcc
+CPP			= $(CC) -E
+AR			= $(CROSS_COMPILE)ar
+NM			= $(CROSS_COMPILE)nm
 STRIP		= $(CROSS_COMPILE)strip
 OBJCOPY		= $(CROSS_COMPILE)objcopy
 OBJDUMP		= $(CROSS_COMPILE)objdump
-LEX		= flex
+LEX			= flex
 YACC		= bison
-AWK		= awk
+AWK			= awk
 PERL		= perl
 PYTHON		= python
 PYTHON2		= python2
 PYTHON3		= python3
 CHECK		= sparse
-DTC		= dtc
+DTC			= dtc
 
 EEOSINCLUDE    := \
 		-I$(srctree)/arch/$(SRCARCH)/include \
-		-I$(objtree)/include	\
-		-I$(objtree)/include/kernel	\
-		-I$(objtree)/include/config \
-		-I$(objtree)/include/libc	\
-		-I$(objtree)/lib/libfdt	\
-		-I$(objtree)/include/ee
+		-I$(srctree)/include	\
+		-I$(srctree)/include/kernel	\
+		-I$(srctree)/include/config \
+		-I$(srctree)/include/libc	\
+		-I$(srctree)/lib/libfdt	\
+		-I$(srctree)/include/ee
 
 CSTD_FLAG := -std=gnu11
 MBUILD_DEFINE := -D__KERNEL__ -D__DEBUG_USE_GDB__=$(DEBUG_USE_GDB)
