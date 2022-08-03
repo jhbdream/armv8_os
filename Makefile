@@ -100,6 +100,7 @@ EEOSINCLUDE    := \
 		-I$(objtree)/include/kernel	\
 		-I$(objtree)/include/config \
 		-I$(objtree)/include/libc	\
+		-I$(objtree)/lib/libfdt	\
 		-I$(objtree)/include/ee
 
 CSTD_FLAG := -std=gnu11
