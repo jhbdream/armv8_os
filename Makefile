@@ -190,8 +190,10 @@ $(clean-dirs):
 	$(Q) $(MAKE) $(clean)=$(patsubst _clean_%,%,$@)
 
 eeos: $(eeos-deps) scripts/generate_allsymbols.py
+	$(Q) echo "  OBJCOPY arch/$(ARCH)/dts/riscv_qemu.dtb"
+	$(Q) $(OBJCOPY) -I binary -O elf64-littleriscv arch/$(ARCH)/dts/riscv_qemu.dtb .tmp.dtb
 	$(Q) echo "  LD      .tmp.eeos.elf"
-	$(Q) $(LD) $(eeos_LDFLAGS) -o .tmp.eeos.elf $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS)
+	$(Q) $(LD) $(eeos_LDFLAGS) -o .tmp.eeos.elf $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS) .tmp.dtb
 	$(Q) echo "  NM      .tmp.eeos.symbols"
 	$(Q) $(NM) -n .tmp.eeos.elf > .tmp.eeos.symbols
 	$(Q) echo "  PYTHON  allsymbols.S"
@@ -199,7 +201,7 @@ eeos: $(eeos-deps) scripts/generate_allsymbols.py
 	$(Q) echo "  CC      $(MBUILD_IMAGE_SYMBOLS)"
 	$(Q) $(CC) $(MBUILD_AFLAGS) $(MBUILD_CFLAGS) $(ARCH_CFLAGS) -c allsymbols.S -o $(MBUILD_IMAGE_SYMBOLS)
 	$(Q) echo "  LD      $(MBUILD_IMAGE_ELF)"
-	$(Q) $(LD) $(eeos_LDFLAGS) -o $(MBUILD_IMAGE_ELF) $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS) $(MBUILD_IMAGE_SYMBOLS)
+	$(Q) $(LD) $(eeos_LDFLAGS) -o $(MBUILD_IMAGE_ELF) $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS) $(MBUILD_IMAGE_SYMBOLS) .tmp.dtb
 	$(Q) echo "  OBJCOPY $(MBUILD_IMAGE)"
 	$(Q) $(OBJCOPY) -O binary $(MBUILD_IMAGE_ELF) $(MBUILD_IMAGE)
 	$(Q) echo "  OBJDUMP eeos.dis"

@@ -11,6 +11,9 @@ void start_kernel(void)
 {
    setup_arch();
 
+   extern void fdt_test(void);
+   fdt_test();
+
    printk("hello kernel!\n");
 
    for(;;);

@@ -68,7 +68,7 @@ MBUILD_AFLAGS += $(ARCH_AFLAGS) $(EXTRA_AFLAGS)
 
 builtin-target 	:= $(obj)/built-in.o
 
-__build: $(subdir-y) $(builtin-target) $(lds-y) $(real-head-y)
+__build: $(subdir-y) $(builtin-target) $(lds-y) $(real-head-y) $(dtb-y)
 	@:
 
 ifdef builtin-target

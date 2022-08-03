@@ -38,8 +38,8 @@ void setup_arch(void)
 	extern void slob_test(void);
 	slob_test();
 
-	while(1);
-
+#if 0
 	extern void riscv_timer_init(void);
 	riscv_timer_init();
+#endif
 }
