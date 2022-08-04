@@ -2,5 +2,6 @@ menu "Device Drivers"
 
 source "driver/interrupt/Kconfig"
 source "driver/console/Kconfig"
+source "driver/of/Kconfig"
 
 endmenu

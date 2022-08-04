@@ -1,0 +1,6 @@
+menu "Of flat tree"
+
+config FLAT_TEST
+    bool "ENABLE OF FLAT"
+
+endmenu

@@ -1,1 +1,1 @@
-obj-y += fdt.o
+obj-$(CONFIG_FLAT_TEST) += fdt.o

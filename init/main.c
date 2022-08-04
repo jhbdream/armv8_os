@@ -11,8 +11,10 @@ void start_kernel(void)
 {
    setup_arch();
 
+#ifdef CONFIG_FLAT_TEST
    extern void fdt_test(void);
    fdt_test();
+#endif
 
    printk("hello kernel!\n");
 
