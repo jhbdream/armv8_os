@@ -83,5 +83,7 @@ include/config/config.h
 
 *.pyc
 
+*.dtb
+
 .cache/
 compile_commands.json
