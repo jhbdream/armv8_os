@@ -1,11 +1,16 @@
 #include "printk.h"
 #include <libfdt.h>
+#include <pgtable.h>
+#include <mm/memblock.h>
+#include <ee/init.h>
 
 extern char DTB_START_SYMBOL[];
 #define _FDT_INIT_BLOB_ADDR (DTB_START_SYMBOL)
 #define FDT_ROOT_BLOB (void *)_FDT_INIT_BLOB_ADDR
 
 void *initial_boot_params = FDT_ROOT_BLOB;
+int dt_root_addr_cells = 2;
+int dt_root_size_cells = 2;
 
 /*
  * of_get_flat_dt_root - find the root node in the flat blob
@@ -91,7 +96,40 @@ const char * of_flat_dt_get_machine_name(void)
 	return name;
 }
 
-#if 0
+static u32 of_be32_to_le32(u32 val)
+{
+	return	((((__u32)(val) & (__u32)0x000000ffUL) << 24) |		\
+			 (((__u32)(val) & (__u32)0x0000ff00UL) <<  8) |		\
+			(((__u32)(val) & (__u32)0x00ff0000UL) >>  8) |		\
+			(((__u32)(val) & (__u32)0xff000000UL) >> 24));
+}
+
+/*
+ * OF address retrieval & translation
+ */
+
+/* Helper to read a big number; size is in cells (not bytes) */
+static inline u64 of_read_number(const __be32 *cell, int size)
+{
+	u64 r = 0;
+	for (; size--; cell++)
+		r = (r << 32) | of_be32_to_le32(*cell);
+	return r;
+}
+
+u64 dt_mem_next_cell(int s, const __be32 **cellp)
+{
+	const __be32 *p = *cellp;
+
+	*cellp = p + s;
+	return of_read_number(p, s);
+}
+
+void early_init_dt_add_memory_arch(u64 base, u64 size)
+{
+    memblock_add(base, size);
+}
+
 /*
  * early_init_dt_scan_memory - Look for and parse memory nodes
  */
@@ -104,10 +142,10 @@ int early_init_dt_scan_memory(unsigned long node, const char *uname,
 			reg = <0x0 0x80000000 0x2 0x00000000>;
 		};
 	*/
+
 	const char *type = of_get_flat_dt_prop(node, "device_type", NULL);
 	const __be32 *reg, *endp;
 	int l;
-	bool hotpluggable;
 
 	/* We are scanning "memory" nodes only */
 	if (type == NULL || strcmp(type, "memory") != 0)
@@ -117,9 +155,9 @@ int early_init_dt_scan_memory(unsigned long node, const char *uname,
 	if (reg == NULL)
 		return 0;
 
-	endp = reg + (l / sizeof(__be32));
+	endp = reg + (l / sizeof(uint32_t));
 
-	pr_debug("memory scan node %s, reg size %d,\n", uname, l);
+	printk("memory scan node %s, reg size %d,\n", uname, l);
 
 	while ((endp - reg) >= (dt_root_addr_cells + dt_root_size_cells)) {
 		u64 base, size;
@@ -129,17 +167,16 @@ int early_init_dt_scan_memory(unsigned long node, const char *uname,
 
 		if (size == 0)
 			continue;
-		printk(" - %llx, %llx\n", base, size);
 
-		//early_init_dt_add_memory_arch(base, size);
+		printk("0x%llx -- 0x%llx\n", base, base + size);
+
+		early_init_dt_add_memory_arch(base, size);
 	}
 
 	return 0;
 }
-#endif
 
 int of_fdt_scan(int (*it)(unsigned long node, const char *uname,
-
 					int depth, void *data),
 					void *data)
 {
@@ -197,4 +234,5 @@ void fdt_test(void)
 {
 	printk("FDT_ROOT_BLOB: 0x%016lx\n", FDT_ROOT_BLOB);
 	of_fdt_scan(fdt_iterator, NULL);
+	of_fdt_scan(early_init_dt_scan_memory, NULL);
 }

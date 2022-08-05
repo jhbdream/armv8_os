@@ -9,6 +9,7 @@
 
 void start_kernel(void)
 {
+
    setup_arch();
 
 #ifdef CONFIG_FLAT_TEST
