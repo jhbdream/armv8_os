@@ -99,6 +99,7 @@ PYTHON2		= python2
 PYTHON3		= python3
 CHECK		= sparse
 DTC			= dtc
+CAT			= cat
 
 EEOSINCLUDE    := \
 		-I$(srctree)/arch/$(SRCARCH)/include \
@@ -150,13 +151,10 @@ export ARCH_CFLAGS ARCH_AFLAGS ARCH_LDFLAGS
 
 include arch/$(SRCARCH)/Makefile
 
-MBUILD_IMAGE 	:= eeos.bin
-MBUILD_IMAGE_ELF := eeos.elf
-MBUILD_IMAGE_SYMBOLS := allsymbols.o
-
-#DEVICE_TREE_FILE_SOURCE := $(wordlist ", ", $(CONFIG_DTS_FILE))
-#DEVICE_TREE_FILE_SOURCE := $(wildcard *dts $(CONFIG_DTS_FILE))
-#DEVICE_TREE_FILE_DTB := $(patsubst %.dts,%.dtb, $(DEVICE_TREE_FILE_SOURCE))
+MBUILD_IMAGE 		:= eeos.bin
+MBUILD_IMAGE_DTB	:= eeos_dtb.bin
+MBUILD_IMAGE_ELF 	:= eeos.elf
+MBUILD_IMAGE_SYMBOLS	:= allsymbols.o
 
 DEVICE_TREE ?= $(CONFIG_DEFAULT_DEVICE_TREE:"%"=%)
 ifeq ($(DEVICE_TREE),)
@@ -168,6 +166,11 @@ DTB := $(EXT_DTB)
 else
 DTB := arch/$(ARCH)/dts/$(DEVICE_TREE).dtb
 endif       
+
+DTB_SECTION := $(subst /,_,$(DTB))
+DTB_SECTION := $(DTB_SECTION:%.dtb=%)
+DTB_SECTION := $(addprefix _binary_, $(DTB_SECTION)) 
+DTB_SECTION := $(addsuffix _dtb_start, $(DTB_SECTION)) 
 
 all: include/config/config.h $(version_h) eeos
 
@@ -217,7 +220,7 @@ eeos: $(eeos-deps) scripts/generate_allsymbols.py
 	$(Q) echo "  LD      $(MBUILD_IMAGE_ELF)"
 	$(Q) $(LD) $(eeos_LDFLAGS) -o $(MBUILD_IMAGE_ELF) $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS) $(MBUILD_IMAGE_SYMBOLS) .tmp.dtb.o
 	$(Q) echo "  OBJCOPY $(MBUILD_IMAGE)"
-	$(Q) $(OBJCOPY) -O binary $(MBUILD_IMAGE_ELF) $(MBUILD_IMAGE)
+	$(Q) $(OBJCOPY) -O binary  $(MBUILD_IMAGE_ELF) $(MBUILD_IMAGE)
 	$(Q) echo "  OBJDUMP eeos.dis"
 	$(Q) $(OBJDUMP) $(MBUILD_IMAGE_ELF) -D > eeos.dis
 
@@ -243,6 +246,11 @@ define filechk_version.h
 	echo '#define EEOS_VERSION_STR "v$(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION) $(NAME)"' >> $@;)
 endef
 
+define device_tree_config.h
+	(echo '#define DTB_START_SYMBOL $(DTB_SECTION)' >> $@;)
+endef
+
+
 PHONY += scriptconfig iscriptconfig menuconfig guiconfig dumpvarsconfig
 
 PYTHONCMD ?= python3
@@ -263,6 +271,7 @@ PHONY += include/config/config.h
 include/config/config.h: .config
 	$(Q) mkdir -p include/config
 	$(Q) $(kpython) $(srctree)/scripts/Kconfiglib/genconfig.py --header-path=include/config/config.h
+	$(Q) $(call device_tree_config.h)
 
 clean: $(clean-dirs)
 	$(Q) echo "  CLEAN   all .o .*.d *.dtb built-in.o"
@@ -330,5 +339,5 @@ PHONY += FORCE
 FORCE:
 
 # Declare the contents of the PHONY variable as phony.  We keep that
-# information in a variable so we can use it in if_changed and friends.
+# information in a variable so we can use it in if_changed and friend)
 .PHONY: $(PHONY)

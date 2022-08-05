@@ -1,8 +1,8 @@
 #include "printk.h"
 #include <libfdt.h>
 
-extern unsigned char _binary_arch_riscv64_dts_riscv_qemu_dtb_start[];
-#define _FDT_INIT_BLOB_ADDR (_binary_arch_riscv64_dts_riscv_qemu_dtb_start)
+extern char DTB_START_SYMBOL[];
+#define _FDT_INIT_BLOB_ADDR (DTB_START_SYMBOL)
 #define FDT_ROOT_BLOB (void *)_FDT_INIT_BLOB_ADDR
 
 void *initial_boot_params = FDT_ROOT_BLOB;
@@ -195,5 +195,6 @@ int fdt_iterator(unsigned long node, const char *uname,
 
 void fdt_test(void)
 {
+	printk("FDT_ROOT_BLOB: 0x%016lx\n", FDT_ROOT_BLOB);
 	of_fdt_scan(fdt_iterator, NULL);
 }
