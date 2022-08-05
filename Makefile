@@ -79,6 +79,7 @@ endif
 
 SRCARCH 	:= $(ARCH)
 
+
 # Make variables (CC, etc...)
 AS			= $(CROSS_COMPILE)as
 LD			= $(CROSS_COMPILE)ld
@@ -153,6 +154,21 @@ MBUILD_IMAGE 	:= eeos.bin
 MBUILD_IMAGE_ELF := eeos.elf
 MBUILD_IMAGE_SYMBOLS := allsymbols.o
 
+#DEVICE_TREE_FILE_SOURCE := $(wordlist ", ", $(CONFIG_DTS_FILE))
+#DEVICE_TREE_FILE_SOURCE := $(wildcard *dts $(CONFIG_DTS_FILE))
+#DEVICE_TREE_FILE_DTB := $(patsubst %.dts,%.dtb, $(DEVICE_TREE_FILE_SOURCE))
+
+DEVICE_TREE ?= $(CONFIG_DEFAULT_DEVICE_TREE:"%"=%)
+ifeq ($(DEVICE_TREE),)
+DEVICE_TREE := unset
+endif
+
+ifneq ($(EXT_DTB),)
+DTB := $(EXT_DTB)
+else
+DTB := arch/$(ARCH)/dts/$(DEVICE_TREE).dtb
+endif       
+
 all: include/config/config.h $(version_h) eeos
 
 eeos-dirs	:= $(patsubst %/,%,$(filter %/, $(core-y) $(external-y) $(drivers-y) $(libs-y)))
@@ -170,9 +186,9 @@ libs-y1		:= $(patsubst %/, %/lib.a, $(libs-y))
 libs-y2		:= $(patsubst %/, %/built-in.o, $(filter-out %.o, $(libs-y)))
 
 # Externally visible symbols (used by link-eeos.sh)
-export MBUILD_EEOS_MAIN := $(core-y) $(libs-y2) $(drivers-y) $(external-y)
-export MBUILD_EEOS_LIBS := $(libs-y1)
-export MBUILD_LDS          := $(objtree)/arch/$(SRCARCH)/ld_script/kernel.lds
+export MBUILD_EEOS_MAIN	:= $(core-y) $(libs-y2) $(drivers-y) $(external-y)
+export MBUILD_EEOS_LIBS	:= $(libs-y1)
+export MBUILD_LDS		:= $(objtree)/arch/$(SRCARCH)/ld_script/kernel.lds
 
 eeos-deps := $(MBUILD_LDS) $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS)
 
@@ -188,10 +204,10 @@ $(clean-dirs):
 	$(Q) $(MAKE) $(clean)=$(patsubst _clean_%,%,$@)
 
 eeos: $(eeos-deps) scripts/generate_allsymbols.py
-# $(Q) echo "  OBJCOPY arch/$(ARCH)/dts/riscv_qemu.dtb"
-# $(Q) $(OBJCOPY) -I binary -O elf64-littleriscv arch/$(ARCH)/dts/riscv_qemu.dtb .tmp.dtb
+	$(Q) echo "  OBJCOPY $(DTB)"
+	$(Q) $(OBJCOPY) -I binary -O elf64-littleriscv $(DTB) .tmp.dtb.o
 	$(Q) echo "  LD      .tmp.eeos.elf"
-	$(Q) $(LD) $(eeos_LDFLAGS) -o .tmp.eeos.elf $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS)
+	$(Q) $(LD) $(eeos_LDFLAGS) -o .tmp.eeos.elf $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS) .tmp.dtb.o
 	$(Q) echo "  NM      .tmp.eeos.symbols"
 	$(Q) $(NM) -n .tmp.eeos.elf > .tmp.eeos.symbols
 	$(Q) echo "  PYTHON  allsymbols.S"
@@ -199,7 +215,7 @@ eeos: $(eeos-deps) scripts/generate_allsymbols.py
 	$(Q) echo "  CC      $(MBUILD_IMAGE_SYMBOLS)"
 	$(Q) $(CC) $(MBUILD_AFLAGS) $(MBUILD_CFLAGS) $(ARCH_CFLAGS) -c allsymbols.S -o $(MBUILD_IMAGE_SYMBOLS)
 	$(Q) echo "  LD      $(MBUILD_IMAGE_ELF)"
-	$(Q) $(LD) $(eeos_LDFLAGS) -o $(MBUILD_IMAGE_ELF) $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS) $(MBUILD_IMAGE_SYMBOLS)
+	$(Q) $(LD) $(eeos_LDFLAGS) -o $(MBUILD_IMAGE_ELF) $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS) $(MBUILD_IMAGE_SYMBOLS) .tmp.dtb.o
 	$(Q) echo "  OBJCOPY $(MBUILD_IMAGE)"
 	$(Q) $(OBJCOPY) -O binary $(MBUILD_IMAGE_ELF) $(MBUILD_IMAGE)
 	$(Q) echo "  OBJDUMP eeos.dis"
@@ -250,8 +266,8 @@ include/config/config.h: .config
 
 clean: $(clean-dirs)
 	$(Q) echo "  CLEAN   all .o .*.d *.dtb built-in.o"
-	$(Q) echo "  CLEAN   allsymbols.o allsymbols.S linkmap.txt eeos.s .tmp.eeos.elf .tmp.eeos.symbols eeos.bin eeos.elf eeos.dis"
-	$(Q) rm -f allsymbols.o allsymbols.S linkmap.txt eeos.s .tmp.eeos.elf .tmp.eeos.symbols eeos.bin eeos.elf eeos.dis
+	$(Q) echo "  CLEAN   allsymbols.o allsymbols.S linkmap.txt eeos.s .tmp.eeos.elf .tmp.eeos.symbols eeos.bin eeos.elf eeos.dis .tmp.dtb.o"
+	$(Q) rm -f allsymbols.o allsymbols.S linkmap.txt eeos.s .tmp.eeos.elf .tmp.eeos.symbols eeos.bin eeos.elf eeos.dis .tmp.dtb.o
 
 distclean: clean
 	$(Q) echo "  CLEAN   .config include/config"
@@ -300,7 +316,8 @@ endif
 
 qemu: eeos
 ifeq ("$(SRCARCH)", "aarch64")
-	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 2048 -nographic -serial mon:stdio -kernel $(MBUILD_IMAGE) $(QEMU_FLAG)
+	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 2048 -nographic \
+		-serial mon:stdio -kernel $(MBUILD_IMAGE) $(QEMU_FLAG)
 endif
 ifeq ("$(SRCARCH)", "riscv64")
 	qemu-system-riscv64 -machine virt -smp 1 -m 1024 -nographic -serial mon:stdio -bios $(MBUILD_IMAGE) $(QEMU_FLAG)

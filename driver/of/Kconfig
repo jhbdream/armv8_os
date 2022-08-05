@@ -1,6 +1,11 @@
-menu "Of flat tree"
+menu "Device Tree"
 
 config FLAT_TEST
-    bool "ENABLE OF FLAT"
+    bool "Enable of flat test"
+
+config DEFAULT_DEVICE_TREE 
+    depends on FLAT_TEST
+    string "device tree file(arch/xxx/dts/xxx)"
+    default "riscv_qemu"
 
 endmenu
