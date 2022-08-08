@@ -66,15 +66,14 @@ export VERSION PATCHLEVEL SUBLEVEL KERNELVERSION
 ifeq ($(CONFIG_ARCH_AARCH64), y)
 	ARCH			= aarch64
 	CROSS_COMPILE 	= aarch64-linux-gnu-
+	BFD_NAME		= elf64-littleaarch64
 else ifeq ($(CONFIG_ARCH_RISCV64), y)
 	ARCH			= riscv64
 	CROSS_COMPILE 	= riscv64-unknown-elf-
+	BFD_NAME		= elf64-littleriscv
 else ifeq ($(CONFIG_ARCH_RISCV32), y)
 	ARCH			= riscv32
 	CROSS_COMPILE 	= riscv32-unknown-elf-
-else
-	ARCH			= aarch64
-	CROSS_COMPILE 	= aarch64-linux-gnu-
 endif
 
 SRCARCH 	:= $(ARCH)
@@ -208,7 +207,7 @@ $(clean-dirs):
 
 eeos: $(eeos-deps) scripts/generate_allsymbols.py
 	$(Q) echo "  OBJCOPY $(DTB)"
-	$(Q) $(OBJCOPY) -I binary -O elf64-littleriscv $(DTB) .tmp.dtb.o
+	$(Q) $(OBJCOPY) -I binary -O $(BFD_NAME) $(DTB) .tmp.dtb.o
 	$(Q) echo "  LD      .tmp.eeos.elf"
 	$(Q) $(LD) $(eeos_LDFLAGS) -o .tmp.eeos.elf $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS) .tmp.dtb.o
 	$(Q) echo "  NM      .tmp.eeos.symbols"
