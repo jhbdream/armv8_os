@@ -463,6 +463,19 @@ void __next_mem_range_rev(u64 *idx,
     *idx = ULLONG_MAX;
 }
 
+/* lowest address */
+phys_addr_t memblock_start_of_DRAM(void)
+{
+	return memblock.memory.regions[0].base;
+}
+
+phys_addr_t memblock_end_of_DRAM(void)
+{
+	int idx = memblock.memory.cnt - 1;
+
+	return (memblock.memory.regions[idx].base + memblock.memory.regions[idx].size);
+}
+
 static phys_addr_t memblock_find(phys_addr_t size, phys_addr_t align)
 {
     phys_addr_t this_start, this_end, cand;

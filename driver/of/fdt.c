@@ -127,7 +127,7 @@ u64 dt_mem_next_cell(int s, const __be32 **cellp)
 
 void early_init_dt_add_memory_arch(u64 base, u64 size)
 {
-    memblock_add(base, size);
+	memblock_add(base, size);
 }
 
 /*
@@ -157,7 +157,7 @@ int early_init_dt_scan_memory(unsigned long node, const char *uname,
 
 	endp = reg + (l / sizeof(uint32_t));
 
-	printk("memory scan node %s, reg size %d,\n", uname, l);
+	//printk("memory scan node %s, reg size %d,\n", uname, l);
 
 	while ((endp - reg) >= (dt_root_addr_cells + dt_root_size_cells)) {
 		u64 base, size;
@@ -168,7 +168,7 @@ int early_init_dt_scan_memory(unsigned long node, const char *uname,
 		if (size == 0)
 			continue;
 
-		printk("0x%llx -- 0x%llx\n", base, base + size);
+		//printk("0x%llx -- 0x%llx\n", base, base + size);
 
 		early_init_dt_add_memory_arch(base, size);
 	}
@@ -230,9 +230,10 @@ int fdt_iterator(unsigned long node, const char *uname,
 	return 0;
 }
 
+
+
 void fdt_test(void)
 {
 	printk("FDT_ROOT_BLOB: 0x%016lx\n", FDT_ROOT_BLOB);
 	of_fdt_scan(fdt_iterator, NULL);
-	of_fdt_scan(early_init_dt_scan_memory, NULL);
 }

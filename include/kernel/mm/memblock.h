@@ -1,7 +1,5 @@
 #ifndef _LINUX_MEMBLOCK_H
-#define _LINUX_MEMBLOCK_H
-
-#include <type.h>
+#define _LINUX_MEMBLOCK_H #include <type.h>
 #include <limits.h>
 #include <stddef.h>
 
@@ -48,6 +46,9 @@ int memblock_phys_free(phys_addr_t base, phys_addr_t size);
 void memblock_free(void *ptr, size_t size);
 void memblock_dump_all(void);
 void free_memory_core(void);
+
+phys_addr_t memblock_start_of_DRAM(void);
+phys_addr_t memblock_end_of_DRAM(void);
 
 #define __for_each_mem_range(i, type_a, type_b, p_start, p_end) \
     for (i = (u64)0, __next_mem_range(&i, type_a, type_b, p_start, p_end); \
