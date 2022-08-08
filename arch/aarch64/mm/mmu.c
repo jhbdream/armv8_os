@@ -270,12 +270,8 @@ static void map_mem(pgd_t *pgdp)
     u64 i;
     phys_addr_t start, end;
 
-
     for_each_mem_range(i, &start, &end)
     {
-        printk("start: [0x%x]\n", start);
-        printk("end: [0x%x]\n", end);
-
         if(start >= end)
             break;
 
@@ -287,10 +283,6 @@ void paging_init(void)
 {
     map_kernel(swapper_pg_dir);
     map_mem(swapper_pg_dir);
-
     create_pgd_mapping(swapper_pg_dir, 0x09000000, 0xFFFF100000000000, 0x1000, PAGE_DEVICE, early_pgtable_alloc, 0);
-
     cpu_replace_ttbr1(swapper_pg_dir);
-
-    printk("hello new world page!\n");
 }
