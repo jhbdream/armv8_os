@@ -5,3 +5,4 @@ ARCH_LDFLAGS +=
 core-y += arch/aarch64/kernel/
 core-y += arch/aarch64/mm/
 core-y += arch/aarch64/ld_script/
+core-y += arch/aarch64/dts/

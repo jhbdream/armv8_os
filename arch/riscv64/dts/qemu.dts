@@ -1,0 +1,30 @@
+/dts-v1/;
+
+/{
+	#address-cells = <2>;
+	#size-cells = <2>;
+
+	compatible = "riscv qemu";
+	model = "RISCV RV64";
+
+	cpu {
+
+		cpu0 {
+
+
+		};
+		
+		cpu1 {
+
+		};
+
+	};
+
+
+	memory {
+		device_type = "memory";
+		reg = <0x00000000 0x80000000 0x00000000 0x40000000>;
+	};
+
+};
+

@@ -6,6 +6,6 @@ config FLAT_TEST
 config DEFAULT_DEVICE_TREE 
     depends on FLAT_TEST
     string "device tree file(arch/xxx/dts/xxx)"
-    default "riscv_qemu"
+    default "qemu"
 
 endmenu
