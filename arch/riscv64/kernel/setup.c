@@ -33,26 +33,6 @@ void setup_arch(void)
 	local_irq_enable();
 #endif
 
-	console_init();
-
-	printk("hello world\n");
-
-	memblock_dump_all();
-
-	u64 base = memblock_start_of_DRAM();
-	u64 size = memblock_end_of_DRAM() - memblock_start_of_DRAM();
-	vmemmap_page_init(base, base + size);
-
-	buddy_zone_init();
-
-	free_memory_core();
-
-	extern void buddy_page_test(void);
-	buddy_page_test();
-
-	extern void slob_test(void);
-	slob_test();
-
 #if 0
 	extern void riscv_timer_init(void);
 	riscv_timer_init();

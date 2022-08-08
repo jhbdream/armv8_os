@@ -331,7 +331,7 @@ void memblock_free_pages(unsigned long pfn, unsigned int order)
 {
 	struct page *page = pfn_to_page(pfn);
 
-	printk("%s: pfn start[0x%x]  order[%d]\n", __func__, pfn, order);
+	//printk("%s: pfn start[0x%x]  order[%d]\n", __func__, pfn, order);
 	__free_pages(page, order);
 }
 
