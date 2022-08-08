@@ -9,6 +9,7 @@
 
 void start_kernel(void)
 {
+   local_irq_disable();
 
    setup_arch();
 
