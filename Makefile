@@ -148,7 +148,7 @@ ARCH_CFLAGS :=
 ARCH_LDFLAGS :=
 export ARCH_CFLAGS ARCH_AFLAGS ARCH_LDFLAGS
 
-include arch/$(SRCARCH)/Makefile
+-include arch/$(SRCARCH)/Makefile
 
 MBUILD_IMAGE 		:= eeos.bin
 MBUILD_IMAGE_DTB	:= eeos_dtb.bin
