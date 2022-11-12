@@ -41,5 +41,8 @@ void start_kernel(void)
 
    printk("hello kernel!\n");
 
+   int vmalloc_test(void);
+   vmalloc_test();
+
    for(;;);
 }
