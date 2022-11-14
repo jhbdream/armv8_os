@@ -113,7 +113,7 @@ struct page * alloc_pages(unsigned int order);
 
 /* --------------------------------------------------------------------------*/
 /**
- * @brife
+ * @brief
  *
  * @Param order
  *

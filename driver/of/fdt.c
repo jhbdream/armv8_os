@@ -22,7 +22,7 @@ unsigned long of_get_flat_dt_root(void)
 
 /* --------------------------------------------------------------------------*/
 /**
- * @brife  get prop
+ * @brief  get prop
  *
  * @Param node
  * @Param name

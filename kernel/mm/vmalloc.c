@@ -21,7 +21,7 @@ struct vm_struct {
 struct vm_struct *vmlist = NULL;
 
 /**
- * @brife 从地址范围区间内分配一片内存
+ * @brief 从地址范围区间内分配一片内存
  *
  * @Param size 分配内存空间大小
  * @Param flags
