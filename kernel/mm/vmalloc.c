@@ -1,4 +1,5 @@
 #include "asm/page-def.h"
+#include "asm/pgtable_type.h"
 #include "mm/memblock.h"
 #include "mm/slab.h"
 #include "printk.h"
@@ -110,6 +111,11 @@ out:
 	kfree(area);
 	/* unlock */
 	return NULL;
+}
+
+int map_vm_area(struct vm_struct *area, pgprot_t prot, struct page **page)
+{
+	return -1;
 }
 
 int vmalloc_test(void)
