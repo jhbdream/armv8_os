@@ -8,6 +8,7 @@
 #include <driver/interrupt.h>
 #include <mm/memblock.h>
 #include <mm/page_alloc.h>
+#include <config/version.h>
 
 void start_kernel(void)
 {
@@ -16,6 +17,8 @@ void start_kernel(void)
    setup_arch();
 
    console_init();
+
+   printk("VERSION: %s\n", EEOS_VERSION_STR);
 
    memblock_dump_all();
 
