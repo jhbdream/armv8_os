@@ -27,6 +27,7 @@ unsigned long kimage_voffset;
 static int mmu_enabled;
 
 /* early pgd */
+/* swapper_pg_dir 设置为内核页表 */
 pgd_t swapper_pg_dir[PTRS_PER_PGD] __aligned(PAGE_SIZE);
 pgd_t early_pg_dir[PTRS_PER_PGD] __aligned(PAGE_SIZE);
 static pmd_t early_pmd[PTRS_PER_PMD] __aligned(PAGE_SIZE);
