@@ -2,6 +2,7 @@
 #define _EE_PGTABLE_H
 
 #include <asm/pgtable.h>
+#include <asm/pgalloc.h>
 
 extern pgd_t swapper_pg_dir[PTRS_PER_PGD];
 

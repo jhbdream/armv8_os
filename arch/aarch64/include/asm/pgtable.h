@@ -100,4 +100,21 @@ static inline phys_addr_t pte_page_paddr(pte_t pte)
 #define pmd_set_fixmap(dir, addr)    ((pmd_t *)set_fixmap_offset(FIX_PMD, pmd_offset_phys(dir, addr)))
 #define pte_set_fixmap(dir, addr)    ((pte_t *)set_fixmap_offset(FIX_PTE, pte_offset_phys(dir, addr)))
 
+/*
+ * The following only work if pte_present(). Undefined behaviour otherwise.
+ */
+#define pte_present(pte)    (!!(pte_val(pte) & (PTE_VALID | PTE_PROT_NONE)))
+#define pte_young(pte)      (!!(pte_val(pte) & PTE_AF))
+#define pte_special(pte)    (!!(pte_val(pte) & PTE_SPECIAL))
+#define pte_write(pte)      (!!(pte_val(pte) & PTE_WRITE))
+#define pte_user_exec(pte)  (!(pte_val(pte) & PTE_UXN))
+#define pte_cont(pte)       (!!(pte_val(pte) & PTE_CONT))
+#define pte_devmap(pte)     (!!(pte_val(pte) & PTE_DEVMAP))
+#define pte_tagged(pte)     ((pte_val(pte) & PTE_ATTRINDX_MASK) == \
+        PTE_ATTRINDX(MT_NORMAL_TAGGED))
+
+#define pgd_present(pgd) (1)
+#define pud_present(pud) pte_present(pud_pte(pud))
+#define pmd_present(pmd) pte_present(pmd_pte(pmd))
+
 #endif

@@ -2,6 +2,7 @@
 #include "asm/pgtable_type.h"
 #include "mm/memblock.h"
 #include "mm/slab.h"
+#include "pgtable.h"
 #include "printk.h"
 #include <type.h>
 #include <eeos.h>
@@ -22,7 +23,7 @@ struct vm_struct {
 struct vm_struct *vmlist = NULL;
 
 /**
- * @brief 从地址范围区间内分配一片内存
+ * @brief 从vmalloc地址范围区间内分配一片空闲内存
  *
  * @Param size 分配内存空间大小
  * @Param flags
@@ -90,10 +91,9 @@ struct vm_struct *__get_vm_area(unsigned long size, unsigned long flags,
 	}
 
 found:
+
 	/**
-	 *  创建并初始化一个 vmstruct 节点
-	 *  插入到链表中
-	 *
+	 * 找到空闲地址范围,创建并初始化一个 vmstruct 节点,插入到链表中
 	 */
 	area->next = *p;
 	*p = area;
@@ -113,8 +113,44 @@ out:
 	return NULL;
 }
 
+static inline int vmap_pud_range(pgd_t *pgd, unsigned long addr, unsigned long end,
+		pgprot_t prot, struct page ***page)
+{
+	pud_t *pud;
+	unsigned long next;
+	int err;
+
+	BUG_ON(addr >- end);
+
+	/* 查找对应的地址是否已经分配了表项并填充到了 PGD */
+	/* 如果已经分配过 直接取出 */
+	/* 如果pgd中对应pud为空 分配一个内存作为pud页表 并填充到pgd中 */
+
+	return 0;
+}
+
 int map_vm_area(struct vm_struct *area, pgprot_t prot, struct page **page)
 {
+	pgd_t *pgd;
+	unsigned long next;
+	unsigned long addr = (unsigned long)area->addr;
+	unsigned long end = addr + area->size;
+	int err;
+
+	BUG_ON(addr >= end);
+
+	/* 根据地址找到pgd表项 四级页表模式下 pgd表项每一项指示 512G 空间 */
+	/* 根据地址找到对于entry */
+	/* PGD 表示的范围很大，不需要分配表项 一个表足够 */
+	pgd = pgd_offset_k(addr);
+	do
+	{
+		/* 如果end小于pgd的大小 next 即为end， 否则 end 为下一个pgd项地址 */
+		next = pgd_addr_end(addr, end);
+		vmap_pud_range(pgd, addr, next, prot, &page);
+	} while(pgd++, addr = next, addr != end);
+
+
 	return -1;
 }
 
@@ -136,13 +172,4 @@ int vmalloc_test(void)
 
 	return 0;
 }
-
-
-
-
-
-
-
-
-
 

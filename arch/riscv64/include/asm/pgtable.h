@@ -118,9 +118,19 @@ static inline pte_t pfn_pte(unsigned long pfn, pgprot_t prot)
 					 | _PAGE_EXEC)
 #define PAGE_TABLE		__pgprot(_PAGE_TABLE)
 
+static inline int pgd_present(pgd_t pgd)
+{
+	return 1;
+}
+
+static inline int pud_present(pud_t pud)
+{
+	return 1;
+}
+
 static inline int pmd_present(pmd_t pmd)
 {
-	return (pmd_val(pmd) & (_PAGE_PRESENT | _PAGE_PROT_NONE));
+	return 1;
 }
 
 static inline int pmd_none(pmd_t pmd)

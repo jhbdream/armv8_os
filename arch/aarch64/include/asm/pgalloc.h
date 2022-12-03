@@ -27,5 +27,9 @@ static inline void __pte_populate(pte_t *pte, phys_addr_t page, pteval_t prot)
     *pte = val;
 }
 
+#define pgd_populate __pgd_populate
+#define pud_populate __pud_populate
+#define pmd_populate __pmd_populate
+#define pte_populate __pte_populate
 
 #endif
