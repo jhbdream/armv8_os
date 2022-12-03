@@ -1,3 +1,4 @@
+#include "asm-generic/get_order.h"
 #include "errno.h"
 #include "mm/memblock.h"
 #include "printk.h"
@@ -253,6 +254,12 @@ void *__get_free_pages(unsigned int order)
 	return page_to_virt(page);
 }
 
+void *__get_free_page(void)
+{
+	struct page *page = alloc_pages(get_order(PAGE_SIZE));
+	return page_to_virt(page);
+}
+
 void __free_pages(struct page *page, unsigned int order)
 {
 	unsigned long pfn;
@@ -324,6 +331,11 @@ void free_pages(unsigned long addr, unsigned int order)
 {
 	struct page *page = virt_to_page(addr);
 	__free_pages(page, order);
+}
+
+void free_page(unsigned long addr)
+{
+	free_pages(addr, get_order(PAGE_SIZE));
 }
 
 /* 将 membloc 空闲内存加入到buddy */

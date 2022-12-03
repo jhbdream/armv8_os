@@ -122,12 +122,21 @@ struct page * alloc_pages(unsigned int order);
 /* ----------------------------------------------------------------------------*/
 void *__get_free_pages(unsigned int order);
 
+
+/**
+ * @brief 获取一个page
+ *
+ * @return page的虚拟地址
+ */
+void *__get_free_page(void);
+
 /**
  * free pages
  * addr: virt addr
  *
  */
 void free_pages(unsigned long addr, unsigned int order);
+void free_page(unsigned long addr);
 void __free_pages(struct page *page, unsigned int order);
 void buddyinfo_dump(void);
 unsigned int compound_order(struct page *page);
