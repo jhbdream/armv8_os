@@ -25,6 +25,9 @@
 /* 因为线性映射虚拟地址物理地址转换逻辑 PAGE_OFFSET 需要大于 KIMAGE_VADDR */
 #define KIMAGE_VADDR (0xFFFF000000080000)
 #define FIXADDR_TOP (KIMAGE_VADDR + SZ_512M)
+
+#define VMALLOC_START 0xFFFF900000000000
+
 /*
  * Memory types available.
  *

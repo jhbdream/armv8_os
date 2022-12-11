@@ -242,7 +242,7 @@ void *vmap(struct page **pages, unsigned int count,
 {
     struct vm_struct *area;
 
-	area = __get_vm_area(4096, 0, 0x20000000, 0x40000000);
+	area = __get_vm_area(4096, 0, 0xFFFF900000000000, 0xFFFF900400000000);
     if (!area)
 	{
 		printk("get vm area failed\n");
@@ -267,7 +267,14 @@ int vmalloc_test(void)
 	struct page *pages = __get_free_page();
 	v = vmap(&pages, 1, 0, prot);
 	if(v)
-		printk("map va 0x%08x\n", v);
+		printk("map va 0x%lx\n", v);
+
+	int val = *(int *)v;
+	*(int *)v = 0x1234;
+	val = *(int *)v;
+
+	printk("val is 0x%x\n", val);
+
 	printk("do vmalloc_end!\n");
 
 #if 0
