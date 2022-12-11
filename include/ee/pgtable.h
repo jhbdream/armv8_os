@@ -1,6 +1,7 @@
 #ifndef _EE_PGTABLE_H
 #define _EE_PGTABLE_H
 
+#include "asm/pgtable_hwdef.h"
 #include <asm/pgtable.h>
 #include <asm/pgalloc.h>
 
@@ -36,6 +37,25 @@ static inline pte_t *pte_offset_pte(pte_t *pte, unsigned long addr)
 static inline pgd_t *pgd_offset_k(unsigned long addr)
 {
     return ((pgd_t *)swapper_pg_dir + pgd_index(addr));
+}
+
+#define pgd_page_vaddr(pgd) ((unsigned long) __va((unsigned long)pgd_val(pgd) & PTE_ADDR_MASK))
+#define pud_page_vaddr(pud) ((unsigned long) __va((unsigned long)pud_val(pud) & PTE_ADDR_MASK))
+#define pmd_page_vaddr(pmd) ((unsigned long) __va((unsigned long)pmd_val(pmd) & PTE_ADDR_MASK))
+
+static inline pud_t *pud_offset(pgd_t *pgd, unsigned long address)
+{
+    return (pud_t *)pgd_page_vaddr(*(pgd)) + pud_index(address);
+}
+
+static inline pmd_t *pmd_offset(pud_t *pud, unsigned long address)
+{
+    return (pmd_t *)pud_page_vaddr(*(pud)) + pmd_index(address);
+}
+
+static inline pte_t *pte_offset(pmd_t *pmd, unsigned long address)
+{
+    return (pte_t *)pmd_page_vaddr(*(pmd)) + pte_index(address);
 }
 
 /*

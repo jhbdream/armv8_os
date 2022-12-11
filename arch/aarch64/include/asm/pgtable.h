@@ -113,7 +113,7 @@ static inline phys_addr_t pte_page_paddr(pte_t pte)
 #define pte_tagged(pte)     ((pte_val(pte) & PTE_ATTRINDX_MASK) == \
         PTE_ATTRINDX(MT_NORMAL_TAGGED))
 
-#define pgd_present(pgd) (1)
+#define pgd_present(pgd) pgd_val(pgd)
 #define pud_present(pud) pte_present(pud_pte(pud))
 #define pmd_present(pmd) pte_present(pmd_pte(pmd))
 

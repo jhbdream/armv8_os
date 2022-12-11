@@ -1,5 +1,8 @@
+#include "asm/page-def.h"
 #include "asm/pgalloc.h"
+#include "asm/pgtable.h"
 #include "asm/pgtable_hwdef.h"
+#include "asm/pgtable_type.h"
 #include "mm/page_alloc.h"
 #include "type.h"
 #include <ee/mm.h>
@@ -22,13 +25,16 @@ int __pud_alloc(pgd_t *pgd, unsigned long address)
 	// TODO: 不同硬件架构通用处理
 	// TODO: spin lock
 
-	/* 1. check pgd presend 检查pgd是否有效 */
-#if 0
-	if(pgd_present(pgd))
+	/**
+	 * check pgd presend 检查pgd是否有效
+	 * 如果 pgd 有效则不需要分配下一级的pud
+	 * 如果 pgd 无效则填充新分配的pmd
+	 *
+	 */
+	if(pgd_present(*pgd))
 		free_page((unsigned long)new);
 	else
 		pgd_populate(pgd, new, PGD_TYPE_TABLE);
-#endif
 
 	// TODO: spin unlock
 
@@ -37,11 +43,37 @@ int __pud_alloc(pgd_t *pgd, unsigned long address)
 
 int __pmd_alloc(pud_t *pud, unsigned long address)
 {
+	pmd_t *new = __get_free_page();
+	if(!new)
+		return -ENOMEM;
+
+	memset(new, 0, PAGE_SIZE);
+
+	// TODO: spin lock
+
+	if(pud_present(*pud))
+		free_page((unsigned long)new);
+	else
+		pud_populate(pud, new, PGD_TYPE_TABLE);
+
+	// TODO: spin unlock
+
 	return 0;
 }
 
-int __pte_alloc(pte_t *pte, unsigned long address)
+int __pte_alloc(pmd_t *pmd, unsigned long address)
 {
+	pte_t *new = __get_free_page();
+	if(!new)
+		return -ENOMEM;
+
+	memset(new, 0, PAGE_SIZE);
+
+	if(pmd_present(*pmd))
+		free_page((unsigned long)new);
+	else
+		pmd_populate(pmd, new, PGD_TYPE_TABLE);
+
 	return 0;
 }
 

@@ -131,6 +131,13 @@ void *__get_free_pages(unsigned int order);
 void *__get_free_page(void);
 
 /**
+ * @brief 分配一个PAGE
+ *
+ * @return 虚拟地址
+ */
+void *__get_free_page(void);
+
+/**
  * free pages
  * addr: virt addr
  *
@@ -138,6 +145,13 @@ void *__get_free_page(void);
 void free_pages(unsigned long addr, unsigned int order);
 void free_page(unsigned long addr);
 void __free_pages(struct page *page, unsigned int order);
+
+/**
+ * @brief 释放一个页面
+ *
+ * @param addr 虚拟地址
+ */
+void free_page(unsigned long addr);
 void buddyinfo_dump(void);
 unsigned int compound_order(struct page *page);
 void set_compound_order(struct page *page, unsigned int order);
