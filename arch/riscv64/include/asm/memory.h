@@ -41,11 +41,6 @@ extern signed long memory_start;
 #define __kimg_to_phys(addr)    ((addr) - kimage_voffset)
 #define __phys_addr_symbol(x) __kimg_to_phys((phys_addr_t)(x))
 
-#define __pa(x)     ((unsigned long)(x))
-#define __pa_symbol(x) __phys_addr_symbol(x)
-#define __lm_to_phys(addr)  (((addr) - PAGE_OFFSET) + PHYS_OFFSET)
-#define __is_lm_address(addr)   (((u64)(addr) >= PAGE_OFFSET))
-
 #define __phys_to_virt(x) ((x - PHYS_OFFSET) | PAGE_OFFSET)
 #define __virt_to_phys(x) (__is_lm_address(x) ? __lm_to_phys(x) : __kimg_to_phys(x))
 
@@ -60,6 +55,13 @@ static inline void *phys_to_virt(phys_addr_t x)
 {
     return (void *)(__phys_to_virt(x));
 }
+
+#define __pa(x) virt_to_phys(x)
+#define __pa_symbol(x) __phys_addr_symbol(x)
+#define __lm_to_phys(addr)  (((addr) - PAGE_OFFSET) + PHYS_OFFSET)
+#define __is_lm_address(addr)   (((u64)(addr) >= PAGE_OFFSET))
+
+#define __va(x) phys_to_virt(x)
 
 #endif /* #ifndef __ASSEMBLY__ */
 #endif

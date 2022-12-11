@@ -69,9 +69,10 @@ static inline void *phys_to_virt(phys_addr_t x)
 #define __kimg_to_phys(addr)    ((addr) - kimage_voffset)
 #define __phys_addr_symbol(x) __kimg_to_phys((phys_addr_t)(x))
 
-#define __pa(x)     ((unsigned long)(x))
+#define __pa(x) virt_to_phys(x)
 #define __pa_symbol(x) __phys_addr_symbol(x)
 
+#define __va(x) phys_to_virt(x)
 
 #endif /* #ifndef __ASSEMBLY__ */
 #endif
