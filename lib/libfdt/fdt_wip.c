@@ -12,14 +12,13 @@
 
 int fdt_setprop_inplace_namelen_partial(void *fdt, int nodeoffset,
 					const char *name, int namelen,
-					uint32_t idx, const void *val,
-					int len)
+					uint32_t idx, const void *val, int len)
 {
 	void *propval;
 	int proplen;
 
-	propval = fdt_getprop_namelen_w(fdt, nodeoffset, name, namelen,
-					&proplen);
+	propval =
+		fdt_getprop_namelen_w(fdt, nodeoffset, name, namelen, &proplen);
 	if (!propval)
 		return proplen;
 
@@ -44,8 +43,7 @@ int fdt_setprop_inplace(void *fdt, int nodeoffset, const char *name,
 		return -FDT_ERR_NOSPACE;
 
 	return fdt_setprop_inplace_namelen_partial(fdt, nodeoffset, name,
-						   strlen(name), 0,
-						   val, len);
+						   strlen(name), 0, val, len);
 }
 
 static void fdt_nop_region_(void *start, int len)

@@ -12,6 +12,6 @@
  */
 int interrupt_init(void)
 {
-    local_irq_disable();
-    gic_init();
+	local_irq_disable();
+	gic_init();
 }

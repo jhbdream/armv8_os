@@ -10,17 +10,17 @@ extern void sem_task_init(void);
 
 int main()
 {
-    printk("start run in main!\n");
-    mm_init(0x50000000, 0x10000000);
+	printk("start run in main!\n");
+	mm_init(0x50000000, 0x10000000);
 
-    interrupt_init();
-    systic_timer_init();
-    kernel_task_init();
-    lettel_shell_init();
-    sem_task_init(main);
-    user_task_init();
+	interrupt_init();
+	systic_timer_init();
+	kernel_task_init();
+	lettel_shell_init();
+	sem_task_init(main);
+	user_task_init();
 
-    /* will not run here! */
-    printk("will not run here!!!\n");
-    return 0;
+	/* will not run here! */
+	printk("will not run here!!!\n");
+	return 0;
 }

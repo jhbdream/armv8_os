@@ -24,17 +24,15 @@ struct task *g_current_task = NULL;
  */
 static struct task *requset_task()
 {
-    for(int i = 0; i < G_TASK_NUMBER; i++)
-    {
-        //找到一个空闲任务块
-        if(g_task[i].pid == -1)
-        {
-            //只要保证各个任务的pid非负并且不重复就可以
-            g_task[i].pid = i;
-            return &g_task[i];
-        }
-    }
-    return NULL;
+	for (int i = 0; i < G_TASK_NUMBER; i++) {
+		//找到一个空闲任务块
+		if (g_task[i].pid == -1) {
+			//只要保证各个任务的pid非负并且不重复就可以
+			g_task[i].pid = i;
+			return &g_task[i];
+		}
+	}
+	return NULL;
 }
 
 /**
@@ -45,11 +43,11 @@ static struct task *requset_task()
  */
 static void free_task(struct task *free)
 {
-    uint32_t pid = free->pid;
+	uint32_t pid = free->pid;
 
-    free->pid = -1;
-    free->priority = -1;
-    free->task_state = TASK_STATE_NONE;
+	free->pid = -1;
+	free->priority = -1;
+	free->task_state = TASK_STATE_NONE;
 }
 
 /**
@@ -59,14 +57,13 @@ static void free_task(struct task *free)
  */
 static int task_deinit(void)
 {
-    int i = 0;
+	int i = 0;
 
-    for(i; i < G_TASK_NUMBER; i++)
-    {
-        free_task(&g_task[i]);
-    }
+	for (i; i < G_TASK_NUMBER; i++) {
+		free_task(&g_task[i]);
+	}
 
-    return i;
+	return i;
 }
 
 /**
@@ -75,7 +72,7 @@ static int task_deinit(void)
  */
 void kernel_task_init(void)
 {
-    task_deinit();
+	task_deinit();
 }
 
 /**
@@ -86,25 +83,25 @@ void kernel_task_init(void)
  * @param pc_addr 该任务的函数地址
  * @return int
  */
-static void task_init(struct task *t, char *name, void *sp_addr, void *pc_addr, long priority)
+static void task_init(struct task *t, char *name, void *sp_addr, void *pc_addr,
+		      long priority)
 {
-    uint64_t *sp_init = sp_addr;
+	uint64_t *sp_init = sp_addr;
 
-    //初始化任务栈
-    for(int i = 0; i < 31; i++)
-    {
-        sp_init = sp_init - 1;
-        *sp_init = i;
-    }
+	//初始化任务栈
+	for (int i = 0; i < 31; i++) {
+		sp_init = sp_init - 1;
+		*sp_init = i;
+	}
 
-    t->sp = sp_init;
-    t->elr = (unsigned long)pc_addr;    //任务的入口地址
-    t->spsr = 0x345;                    //在aarch64架构下 设置切换到el1 并且使能全局中断
+	t->sp = sp_init;
+	t->elr = (unsigned long)pc_addr; //任务的入口地址
+	t->spsr = 0x345; //在aarch64架构下 设置切换到el1 并且使能全局中断
 
-    t->priority = priority;
-    t->task_state = TASK_STATE_READY;
+	t->priority = priority;
+	t->task_state = TASK_STATE_READY;
 
-    strcpy(t->task_name, name);
+	strcpy(t->task_name, name);
 }
 
 /**
@@ -114,20 +111,18 @@ static void task_init(struct task *t, char *name, void *sp_addr, void *pc_addr, 
  * @param pc_addr
  * @return long
  */
-struct task *task_create(char *name, void *sp_addr, void *pc_addr, long priority)
+struct task *task_create(char *name, void *sp_addr, void *pc_addr,
+			 long priority)
 {
-    struct task *new_task;
+	struct task *new_task;
 
-    new_task = requset_task();
-    if(new_task != NULL)
-    {
-        task_init(new_task, name, sp_addr, pc_addr, priority);
-        return new_task;
-    }
-    else
-    {
-        return NULL;
-    }
+	new_task = requset_task();
+	if (new_task != NULL) {
+		task_init(new_task, name, sp_addr, pc_addr, priority);
+		return new_task;
+	} else {
+		return NULL;
+	}
 }
 
 /**
@@ -139,40 +134,31 @@ struct task *task_create(char *name, void *sp_addr, void *pc_addr, long priority
  */
 struct task *task_schedule_alog_average(void)
 {
-    // 获取下一个任务
-    struct task *next_task;
+	// 获取下一个任务
+	struct task *next_task;
 
-    if(g_current_task == &g_task[G_TASK_NUMBER - 1])
-    {
-        //如果现在任务是在任务快末尾，从任务快开头遍历
-        next_task = &g_task[0];
-    }
-    else
-    {
-        next_task = g_current_task + 1;
-    }
+	if (g_current_task == &g_task[G_TASK_NUMBER - 1]) {
+		//如果现在任务是在任务快末尾，从任务快开头遍历
+		next_task = &g_task[0];
+	} else {
+		next_task = g_current_task + 1;
+	}
 
-    for(int i = 0; i < G_TASK_NUMBER; i++)
-    {
-        if(next_task->task_state & TASK_STATE_READY)
-        {
-            //找到一个有效任务 返回任务
-            return next_task;
-        }
-        else if (next_task == &g_task[G_TASK_NUMBER - 1])
-        {
-            //如果遍历到了末尾，回到头部
-            next_task = &g_task[0];
-        }
-        else
-        {
-            //遍历下一个任务块
-            next_task = next_task + 1;
-        }
-    }
+	for (int i = 0; i < G_TASK_NUMBER; i++) {
+		if (next_task->task_state & TASK_STATE_READY) {
+			//找到一个有效任务 返回任务
+			return next_task;
+		} else if (next_task == &g_task[G_TASK_NUMBER - 1]) {
+			//如果遍历到了末尾，回到头部
+			next_task = &g_task[0];
+		} else {
+			//遍历下一个任务块
+			next_task = next_task + 1;
+		}
+	}
 
-    //目前没有就绪任务，返回空 后续可以考虑添加空闲idel任务
-    return NULL;
+	//目前没有就绪任务，返回空 后续可以考虑添加空闲idel任务
+	return NULL;
 }
 
 /**
@@ -182,43 +168,39 @@ struct task *task_schedule_alog_average(void)
  */
 struct task *task_schedule_alog_priority(void)
 {
-    // 获取下一个任务
-    struct task *t;
-    struct task *priority_max_task = NULL;
+	// 获取下一个任务
+	struct task *t;
+	struct task *priority_max_task = NULL;
 
-    // 直接使用循环遍历全部任务
-    for (int i = 0; i < G_TASK_NUMBER; i++)
-    {
-        t = &g_task[i];
+	// 直接使用循环遍历全部任务
+	for (int i = 0; i < G_TASK_NUMBER; i++) {
+		t = &g_task[i];
 
-        //如果是处于睡眠状态的任务 判断tick是否超时
-        //如果睡眠tick超时 就把任务状态修改为 run
-        if(t->task_state == TASK_STATE_SLEEP)
-        {
-            if(g_systic >= t->sleep_timeout)
-            {
-                t->task_state = TASK_STATE_READY;
-            }
-        }
+		//如果是处于睡眠状态的任务 判断tick是否超时
+		//如果睡眠tick超时 就把任务状态修改为 run
+		if (t->task_state == TASK_STATE_SLEEP) {
+			if (g_systic >= t->sleep_timeout) {
+				t->task_state = TASK_STATE_READY;
+			}
+		}
 
-        //为了找到任务 零时处理
-        if (t->task_state & TASK_STATE_READY && priority_max_task == NULL)
-        {
-            priority_max_task = t;
-        }
+		//为了找到任务 零时处理
+		if (t->task_state & TASK_STATE_READY &&
+		    priority_max_task == NULL) {
+			priority_max_task = t;
+		}
 
-        if (priority_max_task != NULL)
-        {
-            // 找到正在运行且优先级最高的任务 作为to任务
-            if (t->task_state & TASK_STATE_READY && t->priority > priority_max_task->priority)
-            {
-                //比较有效任务的优先级 找到更高优先级任务
-                priority_max_task = t;
-            }
-        }
-    }
+		if (priority_max_task != NULL) {
+			// 找到正在运行且优先级最高的任务 作为to任务
+			if (t->task_state & TASK_STATE_READY &&
+			    t->priority > priority_max_task->priority) {
+				//比较有效任务的优先级 找到更高优先级任务
+				priority_max_task = t;
+			}
+		}
+	}
 
-    return priority_max_task;
+	return priority_max_task;
 }
 
 /**
@@ -227,13 +209,13 @@ struct task *task_schedule_alog_priority(void)
  */
 void schedle_interrupt(void)
 {
-    static struct task *from;
-    static struct task *to;
+	static struct task *from;
+	static struct task *to;
 
-    from = g_current_task;
-    to = task_schedule_alog_priority();
+	from = g_current_task;
+	to = task_schedule_alog_priority();
 
-    interrupt_task_switch_from_to(from, to);
+	interrupt_task_switch_from_to(from, to);
 }
 
 /**
@@ -242,13 +224,13 @@ void schedle_interrupt(void)
  */
 void schedle(void)
 {
-    static struct task *from;
-    static struct task *to;
+	static struct task *from;
+	static struct task *to;
 
-    from = g_current_task;
-    to = task_schedule_alog_priority();
+	from = g_current_task;
+	to = task_schedule_alog_priority();
 
-    task_switch_from_to(from, to);
+	task_switch_from_to(from, to);
 }
 
 /**
@@ -258,5 +240,5 @@ void schedle(void)
  */
 uint32_t getpid(void)
 {
-    return g_current_task->pid;
+	return g_current_task->pid;
 }

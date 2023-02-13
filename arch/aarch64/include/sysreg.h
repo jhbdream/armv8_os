@@ -44,10 +44,9 @@
 #define Op2_shift 5
 #define Op2_mask 0x7
 
-#define sys_reg(op0, op1, crn, crm, op2)           \
-    (((op0) << Op0_shift) | ((op1) << Op1_shift) | \
-     ((crn) << CRn_shift) | ((crm) << CRm_shift) | \
-     ((op2) << Op2_shift))
+#define sys_reg(op0, op1, crn, crm, op2)                                       \
+	(((op0) << Op0_shift) | ((op1) << Op1_shift) | ((crn) << CRn_shift) |  \
+	 ((crm) << CRm_shift) | ((op2) << Op2_shift))
 
 #define sys_insn sys_reg
 
@@ -327,56 +326,57 @@
 #define SYS_CNTP_CTL_EL0 sys_reg(3, 3, 14, 2, 1)
 #define SYS_CNTP_CVAL_EL0 sys_reg(3, 3, 14, 2, 2)
 
-#define __emit_inst(x)			".inst " __stringify((x)) "\n\t"
+#define __emit_inst(x) ".inst " __stringify((x)) "\n\t"
 
-asm(
-"	.irp	num,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30\n"
-"	.equ	.L__reg_num_x\\num, \\num\n"
-"	.endr\n"
-"	.equ	.L__reg_num_xzr, 31\n"
-"\n"
-"	.macro	mrs_s, rt, sreg\n"
-	__emit_inst(0xd5200000|(\\sreg)|(.L__reg_num_\\rt))
-"	.endm\n"
-"\n"
-"	.macro	msr_s, sreg, rt\n"
-	__emit_inst(0xd5000000|(\\sreg)|(.L__reg_num_\\rt))
-"	.endm\n"
-);
+asm("	.irp	num,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30\n"
+    "	.equ	.L__reg_num_x\\num, \\num\n"
+    "	.endr\n"
+    "	.equ	.L__reg_num_xzr, 31\n"
+    "\n"
+    "	.macro	mrs_s, rt, sreg\n" __emit_inst(
+	    0xd5200000 | (\\sreg) |
+	    (.L__reg_num_\\rt)) "	.endm\n"
+				"\n"
+				"	.macro	msr_s, sreg, rt\n" __emit_inst(
+					0xd5000000 | (\\sreg) |
+					(.L__reg_num_\\rt)) "	.endm\n");
 
 /*
  * Unlike read_cpuid, calls to read_sysreg are never expected to be
  * optimized away or replaced with synthetic values.
  */
-#define read_sysreg(r) ({					\
-	uint64_t __val;						\
-	asm volatile("mrs %0, " __stringify(r) : "=r" (__val));	\
-	__val;							\
-})
+#define read_sysreg(r)                                                         \
+	({                                                                     \
+		uint64_t __val;                                                \
+		asm volatile("mrs %0, " __stringify(r) : "=r"(__val));         \
+		__val;                                                         \
+	})
 
 /*
  * The "Z" constraint normally means a zero immediate, but when combined with
  * the "%x0" template means XZR.
  */
-#define write_sysreg(v, r) do {					\
-	uint64_t __val = (uint64_t)(v);					\
-	asm volatile("msr " __stringify(r) ", %x0"		\
-		     : : "rZ" (__val));				\
-} while (0)
+#define write_sysreg(v, r)                                                     \
+	do {                                                                   \
+		uint64_t __val = (uint64_t)(v);                                \
+		asm volatile("msr " __stringify(r) ", %x0" : : "rZ"(__val));   \
+	} while (0)
 
 /*
  * For registers without architectural names, or simply unsupported by
  * GAS.
  */
-#define read_sysreg_s(r) ({						\
-	uint64_t __val;							\
-	asm volatile("mrs_s %0, " __stringify(r) : "=r" (__val));	\
-	__val;								\
-})
+#define read_sysreg_s(r)                                                       \
+	({                                                                     \
+		uint64_t __val;                                                \
+		asm volatile("mrs_s %0, " __stringify(r) : "=r"(__val));       \
+		__val;                                                         \
+	})
 
-#define write_sysreg_s(v, r) do {					\
-	uint64_t __val = (uint64_t)(v);						\
-	asm volatile("msr_s " __stringify(r) ", %x0" : : "rZ" (__val));	\
-} while (0)
+#define write_sysreg_s(v, r)                                                   \
+	do {                                                                   \
+		uint64_t __val = (uint64_t)(v);                                \
+		asm volatile("msr_s " __stringify(r) ", %x0" : : "rZ"(__val)); \
+	} while (0)
 
 #endif /* __ASM_SYSREG_H */

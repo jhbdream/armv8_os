@@ -32,4 +32,3 @@ void riscv_timer_init(void)
 	/* enable timer irq */
 	csr_set(mie, MIE_MTIE);
 }
-

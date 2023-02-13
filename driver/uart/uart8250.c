@@ -6,29 +6,29 @@
 #include <stddef.h>
 #include <ee/irqflags.h>
 
-#define UART_RBR_OFFSET		0	/* In:  Recieve Buffer Register */
-#define UART_THR_OFFSET		0	/* Out: Transmitter Holding Register */
-#define UART_DLL_OFFSET		0	/* Out: Divisor Latch Low */
-#define UART_IER_OFFSET		1	/* I/O: Interrupt Enable Register */
-#define UART_DLM_OFFSET		1	/* Out: Divisor Latch High */
-#define UART_FCR_OFFSET		2	/* Out: FIFO Control Register */
-#define UART_IIR_OFFSET		2	/* I/O: Interrupt Identification Register */
-#define UART_LCR_OFFSET		3	/* Out: Line Control Register */
-#define UART_MCR_OFFSET		4	/* Out: Modem Control Register */
-#define UART_LSR_OFFSET		5	/* In:  Line Status Register */
-#define UART_MSR_OFFSET		6	/* In:  Modem Status Register */
-#define UART_SCR_OFFSET		7	/* I/O: Scratch Register */
-#define UART_MDR1_OFFSET	8	/* I/O:  Mode Register */
+#define UART_RBR_OFFSET 0 /* In:  Recieve Buffer Register */
+#define UART_THR_OFFSET 0 /* Out: Transmitter Holding Register */
+#define UART_DLL_OFFSET 0 /* Out: Divisor Latch Low */
+#define UART_IER_OFFSET 1 /* I/O: Interrupt Enable Register */
+#define UART_DLM_OFFSET 1 /* Out: Divisor Latch High */
+#define UART_FCR_OFFSET 2 /* Out: FIFO Control Register */
+#define UART_IIR_OFFSET 2 /* I/O: Interrupt Identification Register */
+#define UART_LCR_OFFSET 3 /* Out: Line Control Register */
+#define UART_MCR_OFFSET 4 /* Out: Modem Control Register */
+#define UART_LSR_OFFSET 5 /* In:  Line Status Register */
+#define UART_MSR_OFFSET 6 /* In:  Modem Status Register */
+#define UART_SCR_OFFSET 7 /* I/O: Scratch Register */
+#define UART_MDR1_OFFSET 8 /* I/O:  Mode Register */
 
-#define UART_LSR_FIFOE		0x80	/* Fifo error */
-#define UART_LSR_TEMT		0x40	/* Transmitter empty */
-#define UART_LSR_THRE		0x20	/* Transmit-hold-register empty */
-#define UART_LSR_BI		0x10	/* Break interrupt indicator */
-#define UART_LSR_FE		0x08	/* Frame error indicator */
-#define UART_LSR_PE		0x04	/* Parity error indicator */
-#define UART_LSR_OE		0x02	/* Overrun error indicator */
-#define UART_LSR_DR		0x01	/* Receiver data ready */
-#define UART_LSR_BRK_ERROR_BITS	0x1E	/* BI, FE, PE, OE bits */
+#define UART_LSR_FIFOE 0x80 /* Fifo error */
+#define UART_LSR_TEMT 0x40 /* Transmitter empty */
+#define UART_LSR_THRE 0x20 /* Transmit-hold-register empty */
+#define UART_LSR_BI 0x10 /* Break interrupt indicator */
+#define UART_LSR_FE 0x08 /* Frame error indicator */
+#define UART_LSR_PE 0x04 /* Parity error indicator */
+#define UART_LSR_OE 0x02 /* Overrun error indicator */
+#define UART_LSR_DR 0x01 /* Receiver data ready */
+#define UART_LSR_BRK_ERROR_BITS 0x1E /* BI, FE, PE, OE bits */
 
 /* clang-format on */
 
@@ -82,13 +82,13 @@ static int uart8250_getc(void)
 
 #define UART_XMIT_SIZE 4096
 
-#define uart_circ_empty(circ)		((circ)->head == (circ)->tail)
-#define uart_circ_clear(circ)		((circ)->head = (circ)->tail = 0)
+#define uart_circ_empty(circ) ((circ)->head == (circ)->tail)
+#define uart_circ_clear(circ) ((circ)->head = (circ)->tail = 0)
 
-#define uart_circ_chars_pending(circ)	\
+#define uart_circ_chars_pending(circ)                                          \
 	(CIRC_CNT((circ)->head, (circ)->tail, UART_XMIT_SIZE))
 
-#define uart_circ_chars_free(circ)	\
+#define uart_circ_chars_free(circ)                                             \
 	(CIRC_SPACE((circ)->head, (circ)->tail, UART_XMIT_SIZE))
 
 struct circ_buf _recv;
@@ -145,21 +145,17 @@ void uart_interrupt(struct irq_desc *desc)
 {
 	u32 status = get_reg(UART_IIR_OFFSET);
 
-	if(status == 0x01)
-	{
+	if (status == 0x01) {
 		return;
-	}
-	else if(status == 0x06)
-	{
+	} else if (status == 0x06) {
 		get_reg(UART_LSR_OFFSET);
-	}
-	else if(status == 0x04)
-	{
+	} else if (status == 0x04) {
 		/* uart recv data */
 		u32 data = get_reg(UART_RBR_OFFSET);
 		struct circ_buf *circ = recv;
 		int count = 1;
-		int c = CIRC_SPACE_TO_END(circ->head, circ->tail, UART_XMIT_SIZE);
+		int c = CIRC_SPACE_TO_END(circ->head, circ->tail,
+					  UART_XMIT_SIZE);
 		if (count < c)
 			c = count;
 		if (c <= 0)
@@ -167,26 +163,19 @@ void uart_interrupt(struct irq_desc *desc)
 
 		memcpy(circ->buf + circ->head, &data, c);
 		circ->head = (circ->head + c) & (UART_XMIT_SIZE - 1);
-	}
-	else if(status == 0x02)
-	{
-		if(uart_circ_empty(xmit))
-		{
+	} else if (status == 0x02) {
+		if (uart_circ_empty(xmit)) {
 			set_reg(UART_IER_OFFSET, 0x01);
 			return;
 		}
 
 		set_reg(UART_THR_OFFSET, xmit->buf[xmit->tail]);
-        xmit->tail = (xmit->tail + 1) & (UART_XMIT_SIZE - 1);
+		xmit->tail = (xmit->tail + 1) & (UART_XMIT_SIZE - 1);
 
-		if(uart_circ_empty(xmit))
-		{
+		if (uart_circ_empty(xmit)) {
 			set_reg(UART_IER_OFFSET, 0x01);
 		}
-	}
-	else if(status == 0x07)
-	{
-
+	} else if (status == 0x07) {
 	}
 }
 
@@ -201,13 +190,14 @@ int uart8250_init(unsigned long base, u32 in_freq, u32 baudrate, u32 reg_shift,
 {
 	u16 bdiv;
 
-	uart8250_base      = (volatile char *)base + reg_offset;
+	uart8250_base = (volatile char *)base + reg_offset;
 	uart8250_reg_shift = reg_shift;
 	uart8250_reg_width = reg_width;
-	uart8250_in_freq   = in_freq;
-	uart8250_baudrate  = baudrate;
+	uart8250_in_freq = in_freq;
+	uart8250_baudrate = baudrate;
 
-	bdiv = (uart8250_in_freq + 8 * uart8250_baudrate) / (16 * uart8250_baudrate);
+	bdiv = (uart8250_in_freq + 8 * uart8250_baudrate) /
+	       (16 * uart8250_baudrate);
 
 	/* Disable all interrupts */
 	set_reg(UART_IER_OFFSET, 0x00);
@@ -263,10 +253,8 @@ static int _init(struct console *con)
 static void _write(struct console *con, const char *s, unsigned n)
 {
 	unsigned int i;
-	for(i = 0; i < n; i++, s++)
-	{
-		if(*s == '\n')
-		{
+	for (i = 0; i < n; i++, s++) {
+		if (*s == '\n') {
 			uart8250_putc('\r');
 		}
 		uart8250_putc(*s);

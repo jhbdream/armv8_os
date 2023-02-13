@@ -11,13 +11,11 @@
 #include "irq-gic-common.h"
 #include <printk.h>
 
-struct redist_region
-{
+struct redist_region {
 	void __iomem *redist_base;
 };
 
-struct gic_chip_data
-{
+struct gic_chip_data {
 	void __iomem *dist_base;
 	struct redist_region redist_regions[NR_CPUS];
 	u32 nr_redist_regions;
@@ -43,17 +41,15 @@ static inline void __iomem *gic_data_rdist_rd_base(void)
 	 * GICR_TYPER bits [63:32].
 	 */
 	aff = (MPIDR_AFFINITY_LEVEL(mpidr, 3) << 24 |
-		   MPIDR_AFFINITY_LEVEL(mpidr, 2) << 16 |
-		   MPIDR_AFFINITY_LEVEL(mpidr, 1) << 8 |
-		   MPIDR_AFFINITY_LEVEL(mpidr, 0));
+	       MPIDR_AFFINITY_LEVEL(mpidr, 2) << 16 |
+	       MPIDR_AFFINITY_LEVEL(mpidr, 1) << 8 |
+	       MPIDR_AFFINITY_LEVEL(mpidr, 0));
 
-	for (int i = 0; i < gic_data.nr_redist_regions; i++)
-	{
+	for (int i = 0; i < gic_data.nr_redist_regions; i++) {
 		ptr = gic_data.redist_regions[i].redist_base;
 		typer = gic_read_typer(ptr + GICR_TYPER);
 
-		if ((typer >> 32) == aff)
-		{
+		if ((typer >> 32) == aff) {
 			return ptr;
 		}
 	}
@@ -75,11 +71,9 @@ static void gic_do_wait_for_rwp(void __iomem *base)
 {
 	u32 count = 1000000; /* 1s! */
 
-	while (readl_relaxed(base + GICD_CTLR) & GICD_CTLR_RWP)
-	{
+	while (readl_relaxed(base + GICD_CTLR) & GICD_CTLR_RWP) {
 		count--;
-		if (!count)
-		{
+		if (!count) {
 			pr_err_ratelimited("RWP timeout, gone fishing");
 			return;
 		}
@@ -120,15 +114,13 @@ static void gic_enable_redist(bool enable)
 		val |= GICR_WAKER_ProcessorSleep;
 	writel_relaxed(val, rbase + GICR_WAKER);
 
-	if (!enable)
-	{ /* Check that GICR_WAKER is writeable */
+	if (!enable) { /* Check that GICR_WAKER is writeable */
 		val = readl_relaxed(rbase + GICR_WAKER);
 		if (!(val & GICR_WAKER_ProcessorSleep))
 			return; /* No PM support in this redistributor */
 	}
 
-	while (--count)
-	{
+	while (--count) {
 		val = readl_relaxed(rbase + GICR_WAKER);
 		if (enable ^ (bool)(val & GICR_WAKER_ChildrenAsleep))
 			break;
@@ -136,7 +128,7 @@ static void gic_enable_redist(bool enable)
 	};
 	if (!count)
 		pr_err_ratelimited("redistributor failed to %s...\n",
-						   enable ? "wakeup" : "sleep");
+				   enable ? "wakeup" : "sleep");
 }
 
 /*
@@ -161,13 +153,10 @@ static void gic_poke_irq(u32 hwirq, u32 offset)
 	void (*rwp_wait)(void);
 	void __iomem *base;
 
-	if (gic_irq_in_rdist(hwirq))
-	{
+	if (gic_irq_in_rdist(hwirq)) {
 		base = gic_data_rdist_sgi_base();
 		rwp_wait = gic_redist_wait_for_rwp;
-	}
-	else
-	{
+	} else {
 		base = gic_data.dist_base;
 		rwp_wait = gic_dist_wait_for_rwp;
 	}
@@ -181,7 +170,7 @@ void gic_mask_irq(u32 hwirq)
 	gic_poke_irq(hwirq, GICD_ICENABLER);
 }
 
-__attribute__ ((unused)) static void gic_eoimode1_mask_irq(u32 hwirq)
+__attribute__((unused)) static void gic_eoimode1_mask_irq(u32 hwirq)
 {
 	gic_mask_irq(hwirq);
 }
@@ -191,13 +180,12 @@ void gic_unmask_irq(u32 hwirq)
 	gic_poke_irq(hwirq, GICD_ISENABLER);
 }
 
-__attribute__ ((unused)) static int gic_irq_set_irqchip_state(u32 hwirq,
-									 enum irqchip_irq_state which, u8 val)
+__attribute__((unused)) static int
+gic_irq_set_irqchip_state(u32 hwirq, enum irqchip_irq_state which, u8 val)
 {
 	u32 reg;
 
-	switch (which)
-	{
+	switch (which) {
 	case IRQCHIP_STATE_PENDING:
 		reg = val ? GICD_ISPENDR : GICD_ICPENDR;
 		break;
@@ -218,11 +206,10 @@ __attribute__ ((unused)) static int gic_irq_set_irqchip_state(u32 hwirq,
 	return 0;
 }
 
-int gic_irq_get_irqchip_state(u32 hwirq,
-								enum irqchip_irq_state which, bool *val)
+int gic_irq_get_irqchip_state(u32 hwirq, enum irqchip_irq_state which,
+			      bool *val)
 {
-	switch (which)
-	{
+	switch (which) {
 	case IRQCHIP_STATE_PENDING:
 		*val = gic_peek_irq(hwirq, GICD_ISPENDR);
 		break;
@@ -252,7 +239,7 @@ void gic_eoimode1_eoi_irq(u32 hwirq)
 	gic_write_dir(hwirq);
 }
 
-__attribute__ ((unused)) static int gic_set_type(u32 hwirq, unsigned int type)
+__attribute__((unused)) static int gic_set_type(u32 hwirq, unsigned int type)
 {
 	unsigned int irq = hwirq;
 	void (*rwp_wait)(void);
@@ -264,16 +251,13 @@ __attribute__ ((unused)) static int gic_set_type(u32 hwirq, unsigned int type)
 
 	/* SPIs have restrictions on the supported types */
 	if (irq >= 32 && type != IRQ_TYPE_LEVEL_HIGH &&
-		type != IRQ_TYPE_EDGE_RISING)
+	    type != IRQ_TYPE_EDGE_RISING)
 		return -EINVAL;
 
-	if (gic_irq_in_rdist(hwirq))
-	{
+	if (gic_irq_in_rdist(hwirq)) {
 		base = gic_data_rdist_sgi_base();
 		rwp_wait = gic_redist_wait_for_rwp;
-	}
-	else
-	{
+	} else {
 		base = gic_data.dist_base;
 		rwp_wait = gic_dist_wait_for_rwp;
 	}
@@ -286,9 +270,9 @@ static u64 gic_mpidr_to_affinity(unsigned long mpidr)
 	u64 aff;
 
 	aff = ((u64)MPIDR_AFFINITY_LEVEL(mpidr, 3) << 32 |
-		   MPIDR_AFFINITY_LEVEL(mpidr, 2) << 16 |
-		   MPIDR_AFFINITY_LEVEL(mpidr, 1) << 8 |
-		   MPIDR_AFFINITY_LEVEL(mpidr, 0));
+	       MPIDR_AFFINITY_LEVEL(mpidr, 2) << 16 |
+	       MPIDR_AFFINITY_LEVEL(mpidr, 1) << 8 |
+	       MPIDR_AFFINITY_LEVEL(mpidr, 0));
 
 	return aff;
 }
@@ -325,8 +309,9 @@ static void gic_dist_init(void)
 	gic_dist_config(base, gic_data.irq_nr, gic_dist_wait_for_rwp);
 
 	/* Enable distributor with ARE, Group1 */
-	writel_relaxed(GICD_CTLR_ARE_NS | GICD_CTLR_ENABLE_G1A | GICD_CTLR_ENABLE_G1,
-				   base + GICD_CTLR);
+	writel_relaxed(GICD_CTLR_ARE_NS | GICD_CTLR_ENABLE_G1A |
+			       GICD_CTLR_ENABLE_G1,
+		       base + GICD_CTLR);
 
 	/*
 	 * Set all global interrupts to the boot CPU only. ARE must be
@@ -378,10 +363,8 @@ static void gic_cpu_sys_reg_init(void)
 	gic_write_ctlr(ICC_CTLR_EL1_EOImode_drop_dir);
 
 	/* Always whack Group0 before Group1 */
-	if (group0)
-	{
-		switch (pribits)
-		{
+	if (group0) {
+		switch (pribits) {
 		case 8:
 		case 7:
 			write_gicreg(0, ICC_AP0R3_EL1);
@@ -396,8 +379,7 @@ static void gic_cpu_sys_reg_init(void)
 		isb();
 	}
 
-	switch (pribits)
-	{
+	switch (pribits) {
 	case 8:
 	case 7:
 		write_gicreg(0, ICC_AP1R3_EL1);
@@ -432,9 +414,8 @@ static void gic_cpu_init(void)
 	gic_cpu_sys_reg_init();
 }
 
-int gic_init_bases(void __iomem *dist_base,
-				   void __iomem *rdist_base,
-				   u32 nr_redist_regions)
+int gic_init_bases(void __iomem *dist_base, void __iomem *rdist_base,
+		   u32 nr_redist_regions)
 {
 	u32 typer;
 	int gic_irqs;
@@ -448,8 +429,7 @@ int gic_init_bases(void __iomem *dist_base,
 	gic_data.nr_redist_regions = nr_redist_regions;
 	gic_data.dist_base = dist_base;
 
-	for (i = 0; i < nr_redist_regions; i++)
-	{
+	for (i = 0; i < nr_redist_regions; i++) {
 		gic_data.redist_regions[i].redist_base = rdist_base;
 		rdist_base = rdist_base + 0x20000;
 	}
@@ -471,8 +451,7 @@ int gic_init_bases(void __iomem *dist_base,
 	return 0;
 }
 
-struct irq_chip gicv3_chip =
-{
+struct irq_chip gicv3_chip = {
 	.irq_mask = gic_mask_irq,
 	.irq_unmask = gic_unmask_irq,
 	.irq_eoi = gic_eoi_irq,
@@ -482,8 +461,7 @@ static void gic_handle_irq(void *reg)
 {
 	uint32_t irqnr = (uint32_t)gic_read_iar();
 
-	if((irqnr >= 1020 && irqnr <= 1023))
-	{
+	if ((irqnr >= 1020 && irqnr <= 1023)) {
 		return;
 	}
 
@@ -492,7 +470,8 @@ static void gic_handle_irq(void *reg)
 	gic_eoi_irq(irqnr);
 }
 
-int arm_gicv3_interrupu_init(void *dist_base, void *rdist_base, uint32_t nr_redist_regions)
+int arm_gicv3_interrupu_init(void *dist_base, void *rdist_base,
+			     uint32_t nr_redist_regions)
 {
 	set_irq_chip(&gicv3_chip);
 	set_handle_irq(gic_handle_irq);

@@ -23,9 +23,8 @@
 #include <io.h>
 #include <type.h>
 
-
-#define read_gicreg(r)			read_sysreg_s(SYS_ ## r)
-#define write_gicreg(v, r)		write_sysreg_s(v, SYS_ ## r)
+#define read_gicreg(r) read_sysreg_s(SYS_##r)
+#define write_gicreg(v, r) write_sysreg_s(v, SYS_##r)
 
 /*
  * Low-level accessors
@@ -93,23 +92,23 @@ static inline void gic_write_bpr1(u32 val)
 	write_sysreg_s(val, SYS_ICC_BPR1_EL1);
 }
 
-#define gic_read_typer(c)		readq_relaxed(c)
-#define gic_write_irouter(v, c)		writeq_relaxed(v, c)
-#define gic_read_lpir(c)		readq_relaxed(c)
-#define gic_write_lpir(v, c)		writeq_relaxed(v, c)
+#define gic_read_typer(c) readq_relaxed(c)
+#define gic_write_irouter(v, c) writeq_relaxed(v, c)
+#define gic_read_lpir(c) readq_relaxed(c)
+#define gic_write_lpir(v, c) writeq_relaxed(v, c)
 
-#define gits_read_baser(c)		readq_relaxed(c)
-#define gits_write_baser(v, c)		writeq_relaxed(v, c)
+#define gits_read_baser(c) readq_relaxed(c)
+#define gits_write_baser(v, c) writeq_relaxed(v, c)
 
-#define gits_read_cbaser(c)		readq_relaxed(c)
-#define gits_write_cbaser(v, c)		writeq_relaxed(v, c)
+#define gits_read_cbaser(c) readq_relaxed(c)
+#define gits_write_cbaser(v, c) writeq_relaxed(v, c)
 
-#define gits_write_cwriter(v, c)	writeq_relaxed(v, c)
+#define gits_write_cwriter(v, c) writeq_relaxed(v, c)
 
-#define gicr_read_propbaser(c)		readq_relaxed(c)
-#define gicr_write_propbaser(v, c)	writeq_relaxed(v, c)
+#define gicr_read_propbaser(c) readq_relaxed(c)
+#define gicr_write_propbaser(v, c) writeq_relaxed(v, c)
 
-#define gicr_write_pendbaser(v, c)	writeq_relaxed(v, c)
-#define gicr_read_pendbaser(c)		readq_relaxed(c)
+#define gicr_write_pendbaser(v, c) writeq_relaxed(v, c)
+#define gicr_read_pendbaser(c) readq_relaxed(c)
 
 #endif /* !__ASM_ARCH_GICV3_H */

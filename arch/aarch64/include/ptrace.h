@@ -7,10 +7,10 @@
  * User structures for general purpose, floating point and debug registers.
  */
 struct user_pt_regs {
-	__u64		regs[31];
-	__u64		sp;
-	__u64		pc;
-	__u64		pstate;
+	__u64 regs[31];
+	__u64 sp;
+	__u64 pc;
+	__u64 pstate;
 };
 
 /*
@@ -38,7 +38,7 @@ struct pt_regs {
 #endif
 
 	u64 orig_addr_limit;
-	u64 unused;	// maintain 16 byte alignment
+	u64 unused; // maintain 16 byte alignment
 	u64 stackframe[2];
 };
 

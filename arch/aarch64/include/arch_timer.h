@@ -7,8 +7,7 @@
 static inline void arch_timer_start(void)
 {
 	uint64_t ctrl = read_sysreg(cntp_ctl_el0);
-	if(!(ctrl & (1 << 0)))
-	{
+	if (!(ctrl & (1 << 0))) {
 		ctrl |= (1 << 0);
 		write_sysreg(ctrl, cntp_ctl_el0);
 	}
@@ -17,8 +16,7 @@ static inline void arch_timer_start(void)
 static inline void arch_timer_stop(void)
 {
 	uint64_t ctrl = read_sysreg(cntp_ctl_el0);
-	if((ctrl & (1 << 0)))
-	{
+	if ((ctrl & (1 << 0))) {
 		ctrl &= ~(1 << 0);
 		write_sysreg(ctrl, cntp_ctl_el0);
 	}
@@ -27,8 +25,7 @@ static inline void arch_timer_stop(void)
 static inline void arch_timer_interrupt_enable(void)
 {
 	uint64_t ctrl = read_sysreg(cntp_ctl_el0);
-	if(ctrl & (1 << 1))
-	{
+	if (ctrl & (1 << 1)) {
 		ctrl &= ~(1 << 1);
 		write_sysreg(ctrl, cntp_ctl_el0);
 	}
@@ -37,8 +34,7 @@ static inline void arch_timer_interrupt_enable(void)
 static inline void arch_timer_interrupt_disable(void)
 {
 	uint64_t ctrl = read_sysreg(cntp_ctl_el0);
-	if(!(ctrl & (1 << 1)))
-	{
+	if (!(ctrl & (1 << 1))) {
 		ctrl |= (1 << 1);
 		write_sysreg(ctrl, cntp_ctl_el0);
 	}

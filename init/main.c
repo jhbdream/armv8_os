@@ -12,22 +12,22 @@
 
 void start_kernel(void)
 {
-   local_irq_disable();
+	local_irq_disable();
 
-   setup_arch();
+	setup_arch();
 
-   console_init();
+	console_init();
 
    printk("VERSION: %s\n", EEOS_VERSION_STR);
 
    memblock_dump_all();
 
-   u64 base = memblock_start_of_DRAM();
-   u64 size = memblock_end_of_DRAM() - memblock_start_of_DRAM();
-   vmemmap_page_init(base, base + size);
+	u64 base = memblock_start_of_DRAM();
+	u64 size = memblock_end_of_DRAM() - memblock_start_of_DRAM();
+	vmemmap_page_init(base, base + size);
 
-   buddy_zone_init();
-   free_memory_core();
+	buddy_zone_init();
+	free_memory_core();
 
 #if 0
    extern void buddy_page_test(void);
@@ -38,14 +38,15 @@ void start_kernel(void)
 #endif
 
 #ifdef CONFIG_FLAT_TEST
-   extern void fdt_test(void);
-   fdt_test();
+	extern void fdt_test(void);
+	fdt_test();
 #endif
 
-   printk("hello kernel!\n");
+	printk("hello kernel!\n");
 
-   int vmalloc_test(void);
-   vmalloc_test();
+	int vmalloc_test(void);
+	vmalloc_test();
 
-   for(;;);
+	for (;;)
+		;
 }

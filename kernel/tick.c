@@ -12,7 +12,7 @@ volatile uint64_t g_systic = 0;
  */
 uint64_t tick_to_ms(uint64_t tick)
 {
-    return g_systic * (1000u / TICK_PER_SECOND);
+	return g_systic * (1000u / TICK_PER_SECOND);
 }
 
 /**
@@ -23,11 +23,11 @@ uint64_t tick_to_ms(uint64_t tick)
  */
 uint64_t ms_to_tick(uint64_t ms)
 {
-    uint64_t tick;
-    tick = TICK_PER_SECOND * (ms / 1000);
-    tick += (TICK_PER_SECOND * (ms % 1000) + 999) / 1000;
+	uint64_t tick;
+	tick = TICK_PER_SECOND * (ms / 1000);
+	tick += (TICK_PER_SECOND * (ms % 1000) + 999) / 1000;
 
-    return tick;
+	return tick;
 }
 
 /**
@@ -38,17 +38,17 @@ uint64_t ms_to_tick(uint64_t ms)
  */
 void task_sleep_ms(uint64_t ms)
 {
-    local_irq_disable();
+	local_irq_disable();
 
-    //设置睡眠任务的状态
-    struct task *t = g_current_task;
-    t->task_state = TASK_STATE_SLEEP;
+	//设置睡眠任务的状态
+	struct task *t = g_current_task;
+	t->task_state = TASK_STATE_SLEEP;
 
-    //设置任务的唤醒时间
-    t->sleep_timeout = g_systic + ms_to_tick(ms);
+	//设置任务的唤醒时间
+	t->sleep_timeout = g_systic + ms_to_tick(ms);
 
-    //发起调度，切出任务
-    schedle();
+	//发起调度，切出任务
+	schedle();
 
-    local_irq_enable();
+	local_irq_enable();
 }

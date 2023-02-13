@@ -10,16 +10,15 @@
 const char hex_asc[] = "0123456789abcdef";
 const char hex_asc_upper[] = "0123456789ABCDEF";
 
-#define SIGN 1	   /* unsigned/signed, must be 1 */
-#define LEFT 2	   /* left justified */
-#define PLUS 4	   /* show plus */
-#define SPACE 8	   /* space if plus */
+#define SIGN 1 /* unsigned/signed, must be 1 */
+#define LEFT 2 /* left justified */
+#define PLUS 4 /* show plus */
+#define SPACE 8 /* space if plus */
 #define ZEROPAD 16 /* pad with zero, must be 16 == '0' - ' ' */
-#define SMALL 32   /* use lowercase in hex (must be 32 == 0x20) */
+#define SMALL 32 /* use lowercase in hex (must be 32 == 0x20) */
 #define SPECIAL 64 /* prefix hex with "0x", octal with "0" */
 
-enum format_type
-{
+enum format_type {
 	FORMAT_TYPE_NONE, /* Just a string part */
 	FORMAT_TYPE_WIDTH,
 	FORMAT_TYPE_PRECISION,
@@ -40,117 +39,26 @@ enum format_type
 	FORMAT_TYPE_SIZE_T,
 };
 
-struct printf_spec
-{
-	unsigned int type : 8;		 /* format_type enum */
+struct printf_spec {
+	unsigned int type : 8; /* format_type enum */
 	signed int field_width : 24; /* width of output field */
-	unsigned int flags : 8;		 /* flags to number() */
-	unsigned int base : 8;		 /* number base, 8, 10 or 16 only */
-	signed int precision : 16;	 /* # of digits/chars */
+	unsigned int flags : 8; /* flags to number() */
+	unsigned int base : 8; /* number base, 8, 10 or 16 only */
+	signed int precision : 16; /* # of digits/chars */
 };
 
 static const u16 decpair[100] = {
 #define _(x) (u16)(((x % 10) | ((x / 10) << 8)) + 0x3030)
-	_(0),
-	_(1),
-	_(2),
-	_(3),
-	_(4),
-	_(5),
-	_(6),
-	_(7),
-	_(8),
-	_(9),
-	_(10),
-	_(11),
-	_(12),
-	_(13),
-	_(14),
-	_(15),
-	_(16),
-	_(17),
-	_(18),
-	_(19),
-	_(20),
-	_(21),
-	_(22),
-	_(23),
-	_(24),
-	_(25),
-	_(26),
-	_(27),
-	_(28),
-	_(29),
-	_(30),
-	_(31),
-	_(32),
-	_(33),
-	_(34),
-	_(35),
-	_(36),
-	_(37),
-	_(38),
-	_(39),
-	_(40),
-	_(41),
-	_(42),
-	_(43),
-	_(44),
-	_(45),
-	_(46),
-	_(47),
-	_(48),
-	_(49),
-	_(50),
-	_(51),
-	_(52),
-	_(53),
-	_(54),
-	_(55),
-	_(56),
-	_(57),
-	_(58),
-	_(59),
-	_(60),
-	_(61),
-	_(62),
-	_(63),
-	_(64),
-	_(65),
-	_(66),
-	_(67),
-	_(68),
-	_(69),
-	_(70),
-	_(71),
-	_(72),
-	_(73),
-	_(74),
-	_(75),
-	_(76),
-	_(77),
-	_(78),
-	_(79),
-	_(80),
-	_(81),
-	_(82),
-	_(83),
-	_(84),
-	_(85),
-	_(86),
-	_(87),
-	_(88),
-	_(89),
-	_(90),
-	_(91),
-	_(92),
-	_(93),
-	_(94),
-	_(95),
-	_(96),
-	_(97),
-	_(98),
-	_(99),
+	_(0),  _(1),  _(2),  _(3),  _(4),  _(5),  _(6),	 _(7),	_(8),  _(9),
+	_(10), _(11), _(12), _(13), _(14), _(15), _(16), _(17), _(18), _(19),
+	_(20), _(21), _(22), _(23), _(24), _(25), _(26), _(27), _(28), _(29),
+	_(30), _(31), _(32), _(33), _(34), _(35), _(36), _(37), _(38), _(39),
+	_(40), _(41), _(42), _(43), _(44), _(45), _(46), _(47), _(48), _(49),
+	_(50), _(51), _(52), _(53), _(54), _(55), _(56), _(57), _(58), _(59),
+	_(60), _(61), _(62), _(63), _(64), _(65), _(66), _(67), _(68), _(69),
+	_(70), _(71), _(72), _(73), _(74), _(75), _(76), _(77), _(78), _(79),
+	_(80), _(81), _(82), _(83), _(84), _(85), _(86), _(87), _(88), _(89),
+	_(90), _(91), _(92), _(93), _(94), _(95), _(96), _(97), _(98), _(99),
 #undef _
 };
 
@@ -231,7 +139,7 @@ static char *put_dec(char *buf, unsigned long long n)
 }
 
 static char *number(char *buf, char *end, unsigned long long num,
-					struct printf_spec spec)
+		    struct printf_spec spec)
 {
 	char tmp[3 * sizeof(num)];
 	char sign;
@@ -249,27 +157,20 @@ static char *number(char *buf, char *end, unsigned long long num,
 		spec.flags &= ~ZEROPAD;
 	sign = 0;
 
-	if (spec.flags & SIGN)
-	{
-		if ((signed long long)num < 0)
-		{
+	if (spec.flags & SIGN) {
+		if ((signed long long)num < 0) {
 			sign = '-';
 			num = -(signed long long)num;
 			field_width--;
-		}
-		else if (spec.flags & PLUS)
-		{
+		} else if (spec.flags & PLUS) {
 			sign = '+';
 			field_width--;
-		}
-		else if (spec.flags & SPACE)
-		{
+		} else if (spec.flags & SPACE) {
 			sign = ' ';
 			field_width--;
 		}
 	}
-	if (need_pfx)
-	{
+	if (need_pfx) {
 		if (spec.base == 16)
 			field_width -= 2;
 		else if (!is_zero)
@@ -277,42 +178,32 @@ static char *number(char *buf, char *end, unsigned long long num,
 	}
 
 	i = 0;
-	if (num < spec.base)
-	{
+	if (num < spec.base) {
 		tmp[i++] = hex_asc_upper[num] | locase;
-	}
-	else if (spec.base != 10)
-	{
+	} else if (spec.base != 10) {
 		int mask = spec.base - 1;
 		int shift = 3;
 
-		if (spec.base == 16)
-		{
+		if (spec.base == 16) {
 			shift = 4;
 		}
 
-		do
-		{
-			tmp[i++] = (hex_asc_upper[((unsigned char)num) & mask] | locase);
+		do {
+			tmp[i++] = (hex_asc_upper[((unsigned char)num) & mask] |
+				    locase);
 			num >>= shift;
 		} while (num);
-	}
-	else
-	{
+	} else {
 		i = (put_dec(tmp, num) - tmp);
 	}
 
-	if (i > precision)
-	{
+	if (i > precision) {
 		precision = i;
 	}
 	field_width -= precision;
-	if (!(spec.flags & (ZEROPAD | LEFT)))
-	{
-		while (--field_width > 0)
-		{
-			if (buf < end)
-			{
+	if (!(spec.flags & (ZEROPAD | LEFT))) {
+		while (--field_width > 0) {
+			if (buf < end) {
 				*buf = ' ';
 			}
 			++buf;
@@ -320,24 +211,20 @@ static char *number(char *buf, char *end, unsigned long long num,
 	}
 
 	/* sign */
-	if (sign)
-	{
+	if (sign) {
 		if (buf < end)
 			*buf = sign;
 		++buf;
 	}
 
 	/* "0x" / "0" prefix %#x */
-	if (need_pfx)
-	{
-		if (spec.base == 16 || !is_zero)
-		{
+	if (need_pfx) {
+		if (spec.base == 16 || !is_zero) {
 			if (buf < end)
 				*buf = '0';
 			++buf;
 		}
-		if (spec.base == 16)
-		{
+		if (spec.base == 16) {
 			if (buf < end)
 				*buf = ('X' | locase);
 			++buf;
@@ -345,12 +232,10 @@ static char *number(char *buf, char *end, unsigned long long num,
 	}
 
 	/* zero or space padding */
-	if (!(spec.flags & LEFT))
-	{
+	if (!(spec.flags & LEFT)) {
 		char c = ' ' + (spec.flags & ZEROPAD);
 
-		while (--field_width >= 0)
-		{
+		while (--field_width >= 0) {
 			if (buf < end)
 				*buf = c;
 			++buf;
@@ -358,24 +243,21 @@ static char *number(char *buf, char *end, unsigned long long num,
 	}
 
 	/* hmm even more zero padding? */
-	while (i <= --precision)
-	{
+	while (i <= --precision) {
 		if (buf < end)
 			*buf = '0';
 		++buf;
 	}
 
 	/* actual digits of result */
-	while (--i >= 0)
-	{
+	while (--i >= 0) {
 		if (buf < end)
 			*buf = tmp[i];
 		++buf;
 	}
 
 	/* trailing space padding */
-	while (--field_width >= 0)
-	{
+	while (--field_width >= 0) {
 		if (buf < end)
 			*buf = ' ';
 		++buf;
@@ -384,14 +266,12 @@ static char *number(char *buf, char *end, unsigned long long num,
 	return buf;
 }
 
-static char *pointer_string(char *buf, char *end,
-							const void *ptr,
-							struct printf_spec spec)
+static char *pointer_string(char *buf, char *end, const void *ptr,
+			    struct printf_spec spec)
 {
 	spec.base = 16;
 	spec.flags |= SMALL;
-	if (spec.field_width == -1)
-	{
+	if (spec.field_width == -1) {
 		spec.field_width = 2 * sizeof(ptr);
 		spec.flags |= ZEROPAD;
 	}
@@ -403,8 +283,7 @@ static int skip_atoi(const char **s)
 {
 	int i = 0;
 
-	do
-	{
+	do {
 		i = i * 10 + *((*s)++) - '0';
 	} while (isdigit(**s));
 
@@ -424,22 +303,18 @@ static void set_precision(struct printf_spec *spec, int prec)
 static void move_right(char *buf, char *end, unsigned len, unsigned spaces)
 {
 	size_t size;
-	if (buf >= end)
-	{
+	if (buf >= end) {
 		return;
 	}
 
 	size = end - buf;
-	if (size <= spaces)
-	{
+	if (size <= spaces) {
 		memset(buf, ' ', size);
 		return;
 	}
 
-	if (len)
-	{
-		if (len > size - spaces)
-		{
+	if (len) {
+		if (len > size - spaces) {
 			len = size - spaces;
 		}
 		memmove(buf + spaces, buf, len);
@@ -451,22 +326,18 @@ static char *widen_string(char *buf, int n, char *end, struct printf_spec spec)
 {
 	unsigned spaces;
 
-	if (n > spec.field_width)
-	{
+	if (n > spec.field_width) {
 		return buf;
 	}
 
 	spaces = spec.field_width - n;
-	if (!(spec.flags & LEFT))
-	{
+	if (!(spec.flags & LEFT)) {
 		move_right(buf - n, end, n, spaces);
 		return buf + spaces;
 	}
 
-	while (spaces--)
-	{
-		if (buf < end)
-		{
+	while (spaces--) {
+		if (buf < end) {
 			*buf = ' ';
 		}
 		++buf;
@@ -474,20 +345,18 @@ static char *widen_string(char *buf, int n, char *end, struct printf_spec spec)
 	return buf;
 }
 
-static char *string(char *buf, char *end, const char *s, struct printf_spec spec)
+static char *string(char *buf, char *end, const char *s,
+		    struct printf_spec spec)
 {
 	int len = 0;
 	int lim = spec.precision;
 
-	while (lim--)
-	{
+	while (lim--) {
 		char c = *s++;
-		if (!c)
-		{
+		if (!c) {
 			break;
 		}
-		if (buf < end)
-		{
+		if (buf < end) {
 			*buf = c;
 		}
 
@@ -502,10 +371,8 @@ int format_decode(const char *fmt, struct printf_spec *spec)
 	const char *start = fmt;
 	char qualifier;
 
-	if (spec->type == FORMAT_TYPE_WIDTH)
-	{
-		if (spec->field_width < 0)
-		{
+	if (spec->type == FORMAT_TYPE_WIDTH) {
+		if (spec->field_width < 0) {
 			spec->field_width = -spec->field_width;
 			spec->flags |= LEFT;
 		}
@@ -513,10 +380,8 @@ int format_decode(const char *fmt, struct printf_spec *spec)
 		goto precision;
 	}
 
-	if (spec->type == FORMAT_TYPE_PRECISION)
-	{
-		if (spec->precision < 0)
-		{
+	if (spec->type == FORMAT_TYPE_PRECISION) {
+		if (spec->precision < 0) {
 			spec->precision = 0;
 		}
 		spec->type = FORMAT_TYPE_NONE;
@@ -524,26 +389,21 @@ int format_decode(const char *fmt, struct printf_spec *spec)
 	}
 
 	spec->type = FORMAT_TYPE_NONE;
-	for (; *fmt; ++fmt)
-	{
-		if (*fmt == '%')
-		{
+	for (; *fmt; ++fmt) {
+		if (*fmt == '%') {
 			break;
 		}
 	}
-	if (fmt != start || !*fmt)
-	{
+	if (fmt != start || !*fmt) {
 		return fmt - start;
 	}
 
 	spec->flags = 0;
-	while (1)
-	{
+	while (1) {
 		bool found = true;
 		++fmt;
 
-		switch (*fmt)
-		{
+		switch (*fmt) {
 		case '-':
 			spec->flags |= LEFT;
 			break;
@@ -570,11 +430,9 @@ int format_decode(const char *fmt, struct printf_spec *spec)
 	}
 
 	spec->field_width = -1;
-	if (isdigit(*fmt))
-	{
+	if (isdigit(*fmt)) {
 		spec->field_width = skip_atoi(&fmt);
-	}
-	else if (*fmt == '*') //*号表示宽度由参数指出
+	} else if (*fmt == '*') //*号表示宽度由参数指出
 	{
 		spec->type = FORMAT_TYPE_WIDTH;
 		return ++fmt - start;
@@ -583,19 +441,14 @@ int format_decode(const char *fmt, struct printf_spec *spec)
 //精度 %.3f
 precision:
 	spec->precision = -1;
-	if (*fmt == '.')
-	{
+	if (*fmt == '.') {
 		++fmt;
-		if (isdigit(*fmt))
-		{
+		if (isdigit(*fmt)) {
 			spec->precision = skip_atoi(&fmt);
-			if (spec->precision < 0)
-			{
+			if (spec->precision < 0) {
 				spec->precision = 0;
 			}
-		}
-		else if (*fmt == '*')
-		{
+		} else if (*fmt == '*') {
 			spec->type = FORMAT_TYPE_PRECISION;
 			return ++fmt - start;
 		}
@@ -604,18 +457,14 @@ precision:
 qualifier:
 	qualifier = 0;
 	// hh = H ll = L
-	if (*fmt == 'h' || _tolower(*fmt) == 'l' || *fmt == 'z' || *fmt == 't')
-	{
+	if (*fmt == 'h' || _tolower(*fmt) == 'l' || *fmt == 'z' ||
+	    *fmt == 't') {
 		qualifier = *fmt++;
-		if (qualifier == *fmt)
-		{
-			if (qualifier == 'l')
-			{
+		if (qualifier == *fmt) {
+			if (qualifier == 'l') {
 				qualifier = 'L';
 				++fmt;
-			}
-			else if (qualifier == 'h')
-			{
+			} else if (qualifier == 'h') {
 				qualifier = 'H';
 				++fmt;
 			}
@@ -623,8 +472,7 @@ qualifier:
 	}
 
 	spec->base = 10;
-	switch (*fmt)
-	{
+	switch (*fmt) {
 	case 'c':
 		spec->type = FORMAT_TYPE_CHAR;
 		return ++fmt - start;
@@ -661,28 +509,17 @@ qualifier:
 		return fmt - start;
 	}
 
-	if (qualifier == 'L')
-	{
+	if (qualifier == 'L') {
 		spec->type = FORMAT_TYPE_LONG_LONG;
-	}
-	else if (qualifier == 'l')
-	{
+	} else if (qualifier == 'l') {
 		spec->type = FORMAT_TYPE_ULONG + (spec->flags & SIGN);
-	}
-	else if (qualifier == 'z')
-	{
+	} else if (qualifier == 'z') {
 		spec->type = FORMAT_TYPE_SIZE_T;
-	}
-	else if (qualifier == 'H')
-	{
+	} else if (qualifier == 'H') {
 		spec->type = FORMAT_TYPE_UBYTE + (spec->flags & SIGN);
-	}
-	else if (qualifier == 'h')
-	{
+	} else if (qualifier == 'h') {
 		spec->type = FORMAT_TYPE_USHORT + (spec->flags & SIGN);
-	}
-	else
-	{
+	} else {
 		spec->type = FORMAT_TYPE_UINT + (spec->flags & SIGN);
 	}
 
@@ -720,37 +557,31 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
 {
 	unsigned long long num;
 	char *str, *end;
-	struct printf_spec spec = {0};
+	struct printf_spec spec = { 0 };
 
-	if (size > INT_MAX)
-	{
+	if (size > INT_MAX) {
 		return 0;
 	}
 
 	str = buf;
 	end = buf + size;
 
-	if (end < buf)
-	{
+	if (end < buf) {
 		end = ((void *)-1);
 		size = end - buf;
 	}
 
-	while (*fmt)
-	{
+	while (*fmt) {
 		const char *old_fmt = fmt;
 		int read = format_decode(fmt, &spec);
 		int copy;
 		char c;
 		fmt += read;
-		switch (spec.type)
-		{
+		switch (spec.type) {
 		case FORMAT_TYPE_NONE:
 			copy = read;
-			if (str < end)
-			{
-				if (copy > end - str)
-				{
+			if (str < end) {
+				if (copy > end - str) {
 					copy = end - str;
 				}
 				memcpy(str, old_fmt, copy);
@@ -768,12 +599,9 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
 
 		case FORMAT_TYPE_CHAR:
 
-			if (!(spec.flags & LEFT))
-			{
-				while (--spec.field_width > 0)
-				{
-					if (str < end)
-					{
+			if (!(spec.flags & LEFT)) {
+				while (--spec.field_width > 0) {
+					if (str < end) {
 						*str = ' ';
 					}
 					++str;
@@ -781,16 +609,13 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
 			}
 
 			c = (unsigned char)va_arg(args, int);
-			if (str < end)
-			{
+			if (str < end) {
 				*str = c;
 			}
 			++str;
 
-			while (--spec.field_width > 0)
-			{
-				if (str < end)
-				{
+			while (--spec.field_width > 0) {
+				if (str < end) {
 					*str = ' ';
 				}
 				++str;
@@ -802,14 +627,14 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
 			break;
 
 		case FORMAT_TYPE_PTR:
-			str = pointer_string(str, end, va_arg(args, void *), spec);
+			str = pointer_string(str, end, va_arg(args, void *),
+					     spec);
 			while (isalnum(*fmt))
 				fmt++;
 			break;
 
 		case FORMAT_TYPE_PERCENT_CHAR:
-			if (str < end)
-			{
+			if (str < end) {
 				*str = '%';
 			}
 			++str;
@@ -819,8 +644,7 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
 			goto out;
 
 		default:
-			switch (spec.type)
-			{
+			switch (spec.type) {
 			case FORMAT_TYPE_LONG_LONG:
 				num = va_arg(args, long long);
 				break;
@@ -862,14 +686,10 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
 	}
 
 out:
-	if (size > 0)
-	{
-		if (str < end)
-		{
+	if (size > 0) {
+		if (str < end) {
 			*str = '\0';
-		}
-		else
-		{
+		} else {
 			end[-1] = '\0';
 		}
 	}

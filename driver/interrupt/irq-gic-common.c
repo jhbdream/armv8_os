@@ -5,8 +5,8 @@
 #include <driver/interrupt.h>
 #include "arm-gic.h"
 
-int gic_configure_irq(unsigned int irq, unsigned int type,
-		       void __iomem *base, void (*sync_access)(void))
+int gic_configure_irq(unsigned int irq, unsigned int type, void __iomem *base,
+		      void (*sync_access)(void))
 {
 	u32 confmask = 0x2 << ((irq % 16) * 2);
 	u32 confoff = (irq / 16) * 4;
@@ -24,8 +24,7 @@ int gic_configure_irq(unsigned int irq, unsigned int type,
 		val |= confmask;
 
 	/* If the current configuration is the same, then we are done */
-	if (val == oldval)
-	{
+	if (val == oldval) {
 		return 0;
 	}
 
@@ -38,13 +37,12 @@ int gic_configure_irq(unsigned int irq, unsigned int type,
 	 * non-secure mode, and hence it may not be catastrophic.
 	 */
 	writel_relaxed(val, base + GIC_DIST_CONFIG + confoff);
-	if (readl_relaxed(base + GIC_DIST_CONFIG + confoff) != val)
-	{
+	if (readl_relaxed(base + GIC_DIST_CONFIG + confoff) != val) {
 		if ((irq >= 32))
 			ret = -EINVAL;
 		else
 			printk("GIC: PPI%d is secure or misconfigured\n",
-				  irq - 16);
+			       irq - 16);
 	}
 
 	if (sync_access)
@@ -63,7 +61,7 @@ void gic_dist_config(void __iomem *base, int gic_irqs,
 	 */
 	for (i = 32; i < gic_irqs; i += 16)
 		writel_relaxed(GICD_INT_ACTLOW_LVLTRIG,
-					base + GIC_DIST_CONFIG + i / 4);
+			       base + GIC_DIST_CONFIG + i / 4);
 
 	/*
 	 * Set priority on all global interrupts.
@@ -104,7 +102,7 @@ void gic_cpu_config(void __iomem *base, void (*sync_access)(void))
 	 */
 	for (i = 0; i < 32; i += 4)
 		writel_relaxed(GICD_INT_DEF_PRI_X4,
-					base + GIC_DIST_PRI + i * 4 / 4);
+			       base + GIC_DIST_PRI + i * 4 / 4);
 
 	if (sync_access)
 		sync_access();

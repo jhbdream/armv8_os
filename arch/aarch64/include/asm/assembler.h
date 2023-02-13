@@ -15,12 +15,12 @@
 #ifndef __ASM_ASSEMBLER_H
 #define __ASM_ASSEMBLER_H
 
-    /*
+/*
     * mov_q - move an immediate constant into a 64-bit register using
     *         between 2 and 4 movz/movk instructions (depending on the
     *         magnitude and sign of the operand)
     */
-    .macro  mov_q, reg, val
+.macro  mov_q, reg, val
     .if (((\val) >> 31) == 0 || ((\val) >> 31) == 0x1ffffffff)
     movz    \reg, :abs_g1_s:\val
     .else

@@ -36,7 +36,7 @@ struct vm_struct *vmlist = NULL;
  * @return
  */
 struct vm_struct *__get_vm_area(unsigned long size, unsigned long flags,
-		unsigned long start, unsigned long end)
+				unsigned long start, unsigned long end)
 {
 	struct vm_struct **p, *tmp, *area;
 	unsigned long align = 1;
@@ -47,14 +47,14 @@ struct vm_struct *__get_vm_area(unsigned long size, unsigned long flags,
 	 */
 	addr = ALIGN(start, align);
 	size = ALIGN(size, PAGE_SIZE);
-	if(!size)
+	if (!size)
 		return NULL;
 
 	/**
 	 * 分配一个链表节点
 	 */
 	area = kmalloc(sizeof(*area));
-	if(!area)
+	if (!area)
 		return NULL;
 
 	/**
@@ -62,19 +62,19 @@ struct vm_struct *__get_vm_area(unsigned long size, unsigned long flags,
 	 * lock: vmlist 是全局变量,如果对全局变量有写相关修改 应该进行加锁操作
 	 * 遍历记录的 vmstruct 信息，找到空闲的区域
 	 */
-	for(p = &vmlist; (tmp = *p) != NULL; p = &tmp->next)
-	{
+	for (p = &vmlist; (tmp = *p) != NULL; p = &tmp->next) {
 		/* 更新起始地址 */
-		if((unsigned long)tmp->addr < addr)
-		{
-			if((unsigned long)tmp->addr + tmp->size >= addr)
-				addr = ALIGN(tmp->size + (unsigned long)tmp->addr, align);
+		if ((unsigned long)tmp->addr < addr) {
+			if ((unsigned long)tmp->addr + tmp->size >= addr)
+				addr = ALIGN(tmp->size +
+						     (unsigned long)tmp->addr,
+					     align);
 
 			continue;
 		}
 
 		/* addr 会变化，避免溢出 */
-		if(size + addr < addr)
+		if (size + addr < addr)
 			goto out;
 
 		/**
@@ -84,12 +84,12 @@ struct vm_struct *__get_vm_area(unsigned long size, unsigned long flags,
 		 * 1. 链表找到末尾(要判断到末尾时剩余空间是否足够)
 		 * 2. 在中间找到空隙
 		 */
-		if(size + addr <= (unsigned long)tmp->addr)
+		if (size + addr <= (unsigned long)tmp->addr)
 			goto found;
 
 		/* 更新查找起始地址 并判断剩余空间是否足够 */
 		addr = ALIGN(tmp->size + (unsigned long)tmp->addr, align);
-		if(addr > end - size)
+		if (addr > end - size)
 			goto out;
 	}
 
@@ -116,8 +116,9 @@ out:
 	return NULL;
 }
 
-static inline int vmap_pte_range(pmd_t *pmd, unsigned long addr, unsigned long end,
-		pgprot_t prot, struct page ***page)
+static inline int vmap_pte_range(pmd_t *pmd, unsigned long addr,
+				 unsigned long end, pgprot_t prot,
+				 struct page ***page)
 {
 	pte_t *pte, *ptep;
 	unsigned long next;
@@ -125,28 +126,27 @@ static inline int vmap_pte_range(pmd_t *pmd, unsigned long addr, unsigned long e
 	BUG_ON(addr >= end);
 
 	pte = pte_alloc(pmd, addr);
-	if(!pte)
+	if (!pte)
 		return -ENOMEM;
 
-	do
-	{
+	do {
 		struct page *p = **page;
-		if(!page)
+		if (!page)
 			return -ENOMEM;
 
 		// set_pte 把 page 的物理地址写入到 pte 表项
 		ptep = pte_offset_pte(pte, addr);
-		*ptep =	pfn_pte(page_to_pfn(p), prot);
-
+		*ptep = pfn_pte(page_to_pfn(p), prot);
 
 		(*page)++;
-	}while(pte++, addr += PAGE_SIZE, addr != end);
+	} while (pte++, addr += PAGE_SIZE, addr != end);
 
 	return 0;
 }
 
-static inline int vmap_pmd_range(pud_t *pud, unsigned long addr, unsigned long end,
-		pgprot_t prot, struct page ***page)
+static inline int vmap_pmd_range(pud_t *pud, unsigned long addr,
+				 unsigned long end, pgprot_t prot,
+				 struct page ***page)
 {
 	pmd_t *pmd;
 	unsigned long next;
@@ -154,14 +154,13 @@ static inline int vmap_pmd_range(pud_t *pud, unsigned long addr, unsigned long e
 	BUG_ON(addr >= end);
 
 	pmd = pmd_alloc(pud, addr);
-	if(!pmd)
+	if (!pmd)
 		return -ENOMEM;
 
-	do
-	{
+	do {
 		next = pmd_addr_end(addr, end);
 		vmap_pte_range(pmd, addr, next, prot, page);
-	} while(pmd++, addr = next, addr != end);
+	} while (pmd++, addr = next, addr != end);
 
 	return 0;
 }
@@ -177,8 +176,9 @@ static inline int vmap_pmd_range(pud_t *pud, unsigned long addr, unsigned long e
  *
  * @return
  */
-static inline int vmap_pud_range(pgd_t *pgd, unsigned long addr, unsigned long end,
-		pgprot_t prot, struct page ***page)
+static inline int vmap_pud_range(pgd_t *pgd, unsigned long addr,
+				 unsigned long end, pgprot_t prot,
+				 struct page ***page)
 {
 	pud_t *pud;
 	unsigned long next;
@@ -190,14 +190,13 @@ static inline int vmap_pud_range(pgd_t *pgd, unsigned long addr, unsigned long e
 	/* 如果pgd中对应pud为空 分配一个内存作为pud页表 并填充到pgd中 */
 
 	pud = pud_alloc(pgd, addr);
-	if(!pud)
+	if (!pud)
 		return -ENOMEM;
 
-	do
-	{
+	do {
 		next = pud_addr_end(addr, end);
 		vmap_pmd_range(pud, addr, next, prot, page);
-	} while(pud++, addr = next, addr != end);
+	} while (pud++, addr = next, addr != end);
 
 	return 0;
 }
@@ -216,13 +215,11 @@ int map_vm_area(struct vm_struct *area, pgprot_t prot, struct page ***page)
 	/* 根据地址找到对于entry */
 	/* PGD 表示的范围很大，不需要分配表项 一个表足够 */
 	pgd = pgd_offset_k(addr);
-	do
-	{
+	do {
 		/* 如果end小于pgd的大小 next 即为end， 否则 end 为下一个pgd项地址 */
 		next = pgd_addr_end(addr, end);
 		vmap_pud_range(pgd, addr, next, prot, page);
-	} while(pgd++, addr = next, addr != end);
-
+	} while (pgd++, addr = next, addr != end);
 
 	return 0;
 }
@@ -237,36 +234,35 @@ int map_vm_area(struct vm_struct *area, pgprot_t prot, struct page ***page)
  *  Maps @count pages from @pages into contiguous kernel virtual
  *  space.
  */
-void *vmap(struct page **pages, unsigned int count,
-        unsigned long flags, pgprot_t prot)
+void *vmap(struct page **pages, unsigned int count, unsigned long flags,
+	   pgprot_t prot)
 {
-    struct vm_struct *area;
+	struct vm_struct *area;
 
 	area = __get_vm_area(4096, 0, 0xFFFF900000000000, 0xFFFF900400000000);
-    if (!area)
-	{
+	if (!area) {
 		printk("get vm area failed\n");
-        return NULL;
+		return NULL;
 	}
 
-    if (map_vm_area(area, prot, &pages)) {
+	if (map_vm_area(area, prot, &pages)) {
 		printk("vmap failed!\n");
-        return NULL;
-    }
+		return NULL;
+	}
 
-    return area->addr;
+	return area->addr;
 }
 
 int vmalloc_test(void)
 {
 	struct vm_struct *vm;
 	void *v = NULL;
-	pgprot_t prot = {0};
+	pgprot_t prot = { 0 };
 
 	printk("do vmalloc_test!\n");
 	struct page *pages = __get_free_page();
 	v = vmap(&pages, 1, 0, prot);
-	if(v)
+	if (v)
 		printk("map va 0x%lx\n", v);
 
 	int val = *(int *)v;
@@ -293,4 +289,3 @@ int vmalloc_test(void)
 
 	return 0;
 }
-

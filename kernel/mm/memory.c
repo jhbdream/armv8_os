@@ -13,7 +13,7 @@
 int __pud_alloc(pgd_t *pgd, unsigned long address)
 {
 	pud_t *new = __get_free_page();
-	if(!new)
+	if (!new)
 		return -ENOMEM;
 
 	/* 为分配页表项时 页表项的内容需要为空,表示未进行映射
@@ -31,7 +31,7 @@ int __pud_alloc(pgd_t *pgd, unsigned long address)
 	 * 如果 pgd 无效则填充新分配的pmd
 	 *
 	 */
-	if(pgd_present(*pgd))
+	if (pgd_present(*pgd))
 		free_page((unsigned long)new);
 	else
 		pgd_populate(pgd, new, PGD_TYPE_TABLE);
@@ -44,14 +44,14 @@ int __pud_alloc(pgd_t *pgd, unsigned long address)
 int __pmd_alloc(pud_t *pud, unsigned long address)
 {
 	pmd_t *new = __get_free_page();
-	if(!new)
+	if (!new)
 		return -ENOMEM;
 
 	memset(new, 0, PAGE_SIZE);
 
 	// TODO: spin lock
 
-	if(pud_present(*pud))
+	if (pud_present(*pud))
 		free_page((unsigned long)new);
 	else
 		pud_populate(pud, new, PGD_TYPE_TABLE);
@@ -64,16 +64,15 @@ int __pmd_alloc(pud_t *pud, unsigned long address)
 int __pte_alloc(pmd_t *pmd, unsigned long address)
 {
 	pte_t *new = __get_free_page();
-	if(!new)
+	if (!new)
 		return -ENOMEM;
 
 	memset(new, 0, PAGE_SIZE);
 
-	if(pmd_present(*pmd))
+	if (pmd_present(*pmd))
 		free_page((unsigned long)new);
 	else
 		pmd_populate(pmd, new, PGD_TYPE_TABLE);
 
 	return 0;
 }
-

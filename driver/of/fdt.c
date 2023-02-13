@@ -45,8 +45,8 @@ const void *of_get_flat_dt_prop(unsigned long node, const char *name, int *size)
  * Return: a non-zero value on match with smaller values returned for more
  * specific compatible values.
  */
-static int of_fdt_is_compatible(const void *blob,
-		      unsigned long node, const char *compat)
+static int of_fdt_is_compatible(const void *blob, unsigned long node,
+				const char *compat)
 {
 	const char *cp;
 	int cplen;
@@ -85,7 +85,7 @@ uint32_t of_get_flat_dt_phandle(unsigned long node)
 	return fdt_get_phandle(initial_boot_params, node);
 }
 
-const char * of_flat_dt_get_machine_name(void)
+const char *of_flat_dt_get_machine_name(void)
 {
 	const char *name;
 	unsigned long dt_root = of_get_flat_dt_root();
@@ -98,10 +98,10 @@ const char * of_flat_dt_get_machine_name(void)
 
 static u32 of_be32_to_le32(u32 val)
 {
-	return	((((__u32)(val) & (__u32)0x000000ffUL) << 24) |		\
-			 (((__u32)(val) & (__u32)0x0000ff00UL) <<  8) |		\
-			(((__u32)(val) & (__u32)0x00ff0000UL) >>  8) |		\
-			(((__u32)(val) & (__u32)0xff000000UL) >> 24));
+	return ((((__u32)(val) & (__u32)0x000000ffUL) << 24) |
+		(((__u32)(val) & (__u32)0x0000ff00UL) << 8) |
+		(((__u32)(val) & (__u32)0x00ff0000UL) >> 8) |
+		(((__u32)(val) & (__u32)0xff000000UL) >> 24));
 }
 
 /*
@@ -133,8 +133,8 @@ void early_init_dt_add_memory_arch(u64 base, u64 size)
 /*
  * early_init_dt_scan_memory - Look for and parse memory nodes
  */
-int early_init_dt_scan_memory(unsigned long node, const char *uname,
-				     int depth, void *data)
+int early_init_dt_scan_memory(unsigned long node, const char *uname, int depth,
+			      void *data)
 {
 	/*
 		memory@80000000 {
@@ -176,34 +176,31 @@ int early_init_dt_scan_memory(unsigned long node, const char *uname,
 	return 0;
 }
 
-int of_fdt_scan(int (*it)(unsigned long node, const char *uname,
-					int depth, void *data),
-					void *data)
+int of_fdt_scan(int (*it)(unsigned long node, const char *uname, int depth,
+			  void *data),
+		void *data)
 {
 	const void *blob = _FDT_INIT_BLOB_ADDR;
 	const char *pathp;
 	int offset, rc = 0, depth = -1;
 
-	if(!blob)
+	if (!blob)
 		return 0;
 
-	for(offset = fdt_next_node(blob, -1, &depth);
-		offset >= 0 && depth >= 0 && !rc;
-		offset = fdt_next_node(blob, offset, &depth))
-	{
+	for (offset = fdt_next_node(blob, -1, &depth);
+	     offset >= 0 && depth >= 0 && !rc;
+	     offset = fdt_next_node(blob, offset, &depth)) {
 		pathp = fdt_get_name(blob, offset, NULL);
-		if(it)
+		if (it)
 			rc = it(offset, pathp, depth, data);
 	}
 
 	return rc;
 }
 
-int fdt_iterator(unsigned long node, const char *uname,
-					int depth, void *data)
+int fdt_iterator(unsigned long node, const char *uname, int depth, void *data)
 {
-	for(int i = 0; i < depth; i++)
-	{
+	for (int i = 0; i < depth; i++) {
 		printk("\t");
 	}
 
@@ -223,14 +220,11 @@ int fdt_iterator(unsigned long node, const char *uname,
 			size -= strlen(prop) + 1;
 			prop += strlen(prop) + 1;
 		}
-
 	}
 
 	printk("\n");
 	return 0;
 }
-
-
 
 void fdt_test(void)
 {

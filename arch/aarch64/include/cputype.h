@@ -18,51 +18,46 @@
 
 #include <const.h>
 
-#define INVALID_HWID		ULONG_MAX
+#define INVALID_HWID ULONG_MAX
 
-#define MPIDR_UP_BITMASK	(0x1 << 30)
-#define MPIDR_MT_BITMASK	(0x1 << 24)
-#define MPIDR_HWID_BITMASK	UL(0xff00ffffff)
+#define MPIDR_UP_BITMASK (0x1 << 30)
+#define MPIDR_MT_BITMASK (0x1 << 24)
+#define MPIDR_HWID_BITMASK UL(0xff00ffffff)
 
-#define MPIDR_LEVEL_BITS_SHIFT	3
-#define MPIDR_LEVEL_BITS	(1 << MPIDR_LEVEL_BITS_SHIFT)
-#define MPIDR_LEVEL_MASK	((1 << MPIDR_LEVEL_BITS) - 1)
+#define MPIDR_LEVEL_BITS_SHIFT 3
+#define MPIDR_LEVEL_BITS (1 << MPIDR_LEVEL_BITS_SHIFT)
+#define MPIDR_LEVEL_MASK ((1 << MPIDR_LEVEL_BITS) - 1)
 
-#define MPIDR_LEVEL_SHIFT(level) \
-	(((1 << level) >> 1) << MPIDR_LEVEL_BITS_SHIFT)
+#define MPIDR_LEVEL_SHIFT(level) (((1 << level) >> 1) << MPIDR_LEVEL_BITS_SHIFT)
 
-#define MPIDR_AFFINITY_LEVEL(mpidr, level) \
+#define MPIDR_AFFINITY_LEVEL(mpidr, level)                                     \
 	((mpidr >> MPIDR_LEVEL_SHIFT(level)) & MPIDR_LEVEL_MASK)
 
-#define MIDR_REVISION_MASK	0xf
-#define MIDR_REVISION(midr)	((midr) & MIDR_REVISION_MASK)
-#define MIDR_PARTNUM_SHIFT	4
-#define MIDR_PARTNUM_MASK	(0xfff << MIDR_PARTNUM_SHIFT)
-#define MIDR_PARTNUM(midr)	\
-	(((midr) & MIDR_PARTNUM_MASK) >> MIDR_PARTNUM_SHIFT)
-#define MIDR_ARCHITECTURE_SHIFT	16
-#define MIDR_ARCHITECTURE_MASK	(0xf << MIDR_ARCHITECTURE_SHIFT)
-#define MIDR_ARCHITECTURE(midr)	\
-	(((midr) & MIDR_ARCHITECTURE_MASK) >> MIDR_ARCHITECTURE_SHIFT)
-#define MIDR_VARIANT_SHIFT	20
-#define MIDR_VARIANT_MASK	(0xf << MIDR_VARIANT_SHIFT)
-#define MIDR_VARIANT(midr)	\
-	(((midr) & MIDR_VARIANT_MASK) >> MIDR_VARIANT_SHIFT)
-#define MIDR_IMPLEMENTOR_SHIFT	24
-#define MIDR_IMPLEMENTOR_MASK	(0xff << MIDR_IMPLEMENTOR_SHIFT)
-#define MIDR_IMPLEMENTOR(midr)	\
-	(((midr) & MIDR_IMPLEMENTOR_MASK) >> MIDR_IMPLEMENTOR_SHIFT)
+#define MIDR_REVISION_MASK 0xf
+#define MIDR_REVISION(midr) ((midr)&MIDR_REVISION_MASK)
+#define MIDR_PARTNUM_SHIFT 4
+#define MIDR_PARTNUM_MASK (0xfff << MIDR_PARTNUM_SHIFT)
+#define MIDR_PARTNUM(midr) (((midr)&MIDR_PARTNUM_MASK) >> MIDR_PARTNUM_SHIFT)
+#define MIDR_ARCHITECTURE_SHIFT 16
+#define MIDR_ARCHITECTURE_MASK (0xf << MIDR_ARCHITECTURE_SHIFT)
+#define MIDR_ARCHITECTURE(midr)                                                \
+	(((midr)&MIDR_ARCHITECTURE_MASK) >> MIDR_ARCHITECTURE_SHIFT)
+#define MIDR_VARIANT_SHIFT 20
+#define MIDR_VARIANT_MASK (0xf << MIDR_VARIANT_SHIFT)
+#define MIDR_VARIANT(midr) (((midr)&MIDR_VARIANT_MASK) >> MIDR_VARIANT_SHIFT)
+#define MIDR_IMPLEMENTOR_SHIFT 24
+#define MIDR_IMPLEMENTOR_MASK (0xff << MIDR_IMPLEMENTOR_SHIFT)
+#define MIDR_IMPLEMENTOR(midr)                                                 \
+	(((midr)&MIDR_IMPLEMENTOR_MASK) >> MIDR_IMPLEMENTOR_SHIFT)
 
-#define MIDR_CPU_MODEL(imp, partnum) \
-	(((imp)			<< MIDR_IMPLEMENTOR_SHIFT) | \
-	(0xf			<< MIDR_ARCHITECTURE_SHIFT) | \
-	((partnum)		<< MIDR_PARTNUM_SHIFT))
+#define MIDR_CPU_MODEL(imp, partnum)                                           \
+	(((imp) << MIDR_IMPLEMENTOR_SHIFT) |                                   \
+	 (0xf << MIDR_ARCHITECTURE_SHIFT) | ((partnum) << MIDR_PARTNUM_SHIFT))
 
-#define MIDR_CPU_VAR_REV(var, rev) \
-	(((var)	<< MIDR_VARIANT_SHIFT) | (rev))
+#define MIDR_CPU_VAR_REV(var, rev) (((var) << MIDR_VARIANT_SHIFT) | (rev))
 
-#define MIDR_CPU_MODEL_MASK (MIDR_IMPLEMENTOR_MASK | MIDR_PARTNUM_MASK | \
-			     MIDR_ARCHITECTURE_MASK)
+#define MIDR_CPU_MODEL_MASK                                                    \
+	(MIDR_IMPLEMENTOR_MASK | MIDR_PARTNUM_MASK | MIDR_ARCHITECTURE_MASK)
 
 #ifndef __ASSEMBLY__
 
@@ -71,7 +66,7 @@
 #include <compiler_types.h>
 #include <compiler_attribute.h>
 
-#define read_cpuid(reg)			read_sysreg_s(SYS_ ## reg)
+#define read_cpuid(reg) read_sysreg_s(SYS_##reg)
 
 /*
  * Represent a range of MIDR values for a given CPU model and a
@@ -88,11 +83,10 @@ struct midr_range {
 	u32 rv_max;
 };
 
-#define MIDR_RANGE(m, v_min, r_min, v_max, r_max)		\
-	{							\
-		.model = m,					\
-		.rv_min = MIDR_CPU_VAR_REV(v_min, r_min),	\
-		.rv_max = MIDR_CPU_VAR_REV(v_max, r_max),	\
+#define MIDR_RANGE(m, v_min, r_min, v_max, r_max)                              \
+	{                                                                      \
+		.model = m, .rv_min = MIDR_CPU_VAR_REV(v_min, r_min),          \
+		.rv_max = MIDR_CPU_VAR_REV(v_max, r_max),                      \
 	}
 
 #define MIDR_ALL_VERSIONS(m) MIDR_RANGE(m, 0, 0, 0xf, 0xf)
@@ -108,12 +102,12 @@ static inline bool midr_is_cpu_model_range(u32 midr, u32 model, u32 rv_min,
 
 static inline bool is_midr_in_range(u32 midr, struct midr_range const *range)
 {
-	return midr_is_cpu_model_range(midr, range->model,
-				       range->rv_min, range->rv_max);
+	return midr_is_cpu_model_range(midr, range->model, range->rv_min,
+				       range->rv_max);
 }
 
-static inline bool
-is_midr_in_range_list(u32 midr, struct midr_range const *ranges)
+static inline bool is_midr_in_range_list(u32 midr,
+					 struct midr_range const *ranges)
 {
 	while (ranges->model)
 		if (is_midr_in_range(midr, ranges++))

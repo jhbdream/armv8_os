@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-#define typeof_member(T, m) typeof(((T*)0)->m)
+#define typeof_member(T, m) typeof(((T *)0)->m)
 
 /**
  * container_of - cast a member of a structure out to the containing structure
@@ -12,8 +12,10 @@
  * @member: the name of the member within the struct.
  *
  */
-#define container_of(ptr, type, member) ({              \
-    void *__mptr = (void *)(ptr);                   \
-    ((type *)(__mptr - offsetof(type, member))); })
+#define container_of(ptr, type, member)                                        \
+	({                                                                     \
+		void *__mptr = (void *)(ptr);                                  \
+		((type *)(__mptr - offsetof(type, member)));                   \
+	})
 
 #endif

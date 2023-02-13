@@ -17,7 +17,6 @@
 extern char __kimage_start[];
 extern char __kimage_end[];
 
-
 /* mm page_va - mm phys_pa */
 unsigned long va_pa_offset;
 
@@ -54,8 +53,7 @@ void __set_fixmap(enum fixed_addresses idx, phys_addr_t phys, pgprot_t prot)
 
 static pte_t *get_pte_virt(phys_addr_t pa)
 {
-	if(mmu_enabled)
-	{
+	if (mmu_enabled) {
 		clear_fixmap(FIX_PTE);
 		return (pte_t *)set_fixmap_offset(FIX_PTE, pa);
 	}
@@ -65,8 +63,7 @@ static pte_t *get_pte_virt(phys_addr_t pa)
 
 static phys_addr_t alloc_pte(uintptr_t va)
 {
-	if(mmu_enabled)
-	{
+	if (mmu_enabled) {
 		return memblock_phys_alloc_align(PAGE_SIZE, PAGE_SIZE);
 	}
 
@@ -76,8 +73,7 @@ static phys_addr_t alloc_pte(uintptr_t va)
 
 static pmd_t *get_pmd_virt(phys_addr_t pa)
 {
-	if(mmu_enabled)
-	{
+	if (mmu_enabled) {
 		clear_fixmap(FIX_PMD);
 		return (pmd_t *)set_fixmap_offset(FIX_PMD, pa);
 	}
@@ -88,17 +84,15 @@ static pmd_t *get_pmd_virt(phys_addr_t pa)
 
 static phys_addr_t alloc_pmd(uintptr_t va)
 {
-	if(mmu_enabled)
-	{
+	if (mmu_enabled) {
 		return memblock_phys_alloc_align(PAGE_SIZE, PAGE_SIZE);
 	}
 
 	return (phys_addr_t)early_pmd;
 }
 
-static void create_pte_mapping(pte_t *ptep,
-				      uintptr_t va, phys_addr_t pa,
-				      phys_addr_t sz, pgprot_t prot)
+static void create_pte_mapping(pte_t *ptep, uintptr_t va, phys_addr_t pa,
+			       phys_addr_t sz, pgprot_t prot)
 {
 	uintptr_t pte_idx = pte_index(va);
 
@@ -108,9 +102,8 @@ static void create_pte_mapping(pte_t *ptep,
 		ptep[pte_idx] = pfn_pte(PFN_DOWN(pa), prot);
 }
 
-static void create_pmd_mapping(pmd_t *pmdp,
-				      uintptr_t va, phys_addr_t pa,
-				      phys_addr_t sz, pgprot_t prot)
+static void create_pmd_mapping(pmd_t *pmdp, uintptr_t va, phys_addr_t pa,
+			       phys_addr_t sz, pgprot_t prot)
 {
 	pte_t *ptep;
 	phys_addr_t pte_phys;
@@ -135,9 +128,8 @@ static void create_pmd_mapping(pmd_t *pmdp,
 	create_pte_mapping(ptep, va, pa, sz, prot);
 }
 
-void create_pgd_mapping(pgd_t *pgdp,
-				uintptr_t va, phys_addr_t pa,
-				phys_addr_t sz, pgprot_t prot)
+void create_pgd_mapping(pgd_t *pgdp, uintptr_t va, phys_addr_t pa,
+			phys_addr_t sz, pgprot_t prot)
 {
 	pmd_t *pmdp;
 	phys_addr_t next_phys;
@@ -176,13 +168,11 @@ static uintptr_t best_map_size(phys_addr_t base, phys_addr_t size)
 void setup_vm(void)
 {
 	/* early map fixmap */
-	create_pgd_mapping(early_pg_dir,
-			FIXADDR_START, (uintptr_t)fixmap_pmd,
-			PGDIR_SIZE, PAGE_TABLE);
+	create_pgd_mapping(early_pg_dir, FIXADDR_START, (uintptr_t)fixmap_pmd,
+			   PGDIR_SIZE, PAGE_TABLE);
 
-	create_pmd_mapping(fixmap_pmd,
-			FIXADDR_START, (uintptr_t)fixmap_pte,
-			PMD_SIZE, PAGE_TABLE);
+	create_pmd_mapping(fixmap_pmd, FIXADDR_START, (uintptr_t)fixmap_pte,
+			   PMD_SIZE, PAGE_TABLE);
 
 	/**
 	 * create kernel image map in early_pd_dir
@@ -201,11 +191,11 @@ void setup_vm(void)
 
 	BUG_ON((pa % PMD_SIZE) != 0);
 
-	for(; va < va_end; va += PMD_SIZE)
-	{
+	for (; va < va_end; va += PMD_SIZE) {
 		/* pmd = early_pmd */
 		/* size = 1g is enough */
-		create_pgd_mapping(early_pg_dir, va, pa + (va - KIMAGE_VADDR), PMD_SIZE, PAGE_KERNEL_EXEC);
+		create_pgd_mapping(early_pg_dir, va, pa + (va - KIMAGE_VADDR),
+				   PMD_SIZE, PAGE_KERNEL_EXEC);
 	}
 }
 
@@ -222,9 +212,8 @@ void setup_vm_final(void)
 	mmu_enabled = 1;
 
 	/* FIXMAP */
-	create_pgd_mapping(swapper_pg_dir,
-			FIXADDR_START, __pa_symbol(fixmap_pmd),
-			PGDIR_SIZE, PAGE_TABLE);
+	create_pgd_mapping(swapper_pg_dir, FIXADDR_START,
+			   __pa_symbol(fixmap_pmd), PGDIR_SIZE, PAGE_TABLE);
 
 	/* KERNEL */
 	uintptr_t va, pa;
@@ -236,9 +225,9 @@ void setup_vm_final(void)
 	va = KIMAGE_VADDR;
 	pa = __pa_symbol(kimage_start);
 
-	for(; va < kimage_end; va += PMD_SIZE, pa += PMD_SIZE)
-	{
-		create_pgd_mapping(swapper_pg_dir, va, pa, PMD_SIZE, PAGE_KERNEL_EXEC);
+	for (; va < kimage_end; va += PMD_SIZE, pa += PMD_SIZE) {
+		create_pgd_mapping(swapper_pg_dir, va, pa, PMD_SIZE,
+				   PAGE_KERNEL_EXEC);
 	}
 
 	/* MEM */
@@ -247,14 +236,13 @@ void setup_vm_final(void)
 	phys_addr_t start, end;
 	va = PAGE_OFFSET;
 
-	for_each_mem_range(i, &start, &end)
-	{
+	for_each_mem_range (i, &start, &end) {
 		pa = start;
 		size = best_map_size(start, end - start);
-		for(pa = start; pa < end; pa += size)
-		{
+		for (pa = start; pa < end; pa += size) {
 			va = (uintptr_t)phys_to_virt(pa);
-			create_pgd_mapping(swapper_pg_dir, va, pa, size, PAGE_KERNEL);
+			create_pgd_mapping(swapper_pg_dir, va, pa, size,
+					   PAGE_KERNEL);
 		}
 	}
 

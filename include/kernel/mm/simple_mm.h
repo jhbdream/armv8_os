@@ -23,15 +23,14 @@ mm_node_t-> +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |             Size of chunk                                     |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 */
-typedef struct simple_mm
-{
-    uint64_t addr; //有效的数据空间地址
-    uint64_t size; //有效的数据长度
+typedef struct simple_mm {
+	uint64_t addr; //有效的数据空间地址
+	uint64_t size; //有效的数据长度
 
-    struct simple_mm *prev; //双向链表串起来全部的内存节点
-    struct simple_mm *next;
+	struct simple_mm *prev; //双向链表串起来全部的内存节点
+	struct simple_mm *next;
 
-    int used; //标记是否已经被分配
+	int used; //标记是否已经被分配
 } mm_node_t;
 
 void simple_mm_info(void);

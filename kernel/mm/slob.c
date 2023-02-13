@@ -62,25 +62,19 @@ static void set_slob(slob_t *s, slobidx_t size, slob_t *next)
 {
 	slob_t *base = (slob_t *)((unsigned long)s & PAGE_MASK);
 	slobidx_t offset = (next - base);
-	if(size > 1)
-	{
+	if (size > 1) {
 		s[0].units = size;
 		s[1].units = offset;
-	}
-	else
-	{
+	} else {
 		s[0].units = -offset;
 	}
 }
 
 static slobidx_t slob_units(slob_t *s)
 {
-	if(s->units > 0)
-	{
+	if (s->units > 0) {
 		return s->units;
-	}
-	else
-	{
+	} else {
 		return 1;
 	}
 }
@@ -89,12 +83,9 @@ static slob_t *slob_next(slob_t *s)
 {
 	slob_t *base = (slob_t *)((unsigned long)s & PAGE_MASK);
 
-	if(s->units > 0)
-	{
+	if (s->units > 0) {
 		return base + s[1].units;
-	}
-	else
-	{
+	} else {
 		return base + (-s->units);
 	}
 }
@@ -112,8 +103,8 @@ static int slab_last(slob_t *s)
 	return !((unsigned long)slob_next(s) & ~PAGE_MASK);
 }
 
-static void *slob_page_alloc(struct page *slob_page, size_t size,
-					int align, int align_offset, bool *page_remove_from_list)
+static void *slob_page_alloc(struct page *slob_page, size_t size, int align,
+			     int align_offset, bool *page_remove_from_list)
 {
 	slob_t *prev, *cur, *aligned = NULL;
 	int delta = 0;
@@ -121,26 +112,25 @@ static void *slob_page_alloc(struct page *slob_page, size_t size,
 
 	*page_remove_from_list = false;
 
-	for(prev = NULL, cur = slob_page->freelist; ; prev = cur, cur = slob_next(cur))
-	{
+	for (prev = NULL, cur = slob_page->freelist;;
+	     prev = cur, cur = slob_next(cur)) {
 		slobidx_t avail = slob_units(cur);
 
-		if(align)
-		{
-			aligned = (slob_t *)
-				((ALIGN((unsigned long)cur + align_offset, align)) - align_offset);
+		if (align) {
+			aligned = (slob_t *)((ALIGN((unsigned long)cur +
+							    align_offset,
+						    align)) -
+					     align_offset);
 
 			delta = aligned - cur;
 		}
 
-		if(avail >= (delta + units))
-		{
+		if (avail >= (delta + units)) {
 			slob_t *next;
 			next = slob_next(cur);
 
 			/* 拆分 slob */
-			if(delta)
-			{
+			if (delta) {
 				set_slob(cur, delta, aligned);
 				set_slob(aligned, avail - delta, next);
 				prev = cur;
@@ -148,41 +138,31 @@ static void *slob_page_alloc(struct page *slob_page, size_t size,
 				avail = slob_units(cur);
 			}
 
-			if(avail == units)
-			{
-				if(prev)
-				{
+			if (avail == units) {
+				if (prev) {
 					set_slob(prev, slob_units(prev), next);
-				}
-				else
-				{
+				} else {
 					slob_page->freelist = next;
 				}
-			}
-			else
-			{
-				if(prev)
-				{
-					set_slob(prev, slob_units(prev), cur + units);
-				}
-				else
-				{
+			} else {
+				if (prev) {
+					set_slob(prev, slob_units(prev),
+						 cur + units);
+				} else {
 					slob_page->freelist = cur + units;
 				}
 				set_slob(cur + units, avail - units, next);
 			}
 
 			slob_page->units -= units;
-			if(!slob_page->units)
-			{
+			if (!slob_page->units) {
 				*page_remove_from_list = true;
 			}
 
 			return cur;
 		}
 
-		if(slab_last(cur))
-		{
+		if (slab_last(cur)) {
 			return NULL;
 		}
 	}
@@ -194,46 +174,36 @@ static void *slob_alloc(size_t size, int align, int align_offset)
 	struct page *slob_page;
 	struct list_head *slob_list = NULL;
 
-	if(size < SLOB_BREAK_SMALL)
-	{
+	if (size < SLOB_BREAK_SMALL) {
 		slob_list = &small_slob;
-	}
-	else if(size < SLOB_BREAK_MEDIUM)
-	{
+	} else if (size < SLOB_BREAK_MEDIUM) {
 		slob_list = &medium_slob;
-	}
-	else
-	{
+	} else {
 		slob_list = &large_slob;
 	}
 
 	bool page_remove_from_list;
-	list_for_each_entry(slob_page, slob_list, slob_node)
-	{
+	list_for_each_entry (slob_page, slob_list, slob_node) {
 		/* page 内剩余空间是否够分配 */
-		if(slob_page->units < SLOB_UNITS(size))
-		{
+		if (slob_page->units < SLOB_UNITS(size)) {
 			continue;
 		}
 
-		b = slob_page_alloc(slob_page, size, align, align_offset, &page_remove_from_list);
-		if(b == NULL)
-		{
+		b = slob_page_alloc(slob_page, size, align, align_offset,
+				    &page_remove_from_list);
+		if (b == NULL) {
 			continue;
 		}
 
-		if(page_remove_from_list == true)
-		{
-
+		if (page_remove_from_list == true) {
 		}
 
 		break;
 	}
 
-	if(b == NULL)
-	{
+	if (b == NULL) {
 		b = slob_new_page(SLOB_ORDER);
-		if(!b)
+		if (!b)
 			return NULL;
 
 		slob_page = virt_to_page(b);
@@ -244,7 +214,8 @@ static void *slob_alloc(size_t size, int align, int align_offset)
 		INIT_LIST_HEAD(&slob_page->slob_node);
 		list_add(&slob_page->slob_node, slob_list);
 
-		b = slob_page_alloc(slob_page, size, align, align_offset, &page_remove_from_list);
+		b = slob_page_alloc(slob_page, size, align, align_offset,
+				    &page_remove_from_list);
 	}
 
 	return b;
@@ -263,15 +234,14 @@ static void slob_free(void *block, int size)
 	slob_t *prev, *next, *b = (slob_t *)block;
 	slobidx_t units = SLOB_UNITS(size);
 
-	if(block == NULL)
+	if (block == NULL)
 		return;
 
 	BUG_ON(!size);
 
 	slob_page = virt_to_page(block);
 
-	if((slob_page->units + units) == SLOB_UNITS(PAGE_SIZE))
-	{
+	if ((slob_page->units + units) == SLOB_UNITS(PAGE_SIZE)) {
 		slob_free_pages(block, SLOB_ORDER);
 		return;
 	}
@@ -279,45 +249,34 @@ static void slob_free(void *block, int size)
 	slob_page->units += units;
 
 	/* 要释放的位置在前面 */
-	if(b < (slob_t *)slob_page->freelist)
-	{
+	if (b < (slob_t *)slob_page->freelist) {
 		/* 是否可以合并块 */
-		if(b + units == (slob_t *)slob_page->freelist)
-		{
+		if (b + units == (slob_t *)slob_page->freelist) {
 			units += slob_units(slob_page->freelist);
 			slob_page->freelist = slob_next(slob_page->freelist);
 		}
 		set_slob(b, units, slob_page->freelist);
 		slob_page->freelist = b;
-	}
-	else
-	{
+	} else {
 		prev = (slob_t *)slob_page->freelist;
 		next = slob_next(prev);
 
-		while(b > next)
-		{
+		while (b > next) {
 			prev = next;
 			next = slob_next(prev);
 		}
 
-		if(!slab_last(prev) && (b + units == next))
-		{
+		if (!slab_last(prev) && (b + units == next)) {
 			units += slob_units(next);
 			set_slob(b, units, slob_next(next));
-		}
-		else
-		{
+		} else {
 			set_slob(b, units, next);
 		}
 
-		if(prev + slob_units(prev) == b)
-		{
+		if (prev + slob_units(prev) == b) {
 			units = slob_units(prev) + slob_units(b);
 			set_slob(prev, units, slob_next(b));
-		}
-		else
-		{
+		} else {
 			set_slob(prev, slob_units(prev), b);
 		}
 	}
@@ -327,20 +286,18 @@ void *__kmalloc(size_t size)
 {
 	void *m = NULL;
 
-	if(size < PAGE_SIZE - SLOB_ALIGN)
-	{
-		if(!size)
+	if (size < PAGE_SIZE - SLOB_ALIGN) {
+		if (!size)
 			return NULL;
 
-		m = slob_alloc(size + SLOB_ALIGN_OFFSET, SLOB_ALIGN, SLOB_ALIGN_OFFSET);
-		if(!m)
+		m = slob_alloc(size + SLOB_ALIGN_OFFSET, SLOB_ALIGN,
+			       SLOB_ALIGN_OFFSET);
+		if (!m)
 			return NULL;
 
 		*(unsigned long *)m = size;
 		return m + SLOB_ALIGN_OFFSET;
-	}
-	else
-	{
+	} else {
 		int order = get_order(size);
 		m = slob_new_page(order);
 		return m;
@@ -349,18 +306,15 @@ void *__kmalloc(size_t size)
 
 void __kfree(const void *block)
 {
-	if(!block)
+	if (!block)
 		return;
 
 	struct page *page = virt_to_page(block);
 
-	if(PageSlab(page))
-	{
+	if (PageSlab(page)) {
 		unsigned long *m = (unsigned long *)(block - SLOB_ALIGN_OFFSET);
 		slob_free(m, *m + SLOB_ALIGN_OFFSET);
-	}
-	else
-	{
+	} else {
 		int order = compound_order(page);
 		__free_pages(page, order);
 	}
@@ -373,14 +327,12 @@ void slob_test(void)
 
 	void *addr[SLOB_TEST_CYCLE];
 	int i;
-	for(i = 0; i < SLOB_TEST_CYCLE; i++)
-	{
+	for (i = 0; i < SLOB_TEST_CYCLE; i++) {
 		addr[i] = kmalloc(i);
 		printk("[%d] kmalloc addr: [0x%016lx]\n", i, addr[i]);
 	}
 
-	for(i = 0; i < SLOB_TEST_CYCLE; i++)
-	{
+	for (i = 0; i < SLOB_TEST_CYCLE; i++) {
 		kfree(addr[i]);
 		printk("[%d] kfree addr: [0x%016lx]\n", i, addr[i]);
 	}

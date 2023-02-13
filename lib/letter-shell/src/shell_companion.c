@@ -8,8 +8,8 @@
  * @copyright (c) 2020 Letter
  * 
  */
- #include "shell.h"
- 
+#include "shell.h"
+
 #if SHELL_USING_COMPANION == 1
 /**
  * @brief shell添加伴生对象
@@ -21,14 +21,14 @@
  */
 signed char shellCompanionAdd(Shell *shell, int id, void *object)
 {
-    ShellCompanionObj *companions = shell->info.companions;
-    ShellCompanionObj *node = SHELL_MALLOC(sizeof(ShellCompanionObj));
-    SHELL_ASSERT(node, return -1);
-    node->id = id;
-    node->obj = object;
-    node->next = companions;
-    shell->info.companions = node;
-    return 0;
+	ShellCompanionObj *companions = shell->info.companions;
+	ShellCompanionObj *node = SHELL_MALLOC(sizeof(ShellCompanionObj));
+	SHELL_ASSERT(node, return -1);
+	node->id = id;
+	node->obj = object;
+	node->next = companions;
+	shell->info.companions = node;
+	return 0;
 }
 
 /**
@@ -40,27 +40,23 @@ signed char shellCompanionAdd(Shell *shell, int id, void *object)
  */
 signed char shellCompanionDel(Shell *shell, int id)
 {
-    ShellCompanionObj *companions = shell->info.companions;
-    ShellCompanionObj *front = companions;
-    while (companions)
-    {
-        if (companions->id == id)
-        {
-            if (companions == shell->info.companions && !(companions->next)) 
-            {
-                shell->info.companions = (void *)0;
-            }
-            else
-            {
-                front->next = companions->next;
-            }
-            SHELL_FREE(companions);
-            return 0;
-        }
-        front = companions;
-        companions = companions->next;
-    }
-    return -1;
+	ShellCompanionObj *companions = shell->info.companions;
+	ShellCompanionObj *front = companions;
+	while (companions) {
+		if (companions->id == id) {
+			if (companions == shell->info.companions &&
+			    !(companions->next)) {
+				shell->info.companions = (void *)0;
+			} else {
+				front->next = companions->next;
+			}
+			SHELL_FREE(companions);
+			return 0;
+		}
+		front = companions;
+		companions = companions->next;
+	}
+	return -1;
 }
 
 /**
@@ -72,16 +68,14 @@ signed char shellCompanionDel(Shell *shell, int id)
  */
 void *shellCompanionGet(Shell *shell, int id)
 {
-    SHELL_ASSERT(shell, return (void *)0);
-    ShellCompanionObj *companions = shell->info.companions;
-    while (companions)
-    {
-        if (companions->id == id)
-        {
-            return companions->obj;
-        }
-        companions = companions->next;
-    }
-    return (void *)0;
+	SHELL_ASSERT(shell, return (void *)0);
+	ShellCompanionObj *companions = shell->info.companions;
+	while (companions) {
+		if (companions->id == id) {
+			return companions->obj;
+		}
+		companions = companions->next;
+	}
+	return (void *)0;
 }
 #endif /** SHELL_USING_COMPANION == 1 */
