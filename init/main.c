@@ -18,9 +18,9 @@ void start_kernel(void)
 
 	console_init();
 
-   printk("VERSION: %s\n", EEOS_VERSION_STR);
+	printk("VERSION: %s\n", EEOS_VERSION_STR);
 
-   memblock_dump_all();
+	memblock_dump_all();
 
 	u64 base = memblock_start_of_DRAM();
 	u64 size = memblock_end_of_DRAM() - memblock_start_of_DRAM();
