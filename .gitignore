@@ -78,7 +78,7 @@ GTAGS
 allsymbols.S
 scripts/Kconfiglib/__pycache__
 linkmap.txt
-include/config/config.h
+include/config/*
 *.lds
 
 *.pyc
@@ -87,3 +87,4 @@ include/config/config.h
 
 .cache/
 compile_commands.json
+
