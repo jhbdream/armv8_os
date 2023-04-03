@@ -65,15 +65,15 @@ export VERSION PATCHLEVEL SUBLEVEL KERNELVERSION
 
 ifeq ($(CONFIG_ARCH_AARCH64), y)
 	ARCH			= aarch64
-	CROSS_COMPILE 	= aarch64-linux-gnu-
+	CROSS_COMPILE 	?= aarch64-linux-gnu-
 	BFD_NAME		= elf64-littleaarch64
 else ifeq ($(CONFIG_ARCH_RISCV64), y)
 	ARCH			= riscv64
-	CROSS_COMPILE 	= riscv64-unknown-elf-
+	CROSS_COMPILE 	?= riscv64-unknown-elf-
 	BFD_NAME		= elf64-littleriscv
 else ifeq ($(CONFIG_ARCH_RISCV32), y)
 	ARCH			= riscv32
-	CROSS_COMPILE 	= riscv32-unknown-elf-
+	CROSS_COMPILE 	?= riscv32-unknown-elf-
 endif
 
 SRCARCH 	:= $(ARCH)
@@ -164,12 +164,12 @@ ifneq ($(EXT_DTB),)
 DTB := $(EXT_DTB)
 else
 DTB := arch/$(ARCH)/dts/$(DEVICE_TREE).dtb
-endif       
+endif
 
 DTB_SECTION := $(subst /,_,$(DTB))
 DTB_SECTION := $(DTB_SECTION:%.dtb=%)
-DTB_SECTION := $(addprefix _binary_, $(DTB_SECTION)) 
-DTB_SECTION := $(addsuffix _dtb_start, $(DTB_SECTION)) 
+DTB_SECTION := $(addprefix _binary_, $(DTB_SECTION))
+DTB_SECTION := $(addsuffix _dtb_start, $(DTB_SECTION))
 
 all: include/config/config.h $(version_h) eeos
 
