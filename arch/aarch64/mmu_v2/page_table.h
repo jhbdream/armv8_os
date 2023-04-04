@@ -47,7 +47,7 @@ typedef struct {
 #define pte_val(x) ((x).pte)
 #define _pte(x) ((pte_t){ (x) })
 
-#define paprot_val(x) ((x).pgprot)
+#define pgprot_val(x) ((x).pgprot)
 #define _pgprot(x) ((pgprot_t){ (x) })
 
 #endif
