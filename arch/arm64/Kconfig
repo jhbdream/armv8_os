@@ -1,0 +1,7 @@
+menu "ARM architecture"
+    depends on ARCH_ARM64
+
+config 64BIT
+	def_bool y
+
+endmenu
