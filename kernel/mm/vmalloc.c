@@ -1,5 +1,3 @@
-#include "asm/page-def.h"
-#include "asm/pgtable_type.h"
 #include "errno.h"
 #include "mm.h"
 #include "mm/memblock.h"
@@ -135,8 +133,10 @@ static inline int vmap_pte_range(pmd_t *pmd, unsigned long addr,
 			return -ENOMEM;
 
 		// set_pte 把 page 的物理地址写入到 pte 表项
+		#if 0
 		ptep = pte_offset_pte(pte, addr);
 		*ptep = pfn_pte(page_to_pfn(p), prot);
+		#endif
 
 		(*page)++;
 	} while (pte++, addr += PAGE_SIZE, addr != end);

@@ -1,8 +1,3 @@
-#include "asm/page-def.h"
-#include "asm/pgalloc.h"
-#include "asm/pgtable.h"
-#include "asm/pgtable_hwdef.h"
-#include "asm/pgtable_type.h"
 #include "mm/page_alloc.h"
 #include "type.h"
 #include <ee/mm.h>

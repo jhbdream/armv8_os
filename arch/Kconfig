@@ -1,7 +1,10 @@
 
 choice
 	prompt "Architecture select"
-	default ARCH_AARCH64
+	default ARCH_ARM64
+
+config ARCH_ARM64
+	bool "ARM64"
 
 config ARCH_AARCH64
 	bool "AARCH64"
@@ -14,6 +17,7 @@ config ARCH_RISCV32
 endchoice
 
 
+source "arch/arm64/Kconfig"
 source "arch/aarch64/Kconfig"
 source "arch/riscv64/Kconfig"
 source "arch/riscv32/Kconfig"

@@ -1,13 +1,18 @@
-#include "asm/fixmap.h"
+//#include "asm/fixmap.h"
 #include "type.h"
 #include <io.h>
 #include <config.h>
 #include <driver/console.h>
 #include <driver/uart.h>
 #include <stddef.h>
-#include <asm-generic/fixmap.h>
+//#include <asm-generic/fixmap.h>
 
 static u64 early_mm_base;
+
+#ifdef CONFIG_ARCH_ARM64
+#define QEMU_UART_DR ((void __iomem *)(0xFFFF100000000000 + UART01x_DR))
+#define QEMU_UART_FR ((void __iomem *)(0xFFFF100000000000 + UART01x_FR))
+#endif
 
 #ifdef CONFIG_ARCH_AARCH64
 #define QEMU_UART_DR ((void __iomem *)(0xFFFF100000000000 + UART01x_DR))
@@ -46,7 +51,7 @@ int uart_putchar(uint8_t ch)
 
 static int _init(struct console *con)
 {
-	early_mm_base = set_fixmap_offset(FIX_EARLYCON_MEM_BASE, 0x10000000);
+	//early_mm_base = set_fixmap_offset(FIX_EARLYCON_MEM_BASE, 0x10000000);
 	return 0;
 }
 

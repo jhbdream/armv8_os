@@ -67,6 +67,10 @@ ifeq ($(CONFIG_ARCH_AARCH64), y)
 	ARCH			= aarch64
 	CROSS_COMPILE 	?= aarch64-linux-gnu-
 	BFD_NAME		= elf64-littleaarch64
+else ifeq ($(CONFIG_ARCH_ARM64), y)
+	ARCH			= arm64
+	CROSS_COMPILE 	?= aarch64-linux-gnu-
+	BFD_NAME		= elf64-littleaarch64
 else ifeq ($(CONFIG_ARCH_RISCV64), y)
 	ARCH			= riscv64
 	CROSS_COMPILE 	?= riscv64-unknown-elf-

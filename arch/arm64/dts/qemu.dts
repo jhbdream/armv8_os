@@ -1,0 +1,19 @@
+/dts-v1/;
+
+/{
+	#address-cells = <2>;
+	#size-cells = <2>;
+
+	cpu {
+		cpu0 {
+		};
+	};
+
+
+	memory {
+		device_type = "memory";
+		reg = <0x00000000 0x40000000 0x00000000 0x40000000>;
+	};
+
+};
+
