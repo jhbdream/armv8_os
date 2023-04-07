@@ -15,6 +15,7 @@
  * 6. 中期虚拟地址物理地址转换接口?
  */
 
+/* 公共宏定义 */
 /* config for 48bit va + 4 level page table */
 #define PAGE_SHIFT (12)
 #define PAGE_SIZE (_AC(1, UL) << PAGE_SHIFT)
@@ -41,8 +42,32 @@
 #define PMD_INDEX(va) (((va) >> PMD_SHIFT) & (PTRS_PER_PMD - 1))
 #define PTE_INDEX(va) (((va) >> PAGE_SHIFT) & (PTRS_PER_PTE - 1))
 
-#define PAGE_KERNEL_EXEC _pgprot(0)
+/* 页表属性类型 */
+#define PAGE_MEMORY _pgprot(PROT_NORMAL)
+#define PAGE_DEVICE _pgprot(PROT_DEVICE_nGnRnE)
 
+/* arm64 mmu 页表硬件定义 */
+#define PTE_TYPE_PAGE (_AT(pteval_t, 3) << 0)
+#define PTE_AF (_AT(pteval_t, 1) << 10) /* Access Flag */
+#define PTE_SHARED (_AT(pteval_t, 3) << 8) /* SH[1:0], inner shareable */
+#define PTE_PXN (_AT(pteval_t, 1) << 53) /* Privileged XN */
+#define PTE_UXN (_AT(pteval_t, 1) << 54) /* User XN */
+#define PTE_WRITE (_AT(pteval_t, 1) << 51) /* same as DBM (51) */
+
+#define MT_NORMAL 0
+#define MT_NORMAL_TAGGED 1
+#define MT_NORMAL_NC 2
+#define MT_DEVICE_nGnRnE 3
+#define MT_DEVICE_nGnRE 4
+#define PTE_ATTRINDX(t) (_AT(pteval_t, (t)) << 2)
+
+#define PROT_DEFAULT (PTE_TYPE_PAGE | PTE_AF | PTE_SHARED)
+#define PROT_NORMAL                                                            \
+	(PROT_DEFAULT | PTE_PXN | PTE_UXN | PTE_WRITE | PTE_ATTRINDX(MT_NORMAL))
+
+#define PROT_DEVICE_nGnRnE                                                     \
+	(PROT_DEFAULT | PTE_PXN | PTE_UXN | PTE_WRITE |                        \
+	 PTE_ATTRINDX(MT_DEVICE_nGnRnE))
 // 静态定义 pgd 页表空间
 // 1. 创建内核代码映射
 // 2. 创建fixmap临时访问映射，用于访问内核代码之外物理空间
@@ -175,7 +200,7 @@ static void create_pmd_mapping(pmd_t *pmdp, unsigned long addr,
 
 			// 填充下一级页表物理地址到当前表项
 			// 同时需要补充其他位域的内容
-			set_pmd(pmdp, _pmd(pte_page | 0));
+			set_pmd(pmdp, _pmd(pte_page | 3));
 		}
 
 		// 将pte的物理地址转换为虚拟地址
@@ -222,7 +247,7 @@ static void create_pud_mapping(pud_t *pudp, unsigned long addr,
 
 			// 填充下一级页表物理地址到当前表项
 			// 同时需要补充其他位域的内容
-			set_pud(pudp, _pud(pmd_page | 0));
+			set_pud(pudp, _pud(pmd_page | 3));
 		}
 
 		// 将pmd的物理地址转换为虚拟地址
@@ -288,7 +313,8 @@ static void create_pgd_mapping(pgd_t *pgdp, unsigned long phys,
 
 			// 填充下一级页表物理地址到当前表项
 			// 同时需要补充其他位域的内容
-			set_pgd(pgdp, _pgd(pud_page | 0));
+
+			set_pgd(pgdp, _pgd(pud_page | 3));
 		}
 
 		// 将pgd的物理地址转换为虚拟地址
@@ -338,6 +364,6 @@ void create_kernel_map(void)
 
 	BUG_ON((pa % PMD_SIZE) != 0);
 
-	create_pgd_mapping(init_pgd, pa, va, size, PAGE_KERNEL_EXEC,
+	create_pgd_mapping(init_pgd, pa, va, size, PAGE_MEMORY,
 			   early_page_alloc, early_get_va);
 }
