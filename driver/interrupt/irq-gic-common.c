@@ -5,7 +5,7 @@
 #include <driver/interrupt.h>
 #include "arm-gic.h"
 
-int gic_configure_irq(unsigned int irq, unsigned int type, void __iomem *base,
+int gic_configure_irq(unsigned int irq, unsigned int type, void *base,
 		      void (*sync_access)(void))
 {
 	u32 confmask = 0x2 << ((irq % 16) * 2);
@@ -51,7 +51,7 @@ int gic_configure_irq(unsigned int irq, unsigned int type, void __iomem *base,
 	return ret;
 }
 
-void gic_dist_config(void __iomem *base, int gic_irqs,
+void gic_dist_config(void *base, int gic_irqs,
 		     void (*sync_access)(void))
 {
 	unsigned int i;
@@ -84,7 +84,7 @@ void gic_dist_config(void __iomem *base, int gic_irqs,
 		sync_access();
 }
 
-void gic_cpu_config(void __iomem *base, void (*sync_access)(void))
+void gic_cpu_config(void *base, void (*sync_access)(void))
 {
 	int i;
 
