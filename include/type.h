@@ -29,25 +29,16 @@ typedef __u32 u32;
 typedef __s64 s64;
 typedef __u64 u64;
 
-#ifdef __CHECKER__
-#define __bitwise__ __attribute__((bitwise))
-#else
-#define __bitwise__
-#endif
-#define __bitwise __bitwise__
-
-typedef __u16 __bitwise __le16;
-typedef __u16 __bitwise __be16;
-typedef __u32 __bitwise __le32;
-typedef __u32 __bitwise __be32;
-typedef __u64 __bitwise __le64;
-typedef __u64 __bitwise __be64;
-
-typedef __u16 __bitwise __sum16;
-typedef __u32 __bitwise __wsum;
+typedef __u16 __le16;
+typedef __u16 __be16;
+typedef __u32 __le32;
+typedef __u32 __be32;
+typedef __u64 __le64;
+typedef __u64 __be64;
 
 typedef int bool;
 typedef unsigned long uintptr_t;
+typedef u64 phys_addr_t;
 
 #ifndef true
 #define true 1
@@ -56,8 +47,6 @@ typedef unsigned long uintptr_t;
 #ifndef false
 #define false 0
 #endif
-
-typedef u64 phys_addr_t;
 
 struct list_head {
 	struct list_head *next, *prev;
