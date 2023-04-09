@@ -67,28 +67,13 @@ static inline u64 __raw_readq(const volatile void __iomem *addr)
 }
 
 /* IO barriers */
-/*								                                \
-* Create a dummy control dependency from the IO read to any	    \
-* later instructions. This ensures that a subsequent call to	\
-* udelay() will be ordered due to the ISB in get_cycles().	    \
-*/
-
 #define __iormb(v)                                                             \
-	({                                                                     \
-		unsigned long tmp;                                             \
-                                                                               \
-		dma_rmb();                                                     \
-                                                                               \
-		asm volatile("eor	%0, %1, %1\n"                                \
-			     "cbnz	%0, ."                                      \
-			     : "=r"(tmp)                                       \
-			     : "r"((unsigned long)(v))                         \
-			     : "memory");                                      \
-	})
+	do {                                                                   \
+	} while (0)
 
-#define __io_par(v) __iormb(v)
-#define __iowmb() dma_wmb()
-#define __iomb() dma_mb()
+#define __iowmb(v)                                                             \
+	do {                                                                   \
+	} while (0)
 
 /*
  * Relaxed I/O memory access primitives. These follow the Device memory
