@@ -59,15 +59,18 @@
 #define MT_NORMAL_NC 2
 #define MT_DEVICE_nGnRnE 3
 #define MT_DEVICE_nGnRE 4
+
 #define PTE_ATTRINDX(t) (_AT(pteval_t, (t)) << 2)
 
 #define PROT_DEFAULT (PTE_TYPE_PAGE | PTE_AF | PTE_SHARED)
+
 #define PROT_NORMAL                                                            \
 	(PROT_DEFAULT | PTE_PXN | PTE_UXN | PTE_WRITE | PTE_ATTRINDX(MT_NORMAL))
 
 #define PROT_DEVICE_nGnRnE                                                     \
 	(PROT_DEFAULT | PTE_PXN | PTE_UXN | PTE_WRITE |                        \
 	 PTE_ATTRINDX(MT_DEVICE_nGnRnE))
+
 // 静态定义 pgd 页表空间
 // 1. 创建内核代码映射
 // 2. 创建fixmap临时访问映射，用于访问内核代码之外物理空间
@@ -172,7 +175,7 @@ static void create_pte_mapping(pte_t *ptep, unsigned long addr,
 		if (addr >= end)
 			break;
 
-	} while (ptep++);
+	} while (pte++);
 }
 
 static void create_pmd_mapping(pmd_t *pmdp, unsigned long addr,
@@ -300,7 +303,7 @@ static void create_pgd_mapping(pgd_t *pgdp, unsigned long phys,
 
 	phys = phys & PAGE_MASK;
 	unsigned long addr = virt & PAGE_MASK;
-	unsigned int end = addr + size;
+	unsigned long end = addr + size;
 
 	pgd = pgdp + PMD_INDEX(addr);
 
@@ -347,6 +350,8 @@ void create_kernel_map(void)
 	 *
 	 *  - map 3 level page_table
 	 *  - only use init page_table
+	 *  - arm64 qemu pa = 0x40080000
+	 *
      */
 
 	/**
@@ -359,10 +364,10 @@ void create_kernel_map(void)
 
 	extern unsigned long __kimage_start[], __kimage_end[];
 	pa = (unsigned long)__kimage_start;
-	va = (unsigned long)__kimage_start;
+	// va offset same with pa offset
+	// link address
+	va = 0xFFFF000000080000;
 	size = (unsigned long)__kimage_end - (unsigned long)__kimage_start;
-
-	BUG_ON((pa % PMD_SIZE) != 0);
 
 	create_pgd_mapping(init_pgd, pa, va, size, PAGE_MEMORY,
 			   early_page_alloc, early_get_va);
