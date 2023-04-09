@@ -37,6 +37,12 @@
 #define PGDIR_MASK (~(PGDIR_SIZE - 1))
 #define PTRS_PER_PGD (512)
 
+#define PTE_ADDR_MASK                                                          \
+	(((_AT(pteval_t, 1) << (48 - PAGE_SHIFT)) - 1) << PAGE_SHIFT)
+#define PMD_ADDR_MASK (PTE_ADDR_MASK)
+#define PUD_ADDR_MASK (PTE_ADDR_MASK)
+#define PGD_ADDR_MASK (PTE_ADDR_MASK)
+
 #define PGD_INDEX(va) (((va) >> PGDIR_SHIFT) & (PTRS_PER_PGD - 1))
 #define PUD_INDEX(va) (((va) >> PUD_SHIFT) & (PTRS_PER_PUD - 1))
 #define PMD_INDEX(va) (((va) >> PMD_SHIFT) & (PTRS_PER_PMD - 1))
@@ -80,6 +86,10 @@ pgd_t init_pgd[PTRS_PER_PGD];
 pud_t init_pud[PTRS_PER_PUD];
 pmd_t init_pmd[PTRS_PER_PMD];
 pmd_t init_pte[PTRS_PER_PTE];
+
+pud_t fixmap_pud[PTRS_PER_PUD];
+pmd_t fixmap_pmd[PTRS_PER_PMD];
+pmd_t fixmap_pte[PTRS_PER_PTE];
 
 static inline void set_pte(pte_t *ptep, pte_t pte)
 {
@@ -239,7 +249,7 @@ static void create_pud_mapping(pud_t *pudp, unsigned long addr,
 	unsigned long next;
 	unsigned long pmd_page;
 
-	pud = pudp + PMD_INDEX(addr);
+	pud = pudp + PUD_INDEX(addr);
 
 	do {
 		pmd_page = pud_val(*pud);
@@ -305,7 +315,7 @@ static void create_pgd_mapping(pgd_t *pgdp, unsigned long phys,
 	unsigned long addr = virt & PAGE_MASK;
 	unsigned long end = addr + size;
 
-	pgd = pgdp + PMD_INDEX(addr);
+	pgd = pgdp + PGD_INDEX(addr);
 
 	do {
 		pud_page = pgd_val(*pgd);
@@ -372,3 +382,43 @@ void create_kernel_map(void)
 	create_pgd_mapping(init_pgd, pa, va, size, PAGE_MEMORY,
 			   early_page_alloc, early_get_va);
 }
+
+void fixmap_page_init(pgd_t *pgdir)
+{
+	pgd_t *pgd;
+	pud_t *pud;
+	pmd_t *pmd;
+	pte_t *pte;
+
+	unsigned long fixmap_virt = 0xFFFF000010000000;
+	unsigned long entry;
+
+	pgd = pgdir + PGD_INDEX(fixmap_virt);
+	if (pgd_val(*pgd) == 0) {
+		entry = (unsigned long)fixmap_pud | 3;
+		set_pgd(pgd, _pgd(entry));
+		pud = (pud_t *)fixmap_pud;
+	} else {
+		entry = pgd_val(*pgd) & PGD_ADDR_MASK;
+		pud = (pud_t *)__phys_to_kimg(entry);
+	}
+
+	pud = pud + PUD_INDEX(fixmap_virt);
+	if (pud_val(*pud) == 0) {
+		entry = (unsigned long)fixmap_pmd | 3;
+		set_pud(pud, _pud(entry));
+		pmd = (pmd_t *)fixmap_pmd;
+	} else {
+		entry = pud_val(*pud) & PUD_ADDR_MASK;
+		pmd = (pmd_t *)__phys_to_kimg(entry);
+	}
+
+	pmd = pmd + PMD_INDEX(fixmap_virt);
+	if (pmd_val(*pmd) == 0) {
+		entry = (unsigned long)fixmap_pte | 3;
+		set_pmd(pmd, _pmd(entry));
+	} else {
+		BUG_ON(1);
+	}
+}
+
