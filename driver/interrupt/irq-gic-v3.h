@@ -590,7 +590,7 @@
 #define ICC_SGI1R_AFFINITY_3_MASK (0xffULL << ICC_SGI1R_AFFINITY_3_SHIFT)
 
 #include <io.h>
-int gic_init_bases(void __iomem *dist_base, void __iomem *rdist_base,
+int gic_init_bases(void *dist_base, void *rdist_base,
 		   u32 nr_redist_regions);
 
 void gic_mask_irq(u32 hwirq);

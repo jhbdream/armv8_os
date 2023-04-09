@@ -12,11 +12,11 @@
 #include <printk.h>
 
 struct redist_region {
-	void __iomem *redist_base;
+	void *redist_base;
 };
 
 struct gic_chip_data {
-	void __iomem *dist_base;
+	void *dist_base;
 	struct redist_region redist_regions[NR_CPUS];
 	u32 nr_redist_regions;
 	unsigned int irq_nr;
@@ -30,7 +30,7 @@ static struct gic_chip_data gic_data;
 #define cpu_relax()
 #define pr_err_ratelimited printk
 
-static inline void __iomem *gic_data_rdist_rd_base(void)
+static inline void *gic_data_rdist_rd_base(void)
 {
 	unsigned long mpidr = read_cpuid_mpidr() & MPIDR_HWID_BITMASK;
 	u64 typer;
@@ -57,7 +57,7 @@ static inline void __iomem *gic_data_rdist_rd_base(void)
 	return NULL;
 }
 
-static inline void __iomem *gic_data_rdist_sgi_base(void)
+static inline void *gic_data_rdist_sgi_base(void)
 {
 	return (gic_data_rdist_rd_base() + 0x10000);
 }
@@ -67,7 +67,7 @@ static inline int gic_irq_in_rdist(u32 hwirq)
 	return (hwirq < 32);
 }
 
-static void gic_do_wait_for_rwp(void __iomem *base)
+static void gic_do_wait_for_rwp(void *base)
 {
 	u32 count = 1000000; /* 1s! */
 
@@ -100,7 +100,7 @@ u64 gic_read_iar(void)
 
 static void gic_enable_redist(bool enable)
 {
-	void __iomem *rbase;
+	void *rbase;
 	u32 count = 1000000; /* 1s! */
 	u32 val;
 
@@ -137,7 +137,7 @@ static void gic_enable_redist(bool enable)
 static int gic_peek_irq(u32 hwirq, u32 offset)
 {
 	u32 mask = 1 << (hwirq % 32);
-	void __iomem *base;
+	void *base;
 
 	if (gic_irq_in_rdist(hwirq))
 		base = gic_data_rdist_sgi_base();
@@ -151,7 +151,7 @@ static void gic_poke_irq(u32 hwirq, u32 offset)
 {
 	u32 mask = 1 << (hwirq % 32);
 	void (*rwp_wait)(void);
-	void __iomem *base;
+	void *base;
 
 	if (gic_irq_in_rdist(hwirq)) {
 		base = gic_data_rdist_sgi_base();
@@ -243,7 +243,7 @@ __attribute__((unused)) static int gic_set_type(u32 hwirq, unsigned int type)
 {
 	unsigned int irq = hwirq;
 	void (*rwp_wait)(void);
-	void __iomem *base;
+	void *base;
 
 	/* Interrupt configuration for SGIs can't be changed */
 	if (irq < 16)
@@ -277,7 +277,7 @@ static u64 gic_mpidr_to_affinity(unsigned long mpidr)
 	return aff;
 }
 
-static int gic_validate_dist_version(void __iomem *dist_base)
+static int gic_validate_dist_version(void *dist_base)
 {
 	u32 reg = readl_relaxed(dist_base + GICD_PIDR2) & GIC_PIDR2_ARCH_MASK;
 
@@ -291,7 +291,7 @@ static void gic_dist_init(void)
 {
 	unsigned int i;
 	u64 affinity;
-	void __iomem *base = gic_data.dist_base;
+	void *base = gic_data.dist_base;
 
 	/* Disable the distributor */
 	writel_relaxed(0, base + GICD_CTLR);
@@ -399,7 +399,7 @@ static void gic_cpu_sys_reg_init(void)
 
 static void gic_cpu_init(void)
 {
-	void __iomem *rbase;
+	void *rbase;
 
 	gic_enable_redist(true);
 
@@ -414,7 +414,7 @@ static void gic_cpu_init(void)
 	gic_cpu_sys_reg_init();
 }
 
-int gic_init_bases(void __iomem *dist_base, void __iomem *rdist_base,
+int gic_init_bases(void *dist_base, void *rdist_base,
 		   u32 nr_redist_regions)
 {
 	u32 typer;
