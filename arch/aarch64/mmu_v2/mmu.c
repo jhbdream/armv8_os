@@ -383,6 +383,7 @@ void create_kernel_map(void)
 			   early_page_alloc, early_get_va);
 }
 
+#if 0
 void fixmap_page_init(pgd_t *pgdir)
 {
 	pgd_t *pgd;
@@ -421,4 +422,5 @@ void fixmap_page_init(pgd_t *pgdir)
 		BUG_ON(1);
 	}
 }
+#endif
 
