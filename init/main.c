@@ -1,17 +1,7 @@
-#include <printk.h>
-#include <driver/console.h>
-#include <stdint.h>
-#include <config.h>
-#include <ee/irqflags.h>
-#include <ee/init.h>
-#include <io.h>
-#include <driver/interrupt.h>
-#include <mm/memblock.h>
-#include <mm/page_alloc.h>
-#include <config/version.h>
 
 void start_kernel(void)
 {
+#if 0
 	local_irq_disable();
 
 	setup_arch();
@@ -46,6 +36,8 @@ void start_kernel(void)
 
 	int vmalloc_test(void);
 	vmalloc_test();
+
+#endif
 
 	for (;;)
 		;
