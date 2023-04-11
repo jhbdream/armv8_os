@@ -1,5 +1,9 @@
-#ifndef __PGTABLE_H__
-#define __PGTABLE_H__
+#ifndef __PAGE_TABLE_H__
+#define __PAGE_TABLE_H__
+
+#include "pgtable.h"
+#include "config.h"
+#include "type.h"
 
 /* arm64 mmu 页表硬件定义 */
 #define PTE_TYPE_PAGE (_AT(pteval_t, 3) << 0)
@@ -23,5 +27,8 @@
 #define PROT_DEVICE_nGnRnE                                                     \
 	(PROT_DEFAULT | PTE_PXN | PTE_UXN | PTE_WRITE |                        \
 	 PTE_ATTRINDX(MT_DEVICE_nGnRnE))
+
+#define PAGE_TYPE_TABLE (0x3)
+#define PAGE_TYPE_BLOCK (0)
 
 #endif

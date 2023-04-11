@@ -13,12 +13,6 @@ _startup:
 	bne	hang
 
 __init_el1:
-#if 0
-    mov   x0, INIT_SCTLR_EL1_MMU_OFF
-    msr sctlr_el1, x0
-    isb
-#endif
-
     mov   x0, 0x3c5
     msr spsr_el1, x0
     adr x8, __init_el1_done
@@ -45,6 +39,9 @@ memset_loop:
     adr x8, __stack_top
     mov sp, x8
 
+	bl create_kernel_map
+
+	b .
 
 #if 0
 
