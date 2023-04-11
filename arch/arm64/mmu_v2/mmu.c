@@ -1,10 +1,10 @@
-#include "aarch64_mmu.h"
+#include "asm-generic/bug.h"
+#include "asm/memory.h"
+
 #include "pgtable.h"
-
-#include <const.h>
-#include <asm-generic/bug.h>
-
-#include <stddef.h>
+#include "const.h"
+#include "stddef.h"
+#include "mmu.h"
 
 /**
  * 1. 考虑与 vmap 共用接口
@@ -147,7 +147,7 @@ static void create_pmd_mapping(pmd_t *pmdp, unsigned long addr,
 
 			// 填充下一级页表物理地址到当前表项
 			// 同时需要补充其他位域的内容
-			set_pmd(pmdp, _pmd(pte_page | 3));
+			set_pmd(pmdp, _pmd(pte_page | PAGE_TYPE_TABLE));
 		}
 
 		// 将pte的物理地址转换为虚拟地址
@@ -194,7 +194,7 @@ static void create_pud_mapping(pud_t *pudp, unsigned long addr,
 
 			// 填充下一级页表物理地址到当前表项
 			// 同时需要补充其他位域的内容
-			set_pud(pudp, _pud(pmd_page | 3));
+			set_pud(pudp, _pud(pmd_page | PAGE_TYPE_TABLE));
 		}
 
 		// 将pmd的物理地址转换为虚拟地址
@@ -261,7 +261,7 @@ static void create_pgd_mapping(pgd_t *pgdp, unsigned long phys,
 			// 填充下一级页表物理地址到当前表项
 			// 同时需要补充其他位域的内容
 
-			set_pgd(pgdp, _pgd(pud_page | 3));
+			set_pgd(pgdp, _pgd(pud_page | PAGE_TYPE_TABLE));
 		}
 
 		// 将pgd的物理地址转换为虚拟地址
@@ -305,12 +305,14 @@ void create_kernel_map(void)
 	unsigned long size;
 
 	extern unsigned long __kimage_start[], __kimage_end[];
+
+	/* map kernel image */
 	pa = (unsigned long)__kimage_start;
-	va = (unsigned long)__kimage_start;
+	va = (unsigned long)KIMAGE_VADDR;
 	size = (unsigned long)__kimage_end - (unsigned long)__kimage_start;
 
-	BUG_ON((pa % PMD_SIZE) != 0);
-
-	create_pgd_mapping(init_pgd, pa, va, size, PAGE_MEMORY,
+	create_pgd_mapping(init_pgd, pa, va, size, _pgprot(PROT_NORMAL),
 			   early_page_alloc, early_get_va);
+
+	/* map fixmap */
 }
