@@ -100,9 +100,8 @@ unsigned long early_get_va(unsigned long pa)
  * ptep 使用虚拟地址
  * 表示pte页表指针
  */
-static void create_pte_mapping(pte_t *ptep, unsigned long addr,
-			       unsigned long end, unsigned long phys,
-			       pgprot_t prot)
+static void create_pte_mapping(pte_t *ptep, unsigned long addr, unsigned long end,
+			       unsigned long phys, pgprot_t prot)
 {
 	BUG_ON(ptep == NULL);
 	BUG_ON(pgprot_val(prot) == 0);
@@ -122,17 +121,16 @@ static void create_pte_mapping(pte_t *ptep, unsigned long addr,
 	} while (ptep++);
 }
 
-static void create_pmd_mapping(pmd_t *pmdp, unsigned long addr,
-			       unsigned long end, unsigned long phys,
-			       pgprot_t prot,
+static void create_pmd_mapping(pmd_t *pmdp, unsigned long addr, unsigned long end,
+			       unsigned long phys, pgprot_t prot,
 			       unsigned long (*pgtable_alloc)(int),
 			       unsigned long (*pgtable_get_va)(unsigned long))
 {
 	BUG_ON(pmdp == NULL);
 	BUG_ON(pgprot_val(prot) == 0);
 
-	pmd_t *pmd;
-	pte_t *ptep;
+	pmd_t        *pmd;
+	pte_t        *ptep;
 	unsigned long next;
 	unsigned long pte_page;
 
@@ -169,17 +167,16 @@ static void create_pmd_mapping(pmd_t *pmdp, unsigned long addr,
 	} while (pmdp++);
 }
 
-static void create_pud_mapping(pud_t *pudp, unsigned long addr,
-			       unsigned long end, unsigned long phys,
-			       pgprot_t prot,
+static void create_pud_mapping(pud_t *pudp, unsigned long addr, unsigned long end,
+			       unsigned long phys, pgprot_t prot,
 			       unsigned long (*pgtable_alloc)(int),
 			       unsigned long (*pgtable_get_va)(unsigned long))
 {
 	BUG_ON(pudp == NULL);
 	BUG_ON(pgprot_val(prot) == 0);
 
-	pud_t *pud;
-	pmd_t *pmdp;
+	pud_t        *pud;
+	pmd_t        *pmdp;
 	unsigned long next;
 	unsigned long pmd_page;
 
@@ -205,8 +202,7 @@ static void create_pud_mapping(pud_t *pudp, unsigned long addr,
 		if (next > end)
 			next = end;
 
-		create_pmd_mapping(pmdp, addr, next, phys, prot, pgtable_alloc,
-				   pgtable_get_va);
+		create_pmd_mapping(pmdp, addr, next, phys, prot, pgtable_alloc, pgtable_get_va);
 
 		phys += next - addr;
 
@@ -231,23 +227,22 @@ static void create_pud_mapping(pud_t *pudp, unsigned long addr,
  * 1. 根据虚拟地址找到 pud 表项
  *
  */
-static void create_pgd_mapping(pgd_t *pgdp, unsigned long phys,
-			       unsigned long virt, unsigned long size,
-			       pgprot_t prot,
+static void create_pgd_mapping(pgd_t *pgdp, unsigned long phys, unsigned long virt,
+			       unsigned long size, pgprot_t prot,
 			       unsigned long (*pgtable_alloc)(int),
 			       unsigned long (*pgtable_get_va)(unsigned long))
 {
 	BUG_ON(pgdp == NULL);
 	BUG_ON(pgprot_val(prot) == 0);
 
-	pgd_t *pgd;
-	pud_t *pudp;
+	pgd_t        *pgd;
+	pud_t        *pudp;
 	unsigned long next;
 	unsigned long pud_page;
 
-	phys = phys & PAGE_MASK;
+	phys               = phys & PAGE_MASK;
 	unsigned long addr = virt & PAGE_MASK;
-	unsigned int end = addr + size;
+	unsigned int  end  = addr + size;
 
 	pgd = pgdp + PMD_INDEX(addr);
 
@@ -272,8 +267,7 @@ static void create_pgd_mapping(pgd_t *pgdp, unsigned long phys,
 		if (next > end)
 			next = end;
 
-		create_pud_mapping(pudp, addr, next, phys, prot, pgtable_alloc,
-				   pgtable_get_va);
+		create_pud_mapping(pudp, addr, next, phys, prot, pgtable_alloc, pgtable_get_va);
 
 		phys += next - addr;
 
@@ -287,32 +281,77 @@ static void create_pgd_mapping(pgd_t *pgdp, unsigned long phys,
 void create_kernel_map(void)
 {
 	/**
-     *  1. kernel va
+	 *  1. kernel va
 	 *  2. kernel pa
 	 *  3. kernel size (align to 2M)
 	 *  4. kernel prot
 	 *
 	 *  - map 3 level page_table
 	 *  - only use init page_table
-     */
+	 */
 
 	/**
 	 * create kernel image map in early_pd_dir
 	 *
 	 */
-	phys_addr_t pa;
+	phys_addr_t   pa;
 	unsigned long va;
 	unsigned long size;
 
 	extern unsigned long __kimage_start[], __kimage_end[];
 
 	/* map kernel image */
-	pa = (unsigned long)__kimage_start;
-	va = (unsigned long)KIMAGE_VADDR;
+	pa   = (unsigned long)__kimage_start;
+	va   = (unsigned long)KIMAGE_VADDR;
 	size = (unsigned long)__kimage_end - (unsigned long)__kimage_start;
 
-	create_pgd_mapping(init_pgd, pa, va, size, _pgprot(PROT_NORMAL),
-			   early_page_alloc, early_get_va);
+	create_pgd_mapping(init_pgd, pa, va, size, _pgprot(PROT_NORMAL), early_page_alloc,
+			   early_get_va);
 
 	/* map fixmap */
+
+	/**
+	 * 1. 将 FIXMAP 虚拟地址映射到fixmap_pte页表项
+	 * 2. fixmap_pte 是通过代码分配，映射了kernel后可以直接访问
+	 * 3. 通过向fixmap_pte填充物理地址即可创建临时映射关系
+	 * 4. 在创建线性映射，支持虚拟内存分配之前，只能分配物理内存，使用fixmap映射到虚拟内存
+	 *
+	 *  VA:
+	 *  +------------------------------------------+
+	 *  | 9 |      9 |      9 |      9 |        12 |
+	 *  +------------------------------------------+
+	 *
+	 *  +---+
+	 *  |   |
+	 *  |   |
+	 *  |   |
+	 *  +---+
+	 *  |fix|----+---+
+	 *  |pgd|    |   |
+	 *  +---+    |   |
+	 *  |   |    |   |
+	 *  |   |    +---+
+	 *  |   |    |fix|----+---+
+	 *  |   |    |pud|    |   |
+	 *  |   |    +---+    |   |
+	 *  |   |    |   |    |   |
+	 *  +---+    |   |    +---+
+	 *           |   |    |fix|----+---+
+	 *           |   |    |pmd|    |   |
+	 *           |   |    +---+    |   |
+	 *           |   |    |   |    |   |
+	 *           +---+    |   |    +---+
+	 *                    |   |    |fix|
+	 *                    |   |    |pte|
+	 *                    |   |    +---+
+	 *                    |   |    |   |
+	 *                    +---+    |   |
+	 *                             |   |
+	 *                             |   |
+	 *                             |   |
+	 *                             |   |
+	 *                             +---+
+	 *
+	 */
+
 }
