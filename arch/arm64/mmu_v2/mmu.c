@@ -25,6 +25,10 @@ pud_t init_pud[PTRS_PER_PUD];
 pmd_t init_pmd[PTRS_PER_PMD];
 pmd_t init_pte[PTRS_PER_PTE];
 
+pud_t fixmap_pud[PTRS_PER_PUD];
+pmd_t fixmap_pmd[PTRS_PER_PMD];
+pmd_t fixmap_pte[PTRS_PER_PTE];
+
 static inline void set_pte(pte_t *ptep, pte_t pte)
 {
 	*ptep = pte;
@@ -278,6 +282,26 @@ static void create_pgd_mapping(pgd_t *pgdp, unsigned long phys, unsigned long vi
 	} while (pgdp++);
 }
 
+/* 简单处理 创建fixmap映射 */
+void fixmap_init(pgd_t *pgdir)
+{
+	unsigned long va = FIXADDR_TOP;
+	unsigned long pa_page;
+	pgd_t        *pgdp;
+	pud_t        *pudp;
+	pmd_t        *pmdp;
+	pte_t        *ptep;
+
+	pgdp = pgdir + PGD_INDEX(va);
+	if (pgd_val(*pgdp) == 0) {
+		pa_page = (unsigned long)fixmap_pud;
+		*pgdp = (fixmap_pud | 0x3);
+		pudp = fixmap_pud;
+	} else {
+		pudp = pgd_val(*pgdp);
+	}
+}
+
 void create_kernel_map(void)
 {
 	/**
@@ -353,5 +377,4 @@ void create_kernel_map(void)
 	 *                             +---+
 	 *
 	 */
-
 }
