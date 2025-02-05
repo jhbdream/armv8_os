@@ -65,7 +65,7 @@ export VERSION PATCHLEVEL SUBLEVEL KERNELVERSION
 
 ifeq ($(CONFIG_ARCH_AARCH64), y)
 	ARCH			= aarch64
-	CROSS_COMPILE 	?= aarch64-linux-gnu-
+	CROSS_COMPILE 	?= aarch64-none-elf-
 	BFD_NAME		= elf64-littleaarch64
 else ifeq ($(CONFIG_ARCH_RISCV64), y)
 	ARCH			= riscv64
