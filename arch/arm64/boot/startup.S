@@ -1,12 +1,12 @@
-    .section StartUp, "ax"
+    .section startup, "ax"
     .balign 4
 
     .global _startup
     .type _startup, "function"
 
-    /* default boot from el1 */
+    /* qemu default boot from el1 */
 _startup:
-	/* check CPU ID = 0x0, or jump to hang */
+	/* only boot core0 */
 	mrs	x0, mpidr_el1
 	and	x0, x0, #3
 	cmp	x0, #0
@@ -20,6 +20,8 @@ __init_el1:
     eret
 
 __init_el1_done:
+
+
 __cpu_setup:
     /* Enable FP/SIMD at EL1
      * libc printk use float reg, if not enable fp will exception
@@ -36,10 +38,13 @@ memset_loop:
     cmp x2, x3
     b.lt memset_loop
 
+    /* 初始化栈指针 */
     adr x8, __stack_top
     mov sp, x8
 
-	bl create_kernel_map
+    // 进入到C函数 创建MMU映射
+	// bl create_kernel_map
+
 
 	b .
 

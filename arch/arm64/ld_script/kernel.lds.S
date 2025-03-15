@@ -14,7 +14,7 @@ SECTIONS
     .startup :
     {
         __idmap_text_start = .;
-        KEEP(*(StartUp))
+        KEEP(*(startup))
         __idmap_text_end = .;
     }
 
