@@ -121,6 +121,7 @@ MBUILD_CFLAGS   := 	-Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 					-Wno-unused-function -Wno-unused-variable \
 		   			-fno-strict-aliasing -fno-common -fshort-wchar \
 					-fno-stack-protector \
+					-Wno-psabi \
 		   			-Werror-implicit-function-declaration \
 		   			-Wno-format-security -O$(O_LEVEL) \
 		   			$(CSTD_FLAG) --static -nostdlib  -nostartfiles -fno-builtin	\
