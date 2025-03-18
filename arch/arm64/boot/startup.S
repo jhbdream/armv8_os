@@ -1,7 +1,5 @@
-#include <asm/memory.h>
-#include <asm/sysreg.h>
-#include <asm/pgtable_hwdef.h>
 #include <asm/assembler.h>
+#include <asm/memory.h>
 
 /*
  * Macro to populate page table entries, these entries can be pointers to the next level
@@ -196,11 +194,20 @@ __enable_mmu:
     mov_q           x0, 0x200000034f4d91d
     set_sctlr_el1   x0
 
+
+    // 用于计算 kimage offset
+    adrp x0, __kimage_start
+
     // 获取虚拟地址 跳转到虚拟地址执行
     ldr x8,  =__mmu_on
     blr x8
 
 __mmu_on:
+    ldr x1, =__kimage_start
+    sub x1, x1, x0
+    str_l x1, kimage_voffset, x5
+
+bss_clear:
     // Zero the bss
     ldr x2, =__bss_start__ // Start of block
     ldr x3, =__bss_end__   // End of block
@@ -214,30 +221,6 @@ memset_loop:
     adr x8, __stack_top
     mov sp, x8
 
-    // 进入到C函数 创建MMU映射
-	bl create_kernel_map
-
-	b .
-
-#if 0
-
-    // 获取虚拟地址 跳转到虚拟地址执行
-    adrp x0, __kimage_start
-    ldr x8, =__mmu_on
-    blr x8
-__mmu_on:
-
-    ldr x1, =__kimage_start
-    sub x1, x1, x0
-    //str x1, kimage_voffset, x5
-
-    adrp   x8, vectors         // load VBAR_EL1 with virtual
-    msr vbar_el1, x8            // vector table address
-    isb
-
-    adr x8, __stack_top
-    mov sp, x8
-
 #if __DEBUG_USE_GDB__ == 1
     b .
     nop
@@ -246,7 +229,6 @@ __mmu_on:
     // 创建临时的镜像映射 此时的页表是使用链接脚本分配的空间
     // 正式的页表需要后续使用动态分配内存创建映射关系、然后在切换页表
     bl start_kernel
-#endif
 
 hang:
 	wfi

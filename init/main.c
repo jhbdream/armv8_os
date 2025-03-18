@@ -1,10 +1,19 @@
+#include <stddef.h>
+
+#include <ee/init.h>
+#include <ee/irqflags.h>
+
+#include <mm/memblock.h>
+
+#include <driver/of.h>
 
 void start_kernel(void)
 {
-#if 0
 	local_irq_disable();
 
 	setup_arch();
+
+#if 0
 
 	console_init();
 
@@ -36,7 +45,6 @@ void start_kernel(void)
 
 	int vmalloc_test(void);
 	vmalloc_test();
-
 #endif
 
 	for (;;)
