@@ -495,9 +495,10 @@ void *memblock_alloc(phys_addr_t size, phys_addr_t align)
 void memblock_free(void *ptr, size_t size)
 {
 	if (ptr)
-		memblock_phys_free(__pa(ptr), size);
+		memblock_phys_free(virt_to_phys(ptr), size);
 }
 
+#if 0
 void __free_mem_core(phys_addr_t start, phys_addr_t end)
 {
 	int order;
@@ -533,6 +534,7 @@ void free_memory_core(void)
 		__free_mem_core(start, end);
 	}
 }
+#endif
 
 static void memblock_dump(struct memblock_type *type)
 {
