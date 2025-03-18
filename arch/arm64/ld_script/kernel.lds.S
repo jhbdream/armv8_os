@@ -149,7 +149,7 @@ SECTIONS
     {
         . = ALIGN(4096);
         __idmap_pg_start = .;
-        . += 64;
+        . = . + (4096 * 4);
         __idmap_pg_end = .;
     }
 
@@ -157,7 +157,7 @@ SECTIONS
     {
         . = ALIGN(4096);
         __init_pg_dir_start = .;
-        . = . +  0;
+        . = . + (4096 * 3) + (4096 * 8);
         __init_pg_dir_end = .;
     }
 

@@ -120,12 +120,6 @@
 #define MAIR_ATTR_NORMAL UL(0xff)
 #define MAIR_ATTR_MASK UL(0xff)
 
-#define MT_NORMAL 0
-#define MT_NORMAL_TAGGED 1
-#define MT_NORMAL_NC 2
-#define MT_DEVICE_nGnRnE 3
-#define MT_DEVICE_nGnRE 4
-
 /* Position the attr at the correct index */
 #define MAIR_ATTRIDX(attr, idx) ((attr) << ((idx)*8))
 

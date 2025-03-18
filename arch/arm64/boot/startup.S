@@ -140,13 +140,13 @@ __init_el1_done:
 
     map_memory x0, x1, x3, x6, x7, x3, x4, x10, x11, x12, x13, x14
 
-    adrp  x0, __init_pg_dir_start   // x0 = 1级页表基地址
+    adrp    x0, __init_pg_dir_start   // x0 = 1级页表基地址
     mov_q   x5, KIMAGE_VADDR          // x5 = image 虚拟地址的起始地址
-    mov   x4, #512                  // x4 =页表项的大小
-    adrp  x3, __kimage_start        // x3 = image 物理地址起始地址
-    adrp  x6, __kimage_end
-    sub   x6, x6, x3
-    add   x6, x6, x5                // x6 = image 虚拟地址的结束地址
+    mov     x4, #512                  // x4 =页表项的大小
+    adrp    x3, __kimage_start        // x3 = image 物理地址起始地址
+    adrp    x6, __kimage_end
+    sub     x6, x6, x3
+    add     x6, x6, x5                // x6 = image 虚拟地址的结束地址
 
     /*
     *  Map the kernel image
@@ -170,60 +170,37 @@ __init_el1_done:
     dmb sy
 
 __cpu_setup:
-    tlbi    vmalle1             // Invalidate local TLB
-    dsb nsh
-
-    /* Enable FP/SIMD at EL1
-     * libc printk use float reg, if not enable fp will exception
-     */
+    /* Enable FP/SIMD at EL1 libc printk use float reg, if not enable fp will exception */
     mov x1, #3 << 20
     msr cpacr_el1, x1           // Enable FP/ASIMD
 
-    /*
-     * Default values for VMSA control registers. These will be adjusted
-     * below depending on detected CPU features.
-     */
-    mair .req    x17
-    tcr  .req    x16
+__enable_mmu:
+    tlbi    vmalle1             // Invalidate local TLB
+    dsb nsh
 
-/*
- * Default MAIR_EL1. MT_NORMAL_TAGGED is initially mapped as Normal memory and
- * changed during __cpu_setup to Normal Tagged if the system supports MTE.
- */
-#define MAIR_EL1_SET                            \
-    (MAIR_ATTRIDX(MAIR_ATTR_DEVICE_nGnRnE, MT_DEVICE_nGnRnE) |  \
-     MAIR_ATTRIDX(MAIR_ATTR_DEVICE_nGnRE, MT_DEVICE_nGnRE) |    \
-     MAIR_ATTRIDX(MAIR_ATTR_NORMAL_NC, MT_NORMAL_NC) |      \
-     MAIR_ATTRIDX(MAIR_ATTR_NORMAL, MT_NORMAL) |            \
-     MAIR_ATTRIDX(MAIR_ATTR_NORMAL, MT_NORMAL_TAGGED))
+    mov_q x1, 0x40044ffff
+    msr mair_el1, x1
 
-    mov_q   mair, MAIR_EL1_SET
+    mov_q x1, 0x70b5503510
+    msr tcr_el1, x1
 
-/* PTWs cacheable, inner/outer WBWA */
+    adrp x1, __init_pg_dir_start
+    adrp x2, __idmap_pg_start
 
-#define TCR_CACHE_FLAGS TCR_IRGN_WBWA | TCR_ORGN_WBWA
-#define TCR_SMP_FLAGS   TCR_SHARED
-#define TCR_TG_FLAGS    TCR_TG0_4K | TCR_TG1_4K
-#define TCR_KASLR_FLAGS 0
-#define TCR_KASAN_SW_FLAGS 0
+    msr ttbr0_el1, x2           // load TTBR0
+    msr ttbr1_el1, x1           // load TTBR1
 
-    mov_q   tcr, TCR_TxSZ(48) | TCR_CACHE_FLAGS | TCR_SMP_FLAGS | \
-            TCR_TG_FLAGS | TCR_KASLR_FLAGS | TCR_ASID16 | \
-            TCR_TBI0 | TCR_TBI1 | TCR_A1 | TCR_KASAN_SW_FLAGS
+    isb
 
-    msr mair_el1, mair
-    msr tcr_el1, tcr
+    // 设置 sctlr 寄存器 打开mmu功能
+    mov_q           x0, 0x200000034f4d91d
+    set_sctlr_el1   x0
 
-    /*
-     * Prepare SCTLR
-     */
-    mov_q   x0, INIT_SCTLR_EL1_MMU_ON
+    // 获取虚拟地址 跳转到虚拟地址执行
+    ldr x8,  =__mmu_on
+    blr x8
 
-    .unreq  mair
-    .unreq  tcr
-
-
-
+__mmu_on:
     // Zero the bss
     ldr x2, =__bss_start__ // Start of block
     ldr x3, =__bss_end__   // End of block
@@ -238,8 +215,7 @@ memset_loop:
     mov sp, x8
 
     // 进入到C函数 创建MMU映射
-	// bl create_kernel_map
-
+	bl create_kernel_map
 
 	b .
 

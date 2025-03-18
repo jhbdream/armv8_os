@@ -332,9 +332,16 @@ ifeq ("$(SRCARCH)", "aarch64")
 	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 2048 -nographic \
 		-serial mon:stdio -kernel $(MBUILD_IMAGE) $(QEMU_FLAG)
 endif
+
+ifeq ("$(SRCARCH)", "arm64")
+	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 2048 -nographic \
+		-serial mon:stdio -kernel $(MBUILD_IMAGE) $(QEMU_FLAG)
+endif
+
 ifeq ("$(SRCARCH)", "riscv64")
 	qemu-system-riscv64 -machine virt -smp 1 -m 1024 -nographic -serial mon:stdio -bios $(MBUILD_IMAGE) $(QEMU_FLAG)
 endif
+
 ifeq ("$(SRCARCH)", "riscv32")
 	qemu-system-riscv32 -machine virt -smp 1 -m 1024 -nographic -serial mon:stdio -bios $(MBUILD_IMAGE_ELF) $(QEMU_FLAG)
 endif
