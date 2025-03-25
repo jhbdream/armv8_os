@@ -203,10 +203,6 @@ __enable_mmu:
     blr x8
 
 __mmu_on:
-    ldr x1, =__kimage_start
-    sub x1, x1, x0
-    str_l x1, kimage_voffset, x5
-
 bss_clear:
     // Zero the bss
     ldr x2, =__bss_start__ // Start of block
@@ -216,6 +212,10 @@ memset_loop:
     str wzr, [x2], #4
     cmp x2, x3
     b.lt memset_loop
+
+    ldr x1, =__kimage_start
+    sub x1, x1, x0
+    str_l x1, kimage_voffset, x5
 
     /* 初始化栈指针 */
     adr x8, __stack_top
