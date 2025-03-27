@@ -3,9 +3,17 @@
 #include <ee/init.h>
 #include <ee/irqflags.h>
 
+#include <asm/memory.h>
+
 #include <mm/memblock.h>
 
-#include <driver/of.h>
+#include <driver/console.h>
+
+#include <printk.h>
+
+#include <version.h>
+
+extern unsigned long __kimage_start[], __kimage_end[];
 
 void start_kernel(void)
 {
@@ -13,11 +21,17 @@ void start_kernel(void)
 
 	setup_arch();
 
+	console_init();
+	printk("VERSION: %s\n", EEOS_VERSION_STR);
+
+	memblock_debug_set(1);
+
+	memblock_add(0x40000000, 0x40000000);
+	memblock_reserve(virt_to_phys(__kimage_start), __kimage_end - __kimage_start);
+
 #if 0
 
-	console_init();
 
-	printk("VERSION: %s\n", EEOS_VERSION_STR);
 
 	memblock_dump_all();
 
