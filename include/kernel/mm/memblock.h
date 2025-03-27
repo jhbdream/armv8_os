@@ -37,8 +37,10 @@ phys_addr_t memblock_phys_alloc_align(phys_addr_t size, phys_addr_t align);
 void *memblock_alloc(phys_addr_t size, phys_addr_t align);
 int memblock_phys_free(phys_addr_t base, phys_addr_t size);
 void memblock_free(void *ptr, size_t size);
-void memblock_dump_all(void);
 void free_memory_core(void);
+
+void memblock_dump_all(void);
+void memblock_debug_set(int debug);
 
 phys_addr_t memblock_start_of_DRAM(void);
 phys_addr_t memblock_end_of_DRAM(void);

@@ -566,3 +566,8 @@ void memblock_dump_all(void)
 	memblock_dump(&memblock.memory);
 	memblock_dump(&memblock.reserved);
 }
+
+void memblock_debug_set(int debug)
+{
+    memblock_debug =debug;
+}
