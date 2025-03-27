@@ -30,6 +30,9 @@
 /* 物理内存基地址 */
 #define PHYS_OFFSET      (0x40000000)
 
+/* 虚拟内存偏移地址 */
+#define VIRT_OFFSET      (0xFFFF000000000000)
+
 /* 代码链接地址 */
 #define KIMAGE_VADDR     (0xFFFF000000080000)
 
@@ -63,22 +66,18 @@ extern uint64_t kimage_voffset;
  * lives in the [PAGE_OFFSET, PAGE_END) interval at the bottom of the
  * kernel's TTBR1 address range.
  */
-#define __is_lm_address(addr)     (((u64)(addr)-PAGE_OFFSET) < (PAGE_END - PAGE_OFFSET))
+#define __is_lm_address(addr) (((u64)(addr)-PAGE_OFFSET) < (PAGE_END - PAGE_OFFSET))
 
-#define __lm_to_phys(addr)        (((addr)-PAGE_OFFSET) + PHYS_OFFSET)
-#define __kimg_to_phys(addr)      ((addr)-kimage_voffset)
+#define __lm_to_phys(addr)    (((addr)-PAGE_OFFSET) + PHYS_OFFSET)
+#define __kimg_to_phys(addr)  ((addr)-kimage_voffset)
 
-#define __virt_to_phys_nodebug(x) ({ __is_lm_address(x) ? __lm_to_phys(x) : __kimg_to_phys(x); })
+#define __phys_to_lm(x)       ((unsigned long)((x)-PHYS_OFFSET) | PAGE_OFFSET)
+#define __phys_to_kimg(x)     ((unsigned long)((x) + kimage_voffset))
 
-#define __pa_symbol_nodebug(x)    __kimg_to_phys((phys_addr_t)(x))
+#define __virt_to_phys(x)     ({ __is_lm_address(x) ? __lm_to_phys(x) : __kimg_to_phys(x); })
+#define __phys_to_virt(x)     ({ __is_lm_address(x) ? __phys_to_lm(x) : __phys_to_kimg(x); })
 
-#define __virt_to_phys(x)         __virt_to_phys_nodebug(x)
-#define __phys_addr_symbol(x)     __pa_symbol_nodebug(x)
-
-#define __phys_to_virt(x)         ((unsigned long)((x)-PHYS_OFFSET) | PAGE_OFFSET)
-#define __phys_to_kimg(x)         ((unsigned long)((x) + kimage_voffset))
-
-#define virt_to_phys              virt_to_phys
+#define virt_to_phys          virt_to_phys
 static inline phys_addr_t virt_to_phys(const volatile void *x)
 {
 	return __virt_to_phys((unsigned long)(x));

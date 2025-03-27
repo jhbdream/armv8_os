@@ -87,102 +87,67 @@ static pgd_t pgd_table[PTRS_PER_PGD] __aligned(4096);
 static pud_t pud_table[PTRS_PER_PUD] __aligned(4096);
 static pmd_t pmd_table[PTRS_PER_PMD * 16] __aligned(4096);
 
-void switch_mm(void)
+static void init_pagetables(void)
 {
-	// 设置TTBR1寄存器
-	asm volatile("msr ttbr1_el1, %0\n"
-		     "isb" ::"r"(virt_to_phys(pgd_table)));
+	static int init_pagetables_done = 0;
 
-	// 切换后刷新本地TLB
-	asm volatile("tlbi vmalle1is"); // 使所有EL1 TLB条目失效
-}
+	if (init_pagetables_done != 0)
+		return;
 
-/**
- * @brief 创建3级页表，内核映射线性 + 镜像映射
- */
-void create_kernel_map(void)
-{
-	extern unsigned long __kimage_start[], __kimage_end[];
+	uint64_t va = VIRT_OFFSET;
 
-	uint64_t index;
-	uint64_t va, va_start, va_end;
-
-	pgd_t *pgdp;
-
-	phys_addr_t phys = PHYS_OFFSET;
-
-	phys_addr_t pa;
-
-	pgdval_t pgd_val;
-
-	va_start = (uint64_t)__kimage_start;
-	va_end   = (uint64_t)__kimage_end;
-
-	// init pgd table
-	index = PGD_INDEX(va_start);
-	pgdp  = &pgd_table[index];
-
-	pa      = virt_to_phys(&pud_table[0]);
-	pgd_val = (pa & PMD_MASK) | (PGD_TYPE_TABLE) | (PGD_TABLE_UXN) | (PGD_TABLE_AF);
-
-	writel(pgd_val, pgdp);
-
-	// init pgd
-
-	while (1)
-		;
-}
-
-/**
- * 初始化页表，将虚拟地址0xFFFF000000000000开始的连续区域映射到物理内存
- * @param phys_start 起始物理地址（需2MB对齐）
- * @param size       映射区域总大小（需2MB对齐）
- */
-void init_pagetables(void)
-{
 	// 1. 获取页表物理地址
 	uint64_t pgd_phys = virt_to_phys(pgd_table);
 	uint64_t pud_phys = virt_to_phys(pud_table);
 	uint64_t pmd_phys = virt_to_phys(pmd_table);
 
-	pmdval_t pmd;
-
-	uint64_t va, va_start, va_end;
-	uint64_t phys_start, size;
-
-	phys_addr_t pa;
-
 	// 2. 配置PGD表项 -> PUD表
-	pgd_t *pgd_entry = &pgd_table[PGD_INDEX(0xFFFF000000000000)];
+	pgd_t *pgd_entry = &pgd_table[PGD_INDEX(va)];
 	writeq(pud_phys | PMD_TYPE_TABLE, pgd_entry);
 
 	// 3. 配置PUD表项 -> PMD表
-	pud_t *pud_entry = &pud_table[PUD_INDEX(0xFFFF000000000000)];
-	writeq(pmd_phys | PMD_TYPE_TABLE, pud_entry);
 
-	// 4. 配置PMD表项为2MB大页（Block descriptor）
-	va_start = (uint64_t)__kimage_start;
-	va_end   = (uint64_t)__kimage_end;
+	for (int i = 0; i < 16; i++) {
+		pud_t *pud_entry = &pud_table[PUD_INDEX(va)];
 
-	va   = va_start;
-	pa   = va_start - kimage_voffset;
-	size = va_end - va_start;
+		writeq(pmd_phys | PMD_TYPE_TABLE, pud_entry);
 
-	uint64_t num_entries = size >> PMD_SHIFT;
+		va += PUD_SIZE;
+		pmd_phys += 4096;
+	}
 
-	for (int i = 0; i < num_entries; i++) {
-		pmd_t *pmd_entry = &pmd_table[PMD_INDEX(va)];
-		pmd              = pa | PMD_TYPE_SECT // 块描述符
-		      | PMD_SECT_AF                   // Access Flag
-		      | PMD_SECT_PXN                  //
-		      | PMD_ATTRINDX(MT_NORMAL)       // 内存类型
-		      | PMD_SECT_S;                   // 可共享
+	init_pagetables_done = 1;
+}
+
+static void create_simple_map(uint64_t va, uint64_t pa, uint64_t size)
+{
+	uint64_t va_end = va + size;
+	pmdval_t pmd;
+
+	while (va < va_end) {
+
+		pud_t *pud_entry      = &pud_table[PUD_INDEX(va)];
+		pmd_t *pmd_page_table = phys_to_virt(pud_entry->pud & 0xFFFFFFFFFFFFF000);
+		pmd_t *pmd_entry      = &pmd_page_table[PMD_INDEX(va)];
+
+		pmd = pa | PMD_TYPE_SECT        // 块描述符
+		      | PMD_SECT_AF             // Access Flag
+		      | PMD_SECT_PXN            //
+		      | PMD_ATTRINDX(MT_NORMAL) // 内存类型
+		      | PMD_SECT_S;             // 可共享
 
 		writeq(pmd, pmd_entry);
 
-		va += (1 << PMD_SHIFT); // 增加2MB虚拟地址
-		pa += (1 << PMD_SHIFT); // 增加2MB物理地址
+		va += PMD_SIZE; // 增加2MB虚拟地址
+		pa += PMD_SIZE; // 增加2MB物理地址
 	}
+}
+
+static void switch_mm(pgd_t *pgd)
+{
+	phys_addr_t pgd_phys;
+
+	pgd_phys = virt_to_phys(pgd);
 
 	// 5. 刷新TLB并设置TTBR1_EL1
 	asm volatile("tlbi vmalle1is"); // 无效化所有TLB条目
@@ -191,4 +156,30 @@ void init_pagetables(void)
 	asm volatile("msr ttbr1_el1, %0" ::"r"(pgd_phys)); // 设置页表基址
 	asm volatile("dsb sy");
 	asm volatile("isb");
+}
+
+/**
+ * @brief 创建3级页表，内核映射线性 + 镜像映射
+ */
+void create_kernel_map(void)
+{
+	uint64_t va, pa, size;
+
+	init_pagetables();
+
+	// 创建内核镜像映射
+	va   = (uint64_t)__kimage_start;
+	pa   = (uint64_t)__kimage_start - kimage_voffset;
+	size = (uint64_t)__kimage_end - (uint64_t)__kimage_start;
+
+	create_simple_map(va, pa, size);
+
+	// 创建1G线性映射
+	va   = PAGE_OFFSET;
+	pa   = PHYS_OFFSET;
+	size = 0x40000000;
+
+	create_simple_map(va, pa, size);
+
+    switch_mm(pgd_table);
 }
