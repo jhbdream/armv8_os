@@ -5,7 +5,6 @@
 #include <list.h>
 #include <mm/page_alloc.h>
 #include <round.h>
-#include <asm/pgtable.h>
 #include <ee/align.h>
 #include <asm-generic/bug.h>
 #include <asm-generic/get_order.h>

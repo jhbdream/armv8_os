@@ -46,6 +46,12 @@ void start_kernel(void)
     // 把 memblock 剩余可以使用内存分配到 page 管理器
 	free_memory_core();
 
+   extern void buddy_page_test(void);
+   buddy_page_test();
+
+   extern void slob_test(void);
+   slob_test();
+
 #if 0
 
 
