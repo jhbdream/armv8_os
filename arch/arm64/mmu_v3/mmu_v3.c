@@ -103,14 +103,14 @@ static void init_pagetables(void)
 
 	// 2. 配置PGD表项 -> PUD表
 	pgd_t *pgd_entry = &pgd_table[PGD_INDEX(va)];
-	writeq(pud_phys | PMD_TYPE_TABLE, pgd_entry);
+	writeq(pud_phys | PGD_TYPE_TABLE, pgd_entry);
 
 	// 3. 配置PUD表项 -> PMD表
 
 	for (int i = 0; i < 16; i++) {
 		pud_t *pud_entry = &pud_table[PUD_INDEX(va)];
 
-		writeq(pmd_phys | PMD_TYPE_TABLE, pud_entry);
+		writeq(pmd_phys | PUD_TYPE_TABLE, pud_entry);
 
 		va += PUD_SIZE;
 		pmd_phys += 4096;
@@ -119,7 +119,7 @@ static void init_pagetables(void)
 	init_pagetables_done = 1;
 }
 
-static void create_simple_map(uint64_t va, uint64_t pa, uint64_t size)
+static void create_simple_map(uint64_t va, uint64_t pa, uint64_t size, uint64_t type)
 {
 	uint64_t va_end = va + size;
 	pmdval_t pmd;
@@ -130,11 +130,10 @@ static void create_simple_map(uint64_t va, uint64_t pa, uint64_t size)
 		pmd_t *pmd_page_table = phys_to_virt(pud_entry->pud & 0xFFFFFFFFFFFFF000);
 		pmd_t *pmd_entry      = &pmd_page_table[PMD_INDEX(va)];
 
-		pmd = pa | PMD_TYPE_SECT        // 块描述符
-		      | PMD_SECT_AF             // Access Flag
-		      | PMD_SECT_PXN            //
-		      | PMD_ATTRINDX(MT_NORMAL) // 内存类型
-		      | PMD_SECT_S;             // 可共享
+		pmd = pa                            // 块描述符
+		      | PMD_SECT_AF                 // Access Flag
+		      | PMD_ATTRINDX(type)          // 内存类型
+		      | PMD_SECT_S | PMD_TYPE_SECT; // 可共享
 
 		writeq(pmd, pmd_entry);
 
@@ -172,14 +171,20 @@ void create_kernel_map(void)
 	pa   = (uint64_t)__kimage_start - kimage_voffset;
 	size = (uint64_t)__kimage_end - (uint64_t)__kimage_start;
 
-	create_simple_map(va, pa, size);
+	create_simple_map(va, pa, size, MT_NORMAL);
 
 	// 创建1G线性映射
 	va   = PAGE_OFFSET;
 	pa   = PHYS_OFFSET;
 	size = 0x40000000;
 
-	create_simple_map(va, pa, size);
+	create_simple_map(va, pa, size, MT_NORMAL);
 
-    switch_mm(pgd_table);
+	// 创建UART DEVICE映射
+	va   = EARLY_UART_BASE;
+	pa   = 0x09000000;
+	size = 0x200000;
+	create_simple_map(va, pa, size, MT_DEVICE_nGnRnE);
+
+	switch_mm(pgd_table);
 }

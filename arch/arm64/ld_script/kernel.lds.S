@@ -4,7 +4,7 @@ ENTRY(_startup)
 
 #include <asm/memory.h>
 
-STACK_SIZE = 0x100;
+STACK_SIZE = 0x4000;
 
 SECTIONS
 {

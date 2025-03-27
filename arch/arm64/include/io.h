@@ -76,9 +76,6 @@ static inline u64 __raw_readq(const volatile void *addr)
 #define __iormb(v) \
 	({ \
 		unsigned long tmp; \
-\
-		dma_rmb(); \
-\
 		asm volatile("eor	%0, %1, %1\n" \
 			     "cbnz	%0, ." \
 			     : "=r"(tmp) \

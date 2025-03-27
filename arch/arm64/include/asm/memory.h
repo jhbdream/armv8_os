@@ -36,6 +36,8 @@
 /* 代码链接地址 */
 #define KIMAGE_VADDR     (0xFFFF000000080000)
 
+#define EARLY_UART_BASE  (0xFFFF000080000000)
+
 /* 线性映射起始地址 */
 #define PAGE_OFFSET      (0xFFFF000100000000)
 #define PAGE_END         (0xFFFF0001FFFFFFFF)
