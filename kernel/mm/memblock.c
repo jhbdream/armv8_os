@@ -23,44 +23,42 @@
 #include <bitops.h>
 #include <mm/page_alloc.h>
 
-#define INIT_MEMBLOCK_REGIONS 128
-#define INIT_PHYSMEM_REGIONS 4
+#define INIT_MEMBLOCK_REGIONS          128
+#define INIT_PHYSMEM_REGIONS           4
 #define INIT_MEMBLOCK_RESERVED_REGIONS INIT_MEMBLOCK_REGIONS
 
-static struct memblock_region
-	memblock_memory_init_regions[INIT_MEMBLOCK_REGIONS];
-static struct memblock_region
-	memblock_reserved_init_regions[INIT_MEMBLOCK_RESERVED_REGIONS];
+static struct memblock_region memblock_memory_init_regions[INIT_MEMBLOCK_REGIONS];
+static struct memblock_region memblock_reserved_init_regions[INIT_MEMBLOCK_RESERVED_REGIONS];
 
 // 静态初始化 memblock
 struct memblock memblock = {
 	.memory.regions = memblock_memory_init_regions,
-	.memory.cnt = 1,
-	.memory.max = INIT_MEMBLOCK_REGIONS,
-	.memory.name = "memory",
+	.memory.cnt     = 1,
+	.memory.max     = INIT_MEMBLOCK_REGIONS,
+	.memory.name    = "memory",
 
 	.reserved.regions = memblock_reserved_init_regions,
-	.reserved.cnt = 1,
-	.reserved.max = INIT_MEMBLOCK_RESERVED_REGIONS,
-	.reserved.name = "reserved",
+	.reserved.cnt     = 1,
+	.reserved.max     = INIT_MEMBLOCK_RESERVED_REGIONS,
+	.reserved.name    = "reserved",
 };
 
 static struct memblock_type *memblock_memory = &memblock.memory;
 
-#define for_each_memblock_type(i, memblock_type, rgn)                          \
-	for (i = 0, rgn = &memblock_type->regions[0]; i < memblock_type->cnt;  \
-	     i++, rgn = &memblock_type->regions[i])
+#define for_each_memblock_type(i, memblock_type, rgn) \
+	for (i = 0, rgn = &memblock_type->regions[0]; i < memblock_type->cnt; \
+	     i++, rgn   = &memblock_type->regions[i])
 
-#define memblock_dbg(fmt, ...)                                                 \
-	do {                                                                   \
-		if (memblock_debug)                                            \
-			printk(fmt, ##__VA_ARGS__);                            \
+#define memblock_dbg(fmt, ...) \
+	do { \
+		if (memblock_debug) \
+			printk(fmt, ##__VA_ARGS__); \
 	} while (0)
 
 static int memblock_debug;
 
-static void memblock_insert_region(struct memblock_type *type, int idx,
-				   phys_addr_t base, phys_addr_t size)
+static void memblock_insert_region(struct memblock_type *type, int idx, phys_addr_t base,
+				   phys_addr_t size)
 {
 	struct memblock_region *rgn = &type->regions[idx];
 
@@ -81,7 +79,7 @@ static void memblock_remove_region(struct memblock_type *type, int r)
 	type->cnt--;
 
 	if (type->cnt == 0) {
-		type->cnt = 1;
+		type->cnt             = 1;
 		type->regions[0].base = 0;
 		type->regions[0].size = 0;
 	}
@@ -115,13 +113,12 @@ static void memblock_merge_regions(struct memblock_type *type)
  * @param size
  * @return int
  */
-static int memblock_add_range(struct memblock_type *type, phys_addr_t base,
-			      phys_addr_t size)
+static int memblock_add_range(struct memblock_type *type, phys_addr_t base, phys_addr_t size)
 {
-	bool insert = false;
-	phys_addr_t obase = base;
-	phys_addr_t end = base + size;
-	int idx, nr_new;
+	bool                    insert = false;
+	phys_addr_t             obase  = base;
+	phys_addr_t             end    = base + size;
+	int                     idx, nr_new;
 	struct memblock_region *rgn;
 
 	if (!size) {
@@ -132,18 +129,18 @@ static int memblock_add_range(struct memblock_type *type, phys_addr_t base,
 	if (type->regions[0].size == 0) {
 		type->regions[0].base = base;
 		type->regions[0].size = size;
-		type->total_size = size;
+		type->total_size      = size;
 		return 0;
 	}
 
 repeat:
-	base = obase;
+	base   = obase;
 	nr_new = 0;
 
 	for_each_memblock_type(idx, type, rgn)
 	{
 		phys_addr_t rbase = rgn->base;
-		phys_addr_t rend = rgn->base + rgn->size;
+		phys_addr_t rend  = rgn->base + rgn->size;
 
 		// 新的region插入到该region前面
 		if (rbase >= end) {
@@ -156,25 +153,24 @@ repeat:
 		}
 
 		/**
-         *
-         *
-         *  new_region:
-         *              base                        end
-         *              |===========================|
-         *                              rbase                                 rend
-         *                              |=====================================|
-         *
-         * merge:       base  rbase - base rbase                               rend
-         *              |===============| |=====================================|
-         *
-         */
+		 *
+		 *
+		 *  new_region:
+		 *              base                        end
+		 *              |===========================|
+		 *                              rbase                                 rend
+		 *                              |=====================================|
+		 *
+		 * merge:       base  rbase - base rbase                               rend
+		 *              |===============| |=====================================|
+		 *
+		 */
 
 		if (rbase > base) {
 			nr_new++;
 
 			if (insert) {
-				memblock_insert_region(type, idx, base,
-						       rbase - base);
+				memblock_insert_region(type, idx, base, rbase - base);
 			}
 		}
 
@@ -213,12 +209,11 @@ int memblock_add(phys_addr_t base, phys_addr_t size)
 	return memblock_add_range(&memblock.memory, base, size);
 }
 
-static int memblock_isolate_range(struct memblock_type *type, phys_addr_t base,
-				  phys_addr_t size, int *start_rgn_idx,
-				  int *end_rgn_idx)
+static int memblock_isolate_range(struct memblock_type *type, phys_addr_t base, phys_addr_t size,
+				  int *start_rgn_idx, int *end_rgn_idx)
 {
-	phys_addr_t end = base + size;
-	int idx;
+	phys_addr_t             end = base + size;
+	int                     idx;
 	struct memblock_region *rgn;
 
 	*start_rgn_idx = *end_rgn_idx = 0;
@@ -234,7 +229,7 @@ static int memblock_isolate_range(struct memblock_type *type, phys_addr_t base,
 	for_each_memblock_type(idx, type, rgn)
 	{
 		phys_addr_t rbase = rgn->base;
-		phys_addr_t rend = rgn->base + rgn->size;
+		phys_addr_t rend  = rgn->base + rgn->size;
 
 		if (rbase >= end)
 			break;
@@ -266,14 +261,12 @@ static int memblock_isolate_range(struct memblock_type *type, phys_addr_t base,
 	return 0;
 }
 
-static int memblock_remove_range(struct memblock_type *type, phys_addr_t base,
-				 phys_addr_t size)
+static int memblock_remove_range(struct memblock_type *type, phys_addr_t base, phys_addr_t size)
 {
 	int start_rgn_idx, end_rgn_idx;
 	int i, ret;
 
-	ret = memblock_isolate_range(type, base, size, &start_rgn_idx,
-				     &end_rgn_idx);
+	ret = memblock_isolate_range(type, base, size, &start_rgn_idx, &end_rgn_idx);
 	if (ret)
 		return ret;
 
@@ -299,26 +292,25 @@ int memblock_reserve(phys_addr_t base, phys_addr_t size)
 	return memblock_add_range(&memblock.reserved, base, size);
 }
 
-void __next_mem_range(u64 *idx, struct memblock_type *type_a,
-		      struct memblock_type *type_b, phys_addr_t *out_start,
-		      phys_addr_t *out_end)
+void __next_mem_range(u64 *idx, struct memblock_type *type_a, struct memblock_type *type_b,
+		      phys_addr_t *out_start, phys_addr_t *out_end)
 {
 	// 使用一个64位变量 低32位表示可用mem序号 高32位表示保留mem序号
-	int idx_a = *idx & 0xffffffff;
-	int idx_b = *idx >> 32;
+	int                     idx_a = *idx & 0xffffffff;
+	int                     idx_b = *idx >> 32;
 	struct memblock_region *m;
 	struct memblock_region *r;
-	phys_addr_t m_start;
-	phys_addr_t m_end;
-	phys_addr_t r_start;
-	phys_addr_t r_end;
+	phys_addr_t             m_start;
+	phys_addr_t             m_end;
+	phys_addr_t             r_start;
+	phys_addr_t             r_end;
 
 	//  首先遍历可用mem空间 找到第一块可用空间
 	for (; idx_a < type_a->cnt; idx_a++) {
 		m = &type_a->regions[idx_a];
 
 		m_start = m->base;
-		m_end = m->base + m->size;
+		m_end   = m->base + m->size;
 
 		if (!type_b) {
 			if (out_start)
@@ -335,7 +327,7 @@ void __next_mem_range(u64 *idx, struct memblock_type *type_a,
 			r = &type_b->regions[idx_b];
 
 			r_start = idx_b ? (r[-1].base + r[-1].size) : 0;
-			r_end = (idx_b < type_b->cnt) ? r->base : PHYS_ADDR_MAX;
+			r_end   = (idx_b < type_b->cnt) ? r->base : PHYS_ADDR_MAX;
 
 			if (r_start >= m_end) {
 				break;
@@ -362,9 +354,8 @@ void __next_mem_range(u64 *idx, struct memblock_type *type_a,
 	*idx = ULLONG_MAX;
 }
 
-void __next_mem_range_rev(u64 *idx, struct memblock_type *type_a,
-			  struct memblock_type *type_b, phys_addr_t *out_start,
-			  phys_addr_t *out_end)
+void __next_mem_range_rev(u64 *idx, struct memblock_type *type_a, struct memblock_type *type_b,
+			  phys_addr_t *out_start, phys_addr_t *out_end)
 {
 	int idx_a = *idx & 0xffffffff;
 	int idx_b = *idx >> 32;
@@ -382,7 +373,7 @@ void __next_mem_range_rev(u64 *idx, struct memblock_type *type_a,
 		struct memblock_region *m = &type_a->regions[idx_a];
 
 		phys_addr_t m_start = m->base;
-		phys_addr_t m_end = m->base + m->size;
+		phys_addr_t m_end   = m->base + m->size;
 
 		if (!type_b) {
 			if (out_start)
@@ -397,12 +388,12 @@ void __next_mem_range_rev(u64 *idx, struct memblock_type *type_a,
 
 		for (; idx_b >= 0; idx_b--) {
 			struct memblock_region *r;
-			phys_addr_t r_start;
-			phys_addr_t r_end;
+			phys_addr_t             r_start;
+			phys_addr_t             r_end;
 
-			r = &type_b->regions[idx_b];
+			r       = &type_b->regions[idx_b];
 			r_start = idx_b ? r[-1].base + r[-1].size : 0;
-			r_end = idx_b < type_b->cnt ? r->base : PHYS_ADDR_MAX;
+			r_end   = idx_b < type_b->cnt ? r->base : PHYS_ADDR_MAX;
 
 			if (r_end <= m_start)
 				break;
@@ -436,16 +427,16 @@ phys_addr_t memblock_end_of_DRAM(void)
 {
 	int idx = memblock.memory.cnt - 1;
 
-	return (memblock.memory.regions[idx].base +
-		memblock.memory.regions[idx].size);
+	return (memblock.memory.regions[idx].base + memblock.memory.regions[idx].size);
 }
 
 static phys_addr_t memblock_find(phys_addr_t size, phys_addr_t align)
 {
 	phys_addr_t this_start, this_end, cand;
-	u64 i;
+	u64         i;
 
-	for_each_free_mem_range_reverse (i, &this_start, &this_end) {
+	for_each_free_mem_range_reverse(i, &this_start, &this_end)
+	{
 		if (this_end < size)
 			continue;
 
@@ -479,8 +470,7 @@ int memblock_phys_free(phys_addr_t base, phys_addr_t size)
 
 void *memblock_alloc(phys_addr_t size, phys_addr_t align)
 {
-	memblock_dbg("%s: %llu bytes align=0x%llx\n", __func__, (u64)size,
-		     (u64)align);
+	memblock_dbg("%s: %llu bytes align = 0x%llx\n", __func__, (u64)size, (u64)align);
 
 	phys_addr_t alloc;
 
@@ -539,8 +529,8 @@ void free_memory_core(void)
 static void memblock_dump(struct memblock_type *type)
 {
 	struct memblock_region *rgn;
-	int idx;
-	phys_addr_t base, end, size;
+	int                     idx;
+	phys_addr_t             base, end, size;
 
 	printk("%s.cnt = 0x%lx\n", type->name, type->cnt);
 
@@ -550,18 +540,18 @@ static void memblock_dump(struct memblock_type *type)
 
 		base = rgn->base;
 		size = rgn->size;
-		end = base + size;
+		end  = base + size;
 
-		printk(" %s[%#x]\t[0x%016x-%016x], 0x%016x bytes\n", type->name,
-		       idx, base, end, size);
+		printk(" %s[%#x]\t[0x%016x-%016x], 0x%016x bytes\n", type->name, idx, base, end,
+		       size);
 	}
 }
 
 void memblock_dump_all(void)
 {
 	printk("MEMBLOCK configuration:\n");
-	printk(" memory size = 0x%016x reserved size = 0x%016x\n",
-	       memblock.memory.total_size, memblock.reserved.total_size);
+	printk(" memory size = 0x%016x reserved size = 0x%016x\n", memblock.memory.total_size,
+	       memblock.reserved.total_size);
 
 	memblock_dump(&memblock.memory);
 	memblock_dump(&memblock.reserved);
@@ -569,5 +559,5 @@ void memblock_dump_all(void)
 
 void memblock_debug_set(int debug)
 {
-    memblock_debug =debug;
+	memblock_debug = debug;
 }
