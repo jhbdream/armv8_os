@@ -77,7 +77,7 @@ extern uint64_t kimage_voffset;
 #define __phys_to_kimg(x)     ((unsigned long)((x) + kimage_voffset))
 
 #define __virt_to_phys(x)     ({ __is_lm_address(x) ? __lm_to_phys(x) : __kimg_to_phys(x); })
-#define __phys_to_virt(x)     ({ __is_lm_address(x) ? __phys_to_lm(x) : __phys_to_kimg(x); })
+#define __phys_to_virt(x)     (__phys_to_lm(x))
 
 #define virt_to_phys          virt_to_phys
 static inline phys_addr_t virt_to_phys(const volatile void *x)

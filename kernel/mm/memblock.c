@@ -488,12 +488,11 @@ void memblock_free(void *ptr, size_t size)
 		memblock_phys_free(virt_to_phys(ptr), size);
 }
 
-#if 0
 void __free_mem_core(phys_addr_t start, phys_addr_t end)
 {
-	int order;
+	int           order;
 	unsigned long start_pfn = PFN_UP(start);
-	unsigned long end_pfn = PFN_DOWN(end);
+	unsigned long end_pfn   = PFN_DOWN(end);
 
 	if (start_pfn >= end_pfn)
 		return;
@@ -517,14 +516,14 @@ void __free_mem_core(phys_addr_t start, phys_addr_t end)
  */
 void free_memory_core(void)
 {
-	u64 i;
+	u64         i;
 	phys_addr_t start, end;
 
-	for_each_free_mem_range (i, &start, &end) {
+	for_each_free_mem_range(i, &start, &end)
+	{
 		__free_mem_core(start, end);
 	}
 }
-#endif
 
 static void memblock_dump(struct memblock_type *type)
 {

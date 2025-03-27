@@ -126,9 +126,10 @@ static void create_simple_map(uint64_t va, uint64_t pa, uint64_t size, uint64_t 
 
 	while (va < va_end) {
 
-		pud_t *pud_entry      = &pud_table[PUD_INDEX(va)];
-		pmd_t *pmd_page_table = phys_to_virt(pud_entry->pud & 0xFFFFFFFFFFFFF000);
-		pmd_t *pmd_entry      = &pmd_page_table[PMD_INDEX(va)];
+		pud_t *pud_entry = &pud_table[PUD_INDEX(va)];
+		pmd_t *pmd_page_table =
+		    (pmd_t *)__phys_to_kimg(pud_entry->pud & 0xFFFFFFFFFFFFF000);
+		pmd_t *pmd_entry = &pmd_page_table[PMD_INDEX(va)];
 
 		pmd = pa                            // 块描述符
 		      | PMD_SECT_AF                 // Access Flag
