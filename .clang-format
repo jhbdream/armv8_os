@@ -1,7 +1,6 @@
 ---
 Language:        Cpp
 # BasedOnStyle:  LLVM
-AccessModifierOffset: -2
 AlignAfterOpenBracket: Align
 # 说明: 当使用数组初始化Struct时，对齐数组每一列元素。
 # 类型: ArrayInitializerAlignmentStyle
@@ -21,7 +20,7 @@ AlignArrayOfStructures: Left
 # Enabled: Boolean            (团员项)对齐开关。
 # AlignCompound: Boolean      (团员项)+=, <<= 之类的复合赋值符是否与 = 对齐。
 # PadOperators: Boolean       (团员项)短赋值运算符左侧填充空格，使得与长赋值运算符等宽。
-AlignConsecutiveMacros: AcrossEmptyLinesAndComments 
+AlignConsecutiveMacros: AcrossEmptyLines
 # 连续赋值时，对齐所有等号
 AlignConsecutiveAssignments: true
 AlignConsecutiveBitFields: None
@@ -69,8 +68,8 @@ BraceWrapping:
   SplitEmptyNamespace: true
 BreakBeforeBinaryOperators: None
 BreakBeforeConceptDeclarations: true
-# 在大括号前换行: Attach(始终将大括号附加到周围的上下文), Linux(除函数、命名空间和类定义，与Attach类似), 
-# Mozilla(除枚举、函数、记录定义，与Attach类似), Stroustrup(除函数定义、catch、else，与Attach类似), 
+# 在大括号前换行: Attach(始终将大括号附加到周围的上下文), Linux(除函数、命名空间和类定义，与Attach类似),
+# Mozilla(除枚举、函数、记录定义，与Attach类似), Stroustrup(除函数定义、catch、else，与Attach类似),
 # Allman(总是在大括号前换行), GNU(总是在大括号前换行，并对于控制语句的大括号增加额外的缩进), WebKit(在函数前换行), Custom
 # 注：这里认为语句块也属于函数
 BreakBeforeBraces: Linux
@@ -87,12 +86,13 @@ BreakConstructorInitializersBeforeComma: false
 BreakConstructorInitializers: BeforeColon
 BreakAfterJavaFieldAnnotations: false
 BreakStringLiterals: true
-ColumnLimit:     100
+# 最大列宽度
+ColumnLimit:     90
 CommentPragmas:  '^ IWYU pragma:'
 QualifierAlignment: Left
 CompactNamespaces: false
-ConstructorInitializerIndentWidth: 4
-ContinuationIndentWidth: 4
+ConstructorInitializerIndentWidth: 0
+ContinuationIndentWidth: 0
 Cpp11BracedListStyle: false
 DeriveLineEnding: true
 DerivePointerAlignment: false
@@ -101,7 +101,6 @@ EmptyLineAfterAccessModifier: Never
 EmptyLineBeforeAccessModifier: LogicalBlock
 ExperimentalAutoDetectBinPacking: false
 PackConstructorInitializers: BinPack
-BasedOnStyle:    ''
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 AllowAllConstructorInitializersOnNextLine: true
 FixNamespaceComments: true
@@ -127,14 +126,17 @@ IncludeCategories:
     CaseSensitive:   false
 IncludeIsMainRegex: '(Test)?$'
 IncludeIsMainSourceRegex: ''
-IndentAccessModifiers: false
 IndentCaseLabels: false
 IndentCaseBlocks: false
 IndentGotoLabels: true
-IndentPPDirectives: None
+# 预处理命令对齐缩进
+IndentPPDirectives: AfterHash
 IndentExternBlock: AfterExternBlock
 IndentRequires:  false
-IndentWidth:     8
+# 缩进宽度4
+IndentWidth:     4
+IndentAccessModifiers: false
+AccessModifierOffset: -4
 IndentWrappedFunctionNames: false
 InsertTrailingCommas: None
 JavaScriptQuotes: Leave
@@ -167,7 +169,7 @@ ReflowComments:  true
 RemoveBracesLLVM: false
 SeparateDefinitionBlocks: Leave
 ShortNamespaceLines: 1
-SortIncludes:    Never
+SortIncludes:    false
 SortJavaStaticImport: Before
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: false
@@ -209,7 +211,7 @@ StatementAttributeLikeMacros:
 StatementMacros:
   - Q_UNUSED
   - QT_REQUIRE_VERSION
-TabWidth:        8
+TabWidth:        4
 UseCRLF:         false
 # 说明: 在结果文件中使用制表符的方式。
 # 类型:
@@ -219,7 +221,7 @@ UseCRLF:         false
 # ForContinuationAndIndentation 用制表符填充所有前导空白&#xff0c;并使用空格进行一行内出现的对齐(例如&#xff0c;连续的赋值和声明)。
 # AlignWithSpaces               使用制表符进行续行和缩进&#xff0c;使用空格进行对齐。
 # Always                        当我们需要填充至少从一个制表位到下一个制表位的空白时&#xff0c;请使用制表符。
-UseTab:          ForContinuationAndIndentation
+UseTab:         Never
 WhitespaceSensitiveMacros:
   - STRINGIZE
   - PP_STRINGIZE
@@ -227,4 +229,3 @@ WhitespaceSensitiveMacros:
   - NS_SWIFT_NAME
   - CF_SWIFT_NAME
 ...
-
