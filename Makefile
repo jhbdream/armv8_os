@@ -581,16 +581,16 @@ quiet_cmd_eeos = LD      $@
       -Wl,--start-group $(eeos-libs) $(eeos-objs) -Wl,--end-group \
       -T arch/arm64/ld_script/kernel.lds
 
-quiet_cmd_eeos_bin = OBJCOPY    $@.bin
+quiet_cmd_eeos_bin = OBJCOPY $@.bin
       cmd_eeos_bin = $(OBJCOPY) -O binary $@ $@.bin
 
-quiet_cmd_eeos_dis = OBJDUMP    $@.dis
+quiet_cmd_eeos_dis = OBJDUMP $@.dis
       cmd_eeos_dis = $(OBJDUMP) -D $@ > $@.dis
 
 eeos: $(eeos-all) FORCE
 	+$(call if_changed,eeos)
-	+$(call if_changed,eeos_bin)
 	+$(call if_changed,eeos_dis)
+	+$(call if_changed,eeos_bin)
 
 # The actual objects are generated when descending,
 # make sure no implicit rule kicks in
