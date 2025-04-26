@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <config.h>
 #include <type.h>
 #include <ee/sizes.h>
 

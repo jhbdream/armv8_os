@@ -12,8 +12,6 @@
 
 #include <printk.h>
 
-#include <version.h>
-
 extern unsigned long __kimage_start[], __kimage_end[];
 
 void start_kernel(void)
@@ -28,7 +26,6 @@ void start_kernel(void)
 	setup_arch();
 
 	console_init();
-	printk("VERSION: %s\n", EEOS_VERSION_STR);
 
 	/* 初始化memblock内存管理器 */
 	memblock_debug_set(1);

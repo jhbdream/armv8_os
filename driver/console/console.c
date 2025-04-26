@@ -10,7 +10,7 @@ void console_init(void)
 
 	list_for_each_console(con)
 	{
-		if (0 != strcmp(con->name, CONFIG_CONSOLE_NAME)) {
+		if (0 != strcmp(con->name, "qemu")) {
 			continue;
 		}
 

@@ -2,7 +2,6 @@
 #define __PAGE_TABLE_H__
 
 #include <type.h>
-#include <config.h>
 
 /**
  * page table 相关定义 尽量实现通用

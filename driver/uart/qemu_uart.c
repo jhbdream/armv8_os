@@ -1,18 +1,17 @@
 #include <type.h>
 #include <io.h>
-#include <config.h>
 #include <driver/console.h>
 #include <driver/uart.h>
 #include <stddef.h>
 
 #include <asm/memory.h>
 
-static u64 early_mm_base;
-
-#ifdef CONFIG_ARCH_ARM64
 #define QEMU_UART_DR ((void *)(EARLY_UART_BASE + UART01x_DR))
 #define QEMU_UART_FR ((void *)(EARLY_UART_BASE + UART01x_FR))
-#endif
+
+#if 0
+
+static u64 early_mm_base;
 
 #ifdef CONFIG_ARCH_AARCH64
 #define QEMU_UART_DR ((void *)(0xFFFF100000000000 + UART01x_DR))
@@ -27,6 +26,7 @@ static u64 early_mm_base;
 #ifdef CONFIG_ARCH_RISCV32
 #define QEMU_UART_DR ((void *)(0x10000000 + 0x00))
 #define QEMU_UART_FR ((void *)(0x10000000 + 0x05))
+#endif
 #endif
 
 /**

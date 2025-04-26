@@ -1,6 +1,5 @@
 #include "driver/interrupt.h"
 #include <io.h>
-#include <config.h>
 #include <driver/console.h>
 #include <driver/uart.h>
 #include <stddef.h>

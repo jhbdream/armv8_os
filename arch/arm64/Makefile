@@ -1,9 +1,5 @@
-ARCH_CFLAGS += -march=armv8-a
-ARCH_AFLAGS +=
-ARCH_LDFLAGS +=
+obj-y += boot/startup.o
+obj-y += kernel/setup.o
+obj-y += mmu_v3/mmu_v3.o
 
-core-y += arch/arm64/boot/
-core-y += arch/arm64/kernel/
-core-y += arch/arm64/dts/
-core-y += arch/arm64/mmu_v3/
-core-y += arch/arm64/ld_script/
+extra-y += ld_script/kernel.lds

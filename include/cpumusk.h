@@ -3,7 +3,6 @@
 #define __LINUX_CPUMASK_H
 
 #include <type.h>
-#include <config.h>
 
 /* Don't assign or return these: may not be this big! */
 typedef struct cpumask {

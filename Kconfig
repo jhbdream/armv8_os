@@ -1,8 +1,1 @@
 mainmenu "EEos Configuration"
-
-config SRCARCH
-    string
-    option env="SRCARCH"
-
-source "arch/Kconfig"
-source "driver/Kconfig"

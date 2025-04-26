@@ -1,6 +1,5 @@
 #include <printk.h>
 #include <board_init.h>
-#include <config.h>
 #include <driver/gic.h>
 #include <arch_timer.h>
 #include <common/interrupt.h>

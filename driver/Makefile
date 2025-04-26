@@ -2,4 +2,4 @@ obj-y += uart/
 obj-y += console/
 obj-y += interrupt/
 obj-y += timer/
-obj-y += of/
+# obj-y += of/

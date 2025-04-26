@@ -7,7 +7,7 @@ target remote localhost:1234
 #source gdb/verfy.py
 #source gdb/write_r.py
 
-add-symbol-file -o -(0xffff000000080000-0x40080000) eeos.elf
+add-symbol-file -o -(0xffff000000080000-0x40080000) eeos
 
 # add-symbol-file eeos.elf
 

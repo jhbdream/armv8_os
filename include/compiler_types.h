@@ -25,4 +25,8 @@
 	} while (0)
 #endif
 
+#ifndef asm
+#define asm __asm__
+#endif
+
 #endif /* __LINUX_COMPILER_TYPES_H */

@@ -1,7 +1,6 @@
 #ifndef __ASM_MEMORY_H
 #define __ASM_MEMORY_H
 
-#include <config.h>
 #include <ee/sizes.h>
 #include <type.h>
 

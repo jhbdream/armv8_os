@@ -2,7 +2,6 @@
 #ifndef __LINUX_BITS_H
 #define __LINUX_BITS_H
 
-#include <config.h>
 
 #ifdef CONFIG_64BIT
 #define BITS_PER_LONG 64

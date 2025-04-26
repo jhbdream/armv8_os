@@ -1,23 +1,79 @@
-# SPDX-License-Identifier: GPL-2.0
 VERSION = 1
 PATCHLEVEL = 0
 SUBLEVEL = 0
-EXTRAVERSION = -rc1
-NAME = unstable
+EXTRAVERSION =
+NAME = KBuild Template
 
-PHONY := _all
-_all:
+# *DOCUMENTATION*
+# To see a list of typical targets execute "make help"
+# More info can be located in ./README
+# Comments in this file are targeted only to the developer, do not
+# expect to learn how to build the kernel reading this file.
 
-MAKEFLAGS += -rR --no-print-directory
+# o Do not use make's built-in rules and variables
+#   (this increases performance and avoids hard-to-debug behaviour);
+# o Look for make include files relative to root of kernel src
+MAKEFLAGS += -rR --include-dir=$(CURDIR)
+
+# Avoid funny character set dependencies
+unexport LC_ALL
+LC_COLLATE=C
+LC_NUMERIC=C
+export LC_COLLATE LC_NUMERIC
+
+# Avoid interference with shell env settings
+unexport GREP_OPTIONS
+
+# We are using a recursive build, so we need to do a little thinking
+# to get the ordering right.
+#
+# Most importantly: sub-Makefiles should only ever modify files in
+# their own directory. If in some directory we have a dependency on
+# a file in another dir (which doesn't happen often, but it's often
+# unavoidable when linking the built-in.o targets which finally
+# turn into eeos), we will call a sub make in that other dir, and
+# after that we are sure that everything which is in that other dir
+# is now up to date.
+#
+# The only cases where we need to modify files which have global
+# effects are thus separated out and done before the recursive
+# descending is started. They are now explicitly listed as the
+# prepare rule.
+
+# Beautify output
+# ---------------------------------------------------------------------------
+#
+# Normally, we echo the whole command before executing it. By making
+# that echo $($(quiet)$(cmd)), we now have the possibility to set
+# $(quiet) to choose other forms of output instead, e.g.
+#
+#         quiet_cmd_cc_o_c = Compiling $(RELDIR)/$@
+#         cmd_cc_o_c       = $(CC) $(c_flags) -c -o $@ $<
+#
+# If $(quiet) is empty, the whole command will be printed.
+# If it is set to "quiet_", only the short version will be printed.
+# If it is set to "silent_", nothing will be printed at all, since
+# the variable $(silent_cmd_cc_o_c) doesn't exist.
+#
+# A simple variant is to prefix commands with $(Q) - that's useful
+# for commands that shall be hidden in non-verbose mode.
+#
+#	$(Q)ln $@ :<
+#
+# If KBUILD_VERBOSE equals 0 then the above command will be hidden.
+# If KBUILD_VERBOSE equals 1 then the above command is displayed.
+#
+# To put more focus on warnings, be less verbose as default
+# Use 'make V=1' to see the full commands
 
 ifeq ("$(origin V)", "command line")
-  MBUILD_VERBOSE = $(V)
+  KBUILD_VERBOSE = $(V)
 endif
-ifndef MBUILD_VERBOSE
-  MBUILD_VERBOSE = 0
+ifndef KBUILD_VERBOSE
+  KBUILD_VERBOSE = 0
 endif
 
-ifeq ($(MBUILD_VERBOSE),1)
+ifeq ($(KBUILD_VERBOSE),1)
   quiet =
   Q =
 else
@@ -25,330 +81,765 @@ else
   Q = @
 endif
 
+# If the user is running make -s (silent mode), suppress echoing of
+# commands
+
+ifneq ($(filter 4.%,$(MAKE_VERSION)),)	# make-4
+ifneq ($(filter %s ,$(firstword x$(MAKEFLAGS))),)
+  quiet=silent_
+endif
+else					# make-3.8x
+ifneq ($(filter s% -s%,$(MAKEFLAGS)),)
+  quiet=silent_
+endif
+endif
+
+export quiet Q KBUILD_VERBOSE
+
+# kbuild supports saving output files in a separate directory.
+# To locate output files in a separate directory two syntaxes are supported.
+# In both cases the working directory must be the root of the kernel src.
+# 1) O=
+# Use "make O=dir/to/store/output/files/"
+#
+# 2) Set KBUILD_OUTPUT
+# Set the environment variable KBUILD_OUTPUT to point to the directory
+# where the output files shall be placed.
+# export KBUILD_OUTPUT=dir/to/store/output/files/
+# make
+#
+# The O= assignment takes precedence over the KBUILD_OUTPUT environment
+# variable.
+
+# KBUILD_SRC is set on invocation of make in OBJ directory
+# KBUILD_SRC is not intended to be used by the regular user (for now)
+ifeq ($(KBUILD_SRC),)
+
+# OK, Make called in directory where kernel src resides
+# Do we want to locate output files in a separate directory?
 ifeq ("$(origin O)", "command line")
-	O_LEVEL = $(O)
-endif
-ifndef O_LEVEL
-	O_LEVEL = 0
+  KBUILD_OUTPUT := $(O)
 endif
 
-ifeq ("$(origin GDB)", "command line")
-	DEBUG_USE_GDB = $(GDB)
-endif
-ifndef DEBUG_USE_GDB
-	DEBUG_USE_GDB = 0
+# That's our default target when none is given on the command line
+PHONY := _all
+_all:
+
+# Cancel implicit rules on top Makefile
+$(CURDIR)/Makefile Makefile: ;
+
+ifneq ($(words $(subst :, ,$(CURDIR))), 1)
+  $(error main directory cannot contain spaces nor colons)
 endif
 
-export quiet Q MBUILD_VERBOSE
+ifneq ($(KBUILD_OUTPUT),)
+# Invoke a second make in the output directory, passing relevant variables
+# check that the output directory actually exists
+saved-output := $(KBUILD_OUTPUT)
+KBUILD_OUTPUT := $(shell mkdir -p $(KBUILD_OUTPUT) && cd $(KBUILD_OUTPUT) \
+								&& /bin/pwd)
+$(if $(KBUILD_OUTPUT),, \
+     $(error failed to create output directory "$(saved-output)"))
 
-srctree 	:= $(CURDIR)
-objtree		:= $(CURDIR)
-src			:= $(srctree)
-obj			:= $(objtree)
+PHONY += $(MAKECMDGOALS) sub-make
+
+$(filter-out _all sub-make $(CURDIR)/Makefile, $(MAKECMDGOALS)) _all: sub-make
+	@:
+
+sub-make:
+	$(Q)$(MAKE) -C $(KBUILD_OUTPUT) KBUILD_SRC=$(CURDIR) \
+	-f $(CURDIR)/Makefile $(filter-out _all sub-make,$(MAKECMDGOALS))
+
+# Leave processing to above invocation of make
+skip-makefile := 1
+endif # ifneq ($(KBUILD_OUTPUT),)
+endif # ifeq ($(KBUILD_SRC),)
+
+# We process the rest of the Makefile if this is the final invocation of make
+ifeq ($(skip-makefile),)
+
+# Do not print "Entering directory ...",
+# but we want to display it when entering to the output directory
+# so that IDEs/editors are able to understand relative filenames.
+MAKEFLAGS += --no-print-directory
+
+# Call a source code checker (by default, "sparse") as part of the
+# C compilation.
+#
+# Use 'make C=1' to enable checking of only re-compiled files.
+# Use 'make C=2' to enable checking of *all* source files, regardless
+# of whether they are re-compiled or not.
+#
+# See the file "Documentation/sparse.txt" for more details, including
+# where to get the "sparse" utility.
+
+ifeq ("$(origin C)", "command line")
+  KBUILD_CHECKSRC = $(C)
+endif
+ifndef KBUILD_CHECKSRC
+  KBUILD_CHECKSRC = 0
+endif
+
+PHONY += all
+_all: all
+
+ifeq ($(KBUILD_SRC),)
+        # building in the source tree
+        srctree := .
+else
+        ifeq ($(KBUILD_SRC)/,$(dir $(CURDIR)))
+                # building in a subdirectory of the source tree
+                srctree := ..
+        else
+                srctree := $(KBUILD_SRC)
+        endif
+endif
+
+objtree		:= .
+src		:= $(srctree)
+obj		:= $(objtree)
 
 VPATH		:= $(srctree)
 
 export srctree objtree VPATH
 
-version_h := include/config/version.h
+ARCH		?= $(SUBARCH)
+CROSS_COMPILE	?= $(CONFIG_CROSS_COMPILE:"%"=%)
 
-clean-targets := %clean
+KCONFIG_CONFIG	?= .config
+export KCONFIG_CONFIG
 
-MCONFIG_CONFIG  ?= .config
-export MCONFIG_CONFIG
+# SHELL used by kbuild
+CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
+	  else if [ -x /bin/bash ]; then echo /bin/bash; \
+	  else echo sh; fi ; fi)
 
--include .config
-include scripts/config.mk
+HOSTCC       = gcc
+HOSTCXX      = g++
+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu89
+HOSTCXXFLAGS = -O2
 
-KERNELVERSION = $(VERSION)$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(SUBLEVEL)))$(EXTRAVERSION)
-export VERSION PATCHLEVEL SUBLEVEL KERNELVERSION
-
-ifeq ($(CONFIG_ARCH_AARCH64), y)
-	ARCH			= aarch64
-	CROSS_COMPILE 	?= aarch64-none-elf-
-	BFD_NAME		= elf64-littleaarch64
-else ifeq ($(CONFIG_ARCH_ARM64), y)
-	ARCH			= arm64
-	CROSS_COMPILE 	?= aarch64-linux-gnu-
-	BFD_NAME		= elf64-littleaarch64
-else ifeq ($(CONFIG_ARCH_RISCV64), y)
-	ARCH			= riscv64
-	CROSS_COMPILE 	?= riscv64-unknown-elf-
-	BFD_NAME		= elf64-littleriscv
-else ifeq ($(CONFIG_ARCH_RISCV32), y)
-	ARCH			= riscv32
-	CROSS_COMPILE 	?= riscv32-unknown-elf-
+ifeq ($(shell $(HOSTCC) -v 2>&1 | grep -c "clang version"), 1)
+HOSTCFLAGS  += -Wno-unused-value -Wno-unused-parameter \
+		-Wno-missing-field-initializers -fno-delete-null-pointer-checks
 endif
 
-SRCARCH 	:= $(ARCH)
+# Decide whether to build built-in, modular, or both.
+# Normally, just do built-in.
 
+KBUILD_BUILTIN := 1
+
+export KBUILD_BUILTIN
+export KBUILD_CHECKSRC KBUILD_SRC
+
+
+# We need some generic definitions (do not try to remake the file).
+scripts/Kbuild.include: ;
+include scripts/Kbuild.include
 
 # Make variables (CC, etc...)
-AS			= $(CROSS_COMPILE)as
-LD			= $(CROSS_COMPILE)ld
-CC			= $(CROSS_COMPILE)gcc
-CPP			= $(CC) -E
-AR			= $(CROSS_COMPILE)ar
-NM			= $(CROSS_COMPILE)nm
+AS		= $(CROSS_COMPILE)as
+LD		= $(CROSS_COMPILE)ld
+CC		= $(CROSS_COMPILE)gcc
+CPP		= $(CC) -E
+AR		= $(CROSS_COMPILE)ar
+NM		= $(CROSS_COMPILE)nm
 STRIP		= $(CROSS_COMPILE)strip
 OBJCOPY		= $(CROSS_COMPILE)objcopy
 OBJDUMP		= $(CROSS_COMPILE)objdump
-LEX			= flex
-YACC		= bison
-AWK			= awk
+AWK		= awk
 PERL		= perl
 PYTHON		= python
-PYTHON2		= python2
-PYTHON3		= python3
 CHECK		= sparse
-DTC			= dtc
-CAT			= cat
 
+CHECKFLAGS     := -D__STDC__ -Wbitwise -Wno-return-void $(CF)
+NOSTDINC_FLAGS  =
+CFLAGS_KERNEL	=
+AFLAGS_KERNEL	=
+
+# Use EEOSINCLUDE when you must reference the include/ directory.
+# Needed to be compatible with the O= option
 EEOSINCLUDE    := \
-		-I$(srctree)/arch/$(SRCARCH)/include \
-		-I$(srctree)/include	\
-		-I$(srctree)/include/kernel	\
-		-I$(srctree)/include/config \
-		-I$(srctree)/include/libc	\
-		-I$(srctree)/lib/libfdt	\
-		-I$(srctree)/include/ee
+		$(if $(KBUILD_SRC), -I$(srctree)/include) \
+		-Iinclude -include include/generated/autoconf.h \
+		-I$(srctree)/arch/$(ARCH)/include \
+		-I$(srctree)/include/libc \
+		-I$(srctree)/include/ee \
+		-I$(srctree)/include/kernel \
 
-CSTD_FLAG := -std=gnu11
-MBUILD_DEFINE := -D__KERNEL__ -D__DEBUG_USE_GDB__=$(DEBUG_USE_GDB)
-NOSTDINC_FLAGS += -nostdinc
+KBUILD_CPPFLAGS := -D__EEOS__
 
-MBUILD_CFLAGS   := 	-Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
-					-Wno-unused-function -Wno-unused-variable \
-		   			-fno-strict-aliasing -fno-common -fshort-wchar \
-					-fno-stack-protector \
-					-Wno-psabi \
-		   			-Werror-implicit-function-declaration \
-		   			-Wno-format-security -O$(O_LEVEL) \
-		   			$(CSTD_FLAG) --static -nostdlib  -nostartfiles -fno-builtin	\
-					-g $(EEOSINCLUDE) $(MBUILD_DEFINE) $(NOSTDINC_FLAGS)
+KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+		   -fno-strict-aliasing -fno-common \
+		   -Werror-implicit-function-declaration \
+		   -Wno-format-security \
+		   --static -nostdlib  -nostartfiles -fno-builtin \
+		   -std=gnu99
 
-MBUILD_AFLAGS   := -D__ASSEMBLY__
-MBUILD_LDFLAGS := --no-undefined -static -nostdlib
+KBUILD_AFLAGS_KERNEL :=
+KBUILD_CFLAGS_KERNEL :=
+KBUILD_AFLAGS   := -D__ASSEMBLY__
 
-export ARCH SRCARCH CROSS_COMPILE AS LD CC DTC
+KERNELVERSION = $(VERSION)$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(SUBLEVEL)))$(EXTRAVERSION)
+
+export VERSION PATCHLEVEL SUBLEVEL KERNELVERSION
+export ARCH CONFIG_SHELL HOSTCC HOSTCFLAGS CROSS_COMPILE AS LD CC
 export CPP AR NM STRIP OBJCOPY OBJDUMP
-export MAKE LEX YACC AWK GENKSYMS PERL PYTHON PYTHON2 PYTHON3
+export MAKE AWK PERL PYTHON
+export HOSTCXX HOSTCXXFLAGS CHECK CHECKFLAGS
 
-export NOSTDINC_FLAGS EEOSINCLUDE OBJCOPYFLAGS MBUILD_LDFLAGS
-export MBUILD_CFLAGS
-export MBUILD_AFLAGS
+export KBUILD_CPPFLAGS NOSTDINC_FLAGS EEOSINCLUDE OBJCOPYFLAGS LDFLAGS
+export KBUILD_CFLAGS CFLAGS_KERNEL
+export KBUILD_AFLAGS AFLAGS_KERNEL
+export KBUILD_AFLAGS_KERNEL KBUILD_CFLAGS_KERNEL
+export KBUILD_ARFLAGS
 
-PHONY += all
-_all: all
+# Files to ignore in find ... statements
 
-core-y		:= init/ kernel/ lib/
-drivers-y	:= driver/
-external-y	:=
-libs-y		:=
+export RCS_FIND_IGNORE := \( -name SCCS -o -name BitKeeper -o -name .svn -o    \
+			  -name CVS -o -name .pc -o -name .hg -o -name .git \) \
+			  -prune -o
+export RCS_TAR_IGNORE := --exclude SCCS --exclude BitKeeper --exclude .svn \
+			 --exclude CVS --exclude .pc --exclude .hg --exclude .git
+
+# ===========================================================================
+# Rules shared between *config targets and build targets
+
+# Basic helpers built in scripts/
+PHONY += scripts_basic
+scripts_basic:
+	$(Q)$(MAKE) $(build)=scripts/basic
+
+# To avoid any implicit rule to kick in, define an empty command.
+scripts/basic/%: scripts_basic ;
+
+PHONY += outputmakefile
+# outputmakefile generates a Makefile in the output directory, if using a
+# separate output directory. This allows convenient use of make in the
+# output directory.
+outputmakefile:
+ifneq ($(KBUILD_SRC),)
+	$(Q)ln -fsn $(srctree) source
+	$(Q)$(CONFIG_SHELL) $(srctree)/scripts/mkmakefile \
+	    $(srctree) $(objtree) $(VERSION) $(PATCHLEVEL)
+endif
+
+# To make sure we do not include .config for any of the *config targets
+# catch them early, and hand them over to scripts/kconfig/Makefile
+# It is allowed to specify more targets when calling make, including
+# mixing *config targets and build targets.
+# For example 'make oldconfig all'.
+# Detect when mixed targets is specified, and make a second invocation
+# of make so .config is not included in this case either (for *config).
+
+version_h := include/generated/version.h
+
+no-dot-config-targets := clean mrproper distclean \
+			 cscope help% %docs check% coccicheck \
+			 $(version_h) headers_% archheaders archscripts \
+			 kernelversion %src-pkg
+
+config-targets := 0
+mixed-targets  := 0
+dot-config     := 1
+
+ifneq ($(filter $(no-dot-config-targets), $(MAKECMDGOALS)),)
+	ifeq ($(filter-out $(no-dot-config-targets), $(MAKECMDGOALS)),)
+		dot-config := 0
+	endif
+endif
+
+ifneq ($(filter config %config,$(MAKECMDGOALS)),)
+        config-targets := 1
+        ifneq ($(words $(MAKECMDGOALS)),1)
+                mixed-targets := 1
+        endif
+endif
+
+# install need also be processed one by one
+ifneq ($(filter install,$(MAKECMDGOALS)),)
+    mixed-targets := 1
+endif
+
+ifeq ($(mixed-targets),1)
+# ===========================================================================
+# We're called with mixed targets (*config and build targets).
+# Handle them one by one.
+
+PHONY += $(MAKECMDGOALS) __build_one_by_one
+
+$(filter-out __build_one_by_one, $(MAKECMDGOALS)): __build_one_by_one
+	@:
+
+__build_one_by_one:
+	$(Q)set -e; \
+	for i in $(MAKECMDGOALS); do \
+		$(MAKE) -f $(srctree)/Makefile $$i; \
+	done
+
+else
+ifeq ($(config-targets),1)
+# ===========================================================================
+# *config targets only - make sure prerequisites are updated, and descend
+# in scripts/kconfig to make the *config target
+
+# Read arch specific Makefile to set KBUILD_DEFCONFIG as needed.
+# KBUILD_DEFCONFIG may point out an alternative default configuration
+# used for 'make defconfig'
+-include arch/$(ARCH)/Makefile
+export KBUILD_DEFCONFIG KBUILD_KCONFIG
+
+config: scripts_basic outputmakefile FORCE
+	$(Q)$(MAKE) $(build)=scripts/kconfig $@
+
+%config: scripts_basic outputmakefile FORCE
+	$(Q)$(MAKE) $(build)=scripts/kconfig $@
+
+else
+# ===========================================================================
+# Build targets only - this includes eeos, arch specific targets, clean
+# targets and others. In general all targets except *config targets.
+
+# Additional helpers built in scripts/
+# Carefully list dependencies so we do not try to build scripts twice
+# in parallel
+PHONY += scripts
+scripts: scripts_basic include/config/auto.conf include/config/tristate.conf
+	$(Q)$(MAKE) $(build)=$(@)
+
+ifeq ($(dot-config),1)
+# Read in config
+-include include/config/auto.conf
+
+# Read in dependencies to all Kconfig* files, make sure to run
+# oldconfig if changes are detected.
+-include include/config/auto.conf.cmd
+
+# To avoid any implicit rule to kick in, define an empty command
+$(KCONFIG_CONFIG) include/config/auto.conf.cmd: ;
+
+# If .config is newer than include/config/auto.conf, someone tinkered
+# with it and forgot to run make oldconfig.
+# if auto.conf.cmd is missing then we are probably in a cleaned tree so
+# we execute the config step to be sure to catch updated Kconfig files
+include/config/%.conf: $(KCONFIG_CONFIG) include/config/auto.conf.cmd
+	$(Q)$(MAKE) -f $(srctree)/Makefile silentoldconfig
+
+
+else
+# Dummy target needed, because used as prerequisite
+include/config/auto.conf: ;
+endif # $(dot-config)
+
+# The all: target is the default when no target is given on the
+# command line.
+# This allow a user to issue only 'make' to build the application
+# Defaults to eeos, but the arch makefile usually adds further targets
+all: eeos
 
 # The arch Makefile can set ARCH_{CPP,A,C}FLAGS to override the default
-# values of the respective MBUILD_* variables
+# values of the respective KBUILD_* variables
+ARCH_CPPFLAGS :=
 ARCH_AFLAGS :=
 ARCH_CFLAGS :=
-ARCH_LDFLAGS :=
-export ARCH_CFLAGS ARCH_AFLAGS ARCH_LDFLAGS
+-include arch/$(ARCH)/Makefile
 
--include arch/$(SRCARCH)/Makefile
+KBUILD_CFLAGS	+= $(call cc-option,-fno-delete-null-pointer-checks,)
 
-MBUILD_IMAGE 		:= eeos.bin
-MBUILD_IMAGE_DTB	:= eeos_dtb.bin
-MBUILD_IMAGE_ELF 	:= eeos.elf
-MBUILD_IMAGE_SYMBOLS	:= allsymbols.o
-
-DEVICE_TREE ?= $(CONFIG_DEFAULT_DEVICE_TREE:"%"=%)
-ifeq ($(DEVICE_TREE),)
-DEVICE_TREE := unset
-endif
-
-ifneq ($(EXT_DTB),)
-DTB := $(EXT_DTB)
+ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
+KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
 else
-DTB := arch/$(ARCH)/dts/$(DEVICE_TREE).dtb
+ifdef CONFIG_PROFILE_ALL_BRANCHES
+KBUILD_CFLAGS	+= -O2 $(call cc-disable-warning,maybe-uninitialized,)
+else
+KBUILD_CFLAGS   += -O2
+endif
 endif
 
-DTB_SECTION := $(subst /,_,$(DTB))
-DTB_SECTION := $(DTB_SECTION:%.dtb=%)
-DTB_SECTION := $(addprefix _binary_, $(DTB_SECTION))
-DTB_SECTION := $(addsuffix _dtb_start, $(DTB_SECTION))
+# Tell gcc to never replace conditional load with a non-conditional one
+KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
 
-all: include/config/config.h $(version_h) eeos
+ifeq ($(cc-name),clang)
+KBUILD_CPPFLAGS += $(call cc-option,-Qunused-arguments,)
+KBUILD_CPPFLAGS += $(call cc-option,-Wno-unknown-warning-option,)
+KBUILD_CFLAGS += $(call cc-disable-warning, unused-variable)
+KBUILD_CFLAGS += $(call cc-disable-warning, format-invalid-specifier)
+KBUILD_CFLAGS += $(call cc-disable-warning, gnu)
+# Quiet clang warning: comparison of unsigned expression < 0 is always false
+KBUILD_CFLAGS += $(call cc-disable-warning, tautological-compare)
+# CLANG uses a _MergedGlobals as optimization, but this breaks modpost, as the
+# source of a reference will be _MergedGlobals and not on of the whitelisted names.
+# See modpost pattern 2
+KBUILD_CFLAGS += $(call cc-option, -mno-global-merge,)
+KBUILD_CFLAGS += $(call cc-option, -fcatch-undefined-behavior)
+else
 
-eeos-dirs	:= $(patsubst %/,%,$(filter %/, $(core-y) $(external-y) $(drivers-y) $(libs-y)))
+# These warnings generated too much noise in a regular build.
+# Use make W=1 to enable them (see scripts/Makefile.build)
+KBUILD_CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
+KBUILD_CFLAGS += $(call cc-disable-warning, unused-const-variable)
+endif
 
-eeos-alldirs	:= $(sort $(eeos-dirs) $(patsubst %/,%,$(filter %/, \
-			$(core-) $(external-) $(drivers-) $(libs-))))
+ifdef CONFIG_FRAME_POINTER
+KBUILD_CFLAGS	+= -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+KBUILD_CFLAGS	+= -fomit-frame-pointer
+endif
 
-eeos-clean-dirs = $(eeos-dirs)
-eeos-cleandirs = $(eeos-alldirs)
+KBUILD_CFLAGS   += $(call cc-option, -fno-var-tracking-assignments)
 
-core-y		:= $(patsubst %/, %/built-in.o, $(core-y))
-external-y	:= $(patsubst %/, %/built-in.o, $(external-y))
-drivers-y	:= $(patsubst %/, %/built-in.o, $(drivers-y))
-libs-y1		:= $(patsubst %/, %/lib.a, $(libs-y))
-libs-y2		:= $(patsubst %/, %/built-in.o, $(filter-out %.o, $(libs-y)))
+ifdef CONFIG_DEBUG_INFO
+ifdef CONFIG_DEBUG_INFO_SPLIT
+KBUILD_CFLAGS   += $(call cc-option, -gsplit-dwarf, -g)
+else
+KBUILD_CFLAGS	+= -g
+endif
+KBUILD_AFLAGS	+= -Wa,-gdwarf-2
+endif
+ifdef CONFIG_DEBUG_INFO_DWARF4
+KBUILD_CFLAGS	+= $(call cc-option, -gdwarf-4,)
+endif
 
-# Externally visible symbols (used by link-eeos.sh)
-export MBUILD_EEOS_MAIN	:= $(core-y) $(libs-y2) $(drivers-y) $(external-y)
-export MBUILD_EEOS_LIBS	:= $(libs-y1)
-export MBUILD_LDS		:= $(objtree)/arch/$(SRCARCH)/ld_script/kernel.lds
+ifdef CONFIG_DEBUG_INFO_REDUCED
+KBUILD_CFLAGS 	+= $(call cc-option, -femit-struct-debug-baseonly) \
+		   $(call cc-option,-fno-var-tracking)
+endif
 
-eeos-deps := $(MBUILD_LDS) $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS)
+# We trigger additional mismatches with less inlining
+ifdef CONFIG_DEBUG_SECTION_MISMATCH
+KBUILD_CFLAGS += $(call cc-option, -fno-inline-functions-called-once)
+endif
 
-CLEAN_DIRS	:=
-clean: rm-dirs 	:= $(CLEAN_DIRS)
-clean-dirs      := $(addprefix _clean_, . $(eeos-cleandirs))
+# arch Makefile may override CC so keep this after arch Makefile is included
+NOSTDINC_FLAGS += -nostdinc -isystem $(shell $(CC) -print-file-name=include)
+CHECKFLAGS     += $(NOSTDINC_FLAGS)
 
-eeos_LDFLAGS := $(MBUILD_LDFLAGS) $(ARCH_LDFLAGS)
-eeos_LDFLAGS += -T$(MBUILD_LDS) -Map=$(srctree)/linkmap.txt
+# warn about C99 declaration after statement
+KBUILD_CFLAGS += $(call cc-option,-Wdeclaration-after-statement,)
 
-PHONY += $(clean-dirs) clean distclean
-$(clean-dirs):
-	$(Q) $(MAKE) $(clean)=$(patsubst _clean_%,%,$@)
+# disable pointer signed / unsigned warnings in gcc 4.0
+KBUILD_CFLAGS += $(call cc-disable-warning, pointer-sign)
 
-eeos: $(eeos-deps) scripts/generate_allsymbols.py
-	$(Q) echo "  OBJCOPY $(DTB)"
-	$(Q) $(OBJCOPY) -I binary -O $(BFD_NAME) $(DTB) .tmp.dtb.o
-	$(Q) echo "  LD      .tmp.eeos.elf"
-	$(Q) $(LD) $(eeos_LDFLAGS) -o .tmp.eeos.elf $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS) .tmp.dtb.o
-	$(Q) echo "  NM      .tmp.eeos.symbols"
-	$(Q) $(NM) -n .tmp.eeos.elf > .tmp.eeos.symbols
-	$(Q) echo "  PYTHON  allsymbols.S"
-	$(Q) python3 scripts/generate_allsymbols.py .tmp.eeos.symbols allsymbols.S
-	$(Q) echo "  CC      $(MBUILD_IMAGE_SYMBOLS)"
-	$(Q) $(CC) $(MBUILD_AFLAGS) $(MBUILD_CFLAGS) $(ARCH_CFLAGS) -c allsymbols.S -o $(MBUILD_IMAGE_SYMBOLS)
-	$(Q) echo "  LD      $(MBUILD_IMAGE_ELF)"
-	$(Q) $(LD) $(eeos_LDFLAGS) -o $(MBUILD_IMAGE_ELF) $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS) $(MBUILD_IMAGE_SYMBOLS) .tmp.dtb.o
-	$(Q) echo "  OBJCOPY $(MBUILD_IMAGE)"
-	$(Q) $(OBJCOPY) -O binary  $(MBUILD_IMAGE_ELF) $(MBUILD_IMAGE)
-	$(Q) echo "  OBJDUMP eeos.dis"
-	$(Q) $(OBJDUMP) $(MBUILD_IMAGE_ELF) -D > eeos.dis
+# disable invalid "can't wrap" optimizations for signed / pointers
+KBUILD_CFLAGS	+= $(call cc-option,-fno-strict-overflow)
+
+# conserve stack if available
+KBUILD_CFLAGS   += $(call cc-option,-fconserve-stack)
+
+# disallow errors like 'EXPORT_GPL(foo);' with missing header
+KBUILD_CFLAGS   += $(call cc-option,-Werror=implicit-int)
+
+# require functions to have arguments in prototypes, not empty 'int foo()'
+KBUILD_CFLAGS   += $(call cc-option,-Werror=strict-prototypes)
+
+# Prohibit date/time macros, which would make the build non-deterministic
+KBUILD_CFLAGS   += $(call cc-option,-Werror=date-time)
+
+# enforce correct pointer usage
+KBUILD_CFLAGS   += $(call cc-option,-Werror=incompatible-pointer-types)
+
+# use the deterministic mode of AR if available
+KBUILD_ARFLAGS := $(call ar-option,D)
+
+# check for 'asm goto'
+ifeq ($(shell $(CONFIG_SHELL) $(srctree)/scripts/gcc-goto.sh $(CC)), y)
+	KBUILD_CFLAGS += -DCC_HAVE_ASM_GOTO
+	KBUILD_AFLAGS += -DCC_HAVE_ASM_GOTO
+endif
+
+include scripts/Makefile.extrawarn
+
+# Add any arch overrides and user supplied CPPFLAGS, AFLAGS and CFLAGS as the
+# last assignments
+KBUILD_CPPFLAGS += $(ARCH_CPPFLAGS) $(KCPPFLAGS)
+KBUILD_AFLAGS   += $(ARCH_AFLAGS)   $(KAFLAGS)
+KBUILD_CFLAGS   += $(ARCH_CFLAGS)   $(KCFLAGS)
+
+# Default kernel image to build when no specific target is given.
+# KBUILD_IMAGE may be overruled on the command line or
+# set in the environment
+# Also any assignments in arch/$(ARCH)/Makefile take precedence over
+# this default value
+export KBUILD_IMAGE ?= eeos
+
+#
+# INSTALL_PATH specifies where to place the updated kernel and system map
+# images. Default is /boot, but you can set it to other values
+export	INSTALL_PATH ?= ./install
+
+
+objs-y		:= arch driver init kernel lib
+libs-y		:= 
+
+eeos-dirs	:= $(objs-y) $(libs-y)
+eeos-objs	:= $(patsubst %,%/built-in.o, $(objs-y))
+eeos-libs	:= $(patsubst %,%/lib.a, $(libs-y))
+eeos-all	:= $(eeos-objs) $(eeos-libs)
+
+quiet_cmd_eeos = LD      $@
+      cmd_eeos = $(CC) $(LDFLAGS) -static -nostdlib -o $@                          \
+      -Wl,--start-group $(eeos-libs) $(eeos-objs) -Wl,--end-group \
+      -T arch/arm64/ld_script/kernel.lds
+
+quiet_cmd_eeos_bin = OBJCOPY    $@.bin
+      cmd_eeos_bin = $(OBJCOPY) -O binary $@ $@.bin
+
+quiet_cmd_eeos_dis = OBJDUMP    $@.dis
+      cmd_eeos_dis = $(OBJDUMP) -D $@ > $@.dis
+
+eeos: $(eeos-all) FORCE
+	+$(call if_changed,eeos)
+	+$(call if_changed,eeos_bin)
+	+$(call if_changed,eeos_dis)
 
 # The actual objects are generated when descending,
 # make sure no implicit rule kicks in
-$(sort $(eeos-deps)): $(eeos-dirs)
+$(sort $(eeos-all)): $(eeos-dirs) ;
 
-# here goto each directory to generate built-in.o
+# Handle descending into subdirectories listed in $(eeos-dirs)
+# Preset locale variables to speed up the build process. Limit locale
+# tweaks to this spot to avoid wrong language settings when running
+# make menuconfig etc.
+# Error messages still appears in the original language
+
 PHONY += $(eeos-dirs)
-$(eeos-dirs):
+$(eeos-dirs): prepare scripts
 	$(Q)$(MAKE) $(build)=$@
 
-define sed-y
-    "/^->/{s:->#\(.*\):/* \1 */:; \
-    s:^->\([^ ]*\) [\$$#]*\([^ ]*\) \(.*\):#define \1 \2 /* \3 */:; \
-    s:->::; p;}"
-endef
+
+
+# Things we need to do before we recursively start building the application
+# are listed in "prepare".
+# A multi level approach is used. prepareN is processed before prepareN-1.
+# version.h and scripts_basic is processed / created.
+
+# Listed in dependency order
+PHONY += prepare prepare0 prepare1 prepare2 prepare3
+
+# prepare3 is used to check if we are building in a separate output directory,
+# and if so do:
+# 1) Check that make has not been executed in the kernel src $(srctree)
+prepare3:
+ifneq ($(KBUILD_SRC),)
+	@$(kecho) '  Using $(srctree) as source for kernel'
+	$(Q)if [ -f $(srctree)/.config -o -d $(srctree)/include/config ]; then \
+		echo >&2 "  $(srctree) is not clean, please run 'make mrproper'"; \
+		echo >&2 "  in the '$(srctree)' directory.";\
+		/bin/false; \
+	fi;
+endif
+
+# prepare2 creates a makefile if using a separate output directory
+prepare2: prepare3 outputmakefile
+
+prepare1: prepare2 $(version_h) include/config/auto.conf
+
+archprepare:
+
+prepare0: prepare1 scripts_basic
+	$(Q)$(MAKE) $(build)=.
+
+# All the preparing..
+prepare: prepare0
+
+# Generate some files
+# ---------------------------------------------------------------------------
+
+# KERNELRELEASE can change from a few different places, meaning version.h
+# needs to be updated, so this check is forced on all builds
 
 define filechk_version.h
 	(echo \#define EEOS_VERSION_CODE $(shell                         \
-	expr $(VERSION) \* 65536 + 0$(PATCHLEVEL) \* 256 + 0$(SUBLEVEL)) > $@; \
-	echo '#define EEOS_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))' >> $@; \
-	echo '#define EEOS_VERSION_STR "v$(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION) $(NAME)"' >> $@;)
+	expr $(VERSION) \* 65536 + 0$(PATCHLEVEL) \* 256 + 0$(SUBLEVEL)); \
+	echo '#define EEOS_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))';)
 endef
 
-define device_tree_config.h
-	(echo '#define DTB_START_SYMBOL $(DTB_SECTION)' >> $@;)
-endef
+$(version_h): $(srctree)/Makefile FORCE
+	$(call filechk,version.h)
 
 
-PHONY += scriptconfig iscriptconfig menuconfig guiconfig dumpvarsconfig
+PHONY += headerdep
+headerdep:
+	$(Q)find $(srctree)/include/ -name '*.h' | xargs --max-args 1 \
+	$(srctree)/scripts/headerdep.pl -I$(srctree)/include
 
-PYTHONCMD ?= python3
-kpython := PYTHONPATH=$(srctree)/scripts/Kconfiglib:$$PYTHONPATH $(PYTHONCMD)
-KCONFIG ?= $(srctree)/Kconfig
 
-ifneq ($(filter scriptconfig,$(MAKECMDGOALS)),)
-ifndef SCRIPT
-$(error Use "make scriptconfig SCRIPT=<path to script> [SCRIPT_ARG=<argument>]")
-endif
-endif
+###
+# Cleaning is done on three levels.
+# make clean     Delete most generated files
+# make mrproper  Delete the current configuration, and all generated files
+# make distclean Remove editor backup files, patch leftover files and the like
 
-$(version_h) : Makefile
-	$(Q) mkdir -p include/config
-	$(Q) $(call filechk_version.h)
+# Directories & files removed with 'make clean'
+CLEAN_DIRS  +=
+CLEAN_FILES +=	eeos
 
-PHONY += include/config/config.h
-include/config/config.h: .config
-	$(Q) mkdir -p include/config
-	$(Q) $(kpython) $(srctree)/scripts/Kconfiglib/genconfig.py --header-path=include/config/config.h
-	$(Q) $(call device_tree_config.h)
+# Directories & files removed with 'make mrproper'
+MRPROPER_DIRS  += include/config include/generated .tmp_objdiff
+MRPROPER_FILES += .config .config.old .version .old_version \
+		  cscope* GPATH GSYMS
+
+# clean - Delete most
+#
+clean: rm-dirs  := $(CLEAN_DIRS)
+clean: rm-files := $(CLEAN_FILES)
+clean-dirs      := $(addprefix _clean_, . $(eeos-dirs))
+
+PHONY += $(clean-dirs) clean archclean
+$(clean-dirs):
+	$(Q)$(MAKE) $(clean)=$(patsubst _clean_%,%,$@)
 
 clean: $(clean-dirs)
-	$(Q) echo "  CLEAN   all .o .*.d *.dtb built-in.o"
-	$(Q) echo "  CLEAN   allsymbols.o allsymbols.S linkmap.txt eeos.s .tmp.eeos.elf .tmp.eeos.symbols eeos.bin eeos.elf eeos.dis .tmp.dtb.o"
-	$(Q) rm -f allsymbols.o allsymbols.S linkmap.txt eeos.s .tmp.eeos.elf .tmp.eeos.symbols eeos.bin eeos.elf eeos.dis .tmp.dtb.o
+	$(call cmd,rmdirs)
+	$(call cmd,rmfiles)
+	@find . $(RCS_FIND_IGNORE) \
+		\( -name '*.[oas]' -o -name '.*.cmd' \
+		-o -name '.*.d' -o -name '.*.tmp' \
+		-o -name '.tmp_*.o.*' \
+		-o -name '*.gcno' \) -type f -print | xargs rm -f
 
-distclean: clean
-	$(Q) echo "  CLEAN   .config include/config"
-	$(Q) rm -rf include/config .config .config.old
-	$(Q) echo "  CLEAN   tags cscope.in.out cscope.out cscope.po.out"
-	$(Q) rm -f tags cscope.in.out cscope.out cscope.po.out
+# mrproper - Delete all generated files, including .config
+#
+mrproper: rm-dirs  := $(wildcard $(MRPROPER_DIRS))
+mrproper: rm-files := $(wildcard $(MRPROPER_FILES))
+mrproper-dirs      := $(addprefix _mrproper_, scripts)
 
-scriptconfig:
-	$(Q)$(kpython) $(SCRIPT) $(Kconfig) $(if $(SCRIPT_ARG),"$(SCRIPT_ARG)")
+PHONY += $(mrproper-dirs) mrproper
+$(mrproper-dirs):
+	$(Q)$(MAKE) $(clean)=$(patsubst _mrproper_%,%,$@)
 
-iscriptconfig:
-	$(Q)$(kpython) -i -c \
-	  "import kconfiglib; \
-	   kconf = kconfiglib.Kconfig('$(Kconfig)'); \
-	   print('A Kconfig instance \'kconf\' for the architecture $(ARCH) has been created.')"
+mrproper: clean $(mrproper-dirs)
+	$(call cmd,rmdirs)
+	$(call cmd,rmfiles)
 
-menuconfig:
-	$(Q)$(kpython) $(srctree)/scripts/Kconfiglib/menuconfig.py $(Kconfig)
+# distclean
+#
+PHONY += distclean
 
-guiconfig:
-	$(Q)$(kpython) $(srctree)/scripts/Kconfiglib/guiconfig.py $(Kconfig)
+distclean: mrproper
+	@find $(srctree) $(RCS_FIND_IGNORE) \
+		\( -name '*.orig' -o -name '*.rej' -o -name '*~' \
+		-o -name '*.bak' -o -name '#*#' -o -name '.*.orig' \
+		-o -name '.*.rej' -o -name '*%'  -o -name 'core' \) \
+		-type f -print | xargs rm -f
 
-dumpvarsconfig:
-	$(Q)$(kpython) $(srctree)/scripts/Kconfiglib/examples/dumpvars.py $(Kconfig)
 
-genconfig:
-	$(Q)$(kpython) $(srctree)/scripts/Kconfiglib/genconfig.py $(Kconfig)
+# Shorthand for $(Q)$(MAKE) -f scripts/Makefile.clean obj=dir
+# Usage:
+# $(Q)$(MAKE) $(clean)=dir
+clean := -f $(if $(KBUILD_SRC),$(srctree)/)scripts/Makefile.clean obj
 
-%defconfig:
-	$(Q)test -e configs/$@ || (		\
-	echo >&2;			\
-	echo >&2 "  ERROR: $@ doest exist.";		\
-	echo >&2 ;							\
-	/bin/false)
-	$(Q) echo "  GEN      .config From configs/$@"
-	$(Q) mkdir -p include/config
-	$(Q) python $(srctree)/scripts/Kconfiglib/defconfig.py $(Kconfig) configs/$@
 
-PHONY += qemu
+PHONY += help
+help:
+	@echo  'Cleaning targets:'
+	@echo  '  clean		  - Remove most generated files but keep the config'
+	@echo  '  mrproper	  - Remove all generated files + config + various backup files'
+	@echo  '  distclean	  - mrproper + remove editor backup and patch files'
+	@echo  ''
+	@echo  'Configuration targets:'
+	@$(MAKE) -f $(srctree)/scripts/kconfig/Makefile help
+	@echo  ''
+	@echo  'Other generic targets:'
+	@echo  '  all		  - Build all targets marked with [*]'
+	@echo  '* eeos		  - Build the application'
+	@echo  '  dir/            - Build all files in dir and below'
+	@echo  '  dir/file.[ois]  - Build specified target only'
+	@echo  '  dir/file.lst    - Build specified mixed source/assembly target only'
+	@echo  '                    (requires a recent binutils and recent build (System.map))'
+	@echo  '  kernelversion	  - Output the version stored in Makefile (use with make -s)'
+	 echo  ''
+	@echo  'Static analysers'
+	@echo  '  includecheck    - Check for duplicate included header files'
+	@echo  '  headerdep       - Detect inclusion cycles in headers'
+	@echo  ''
+	@echo  '  make V=0|1 [targets] 0 => quiet build (default), 1 => verbose build'
+	@echo  '  make V=2   [targets] 2 => give reason for rebuild of target'
+	@echo  '  make O=dir [targets] Locate all output files in "dir", including .config'
+	@echo  '  make C=1   [targets] Check all c source with $$CHECK (sparse by default)'
+	@echo  '  make C=2   [targets] Force check of all c source with $$CHECK'
+	@echo  '  make W=n   [targets] Enable extra gcc checks, n=1,2,3 where'
+	@echo  '		1: warnings which may be relevant and do not occur too often'
+	@echo  '		3: more obscure warnings, can most likely be ignored'
+	@echo  '		Multiple levels can be combined with W=12 or W=123'
+	@echo  ''
+	@echo  'Execute "make" or "make all" to build all targets marked with [*] '
+	@echo  'For further info see the ./README file'
 
-ifeq ("$(DEBUG_USE_GDB)", "1")
-	QEMU_FLAG = -S -s
-else
-	QEMU_FLAG =
+
+# Scripts to check various things for consistency
+# ---------------------------------------------------------------------------
+
+PHONY += includecheck
+
+includecheck:
+	find $(srctree)/* $(RCS_FIND_IGNORE) \
+		-name '*.[hcS]' -type f -print | sort \
+		| xargs $(PERL) -w $(srctree)/scripts/checkincludes.pl
+
+endif #ifeq ($(config-targets),1)
+endif #ifeq ($(mixed-targets),1)
+
+PHONY += kernelversion image_name
+
+kernelversion:
+	@echo $(KERNELVERSION)
+
+image_name:
+	@echo $(KBUILD_IMAGE)
+
+
+# Single targets
+# ---------------------------------------------------------------------------
+# Single targets are compatible with:
+# - build with mixed source and output
+# - build with separate output dir 'make O=...'
+#
+#  target-dir => where to store outputfile
+#  build-dir  => directory in kernel source tree to use
+
+build-dir  = $(patsubst %/,%,$(dir $@))
+target-dir = $(dir $@)
+
+%.s: %.c prepare scripts FORCE
+	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+%.i: %.c prepare scripts FORCE
+	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+%.o: %.c prepare scripts FORCE
+	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+%.lst: %.c prepare scripts FORCE
+	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+%.s: %.S prepare scripts FORCE
+	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+%.o: %.S prepare scripts FORCE
+	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+%.symtypes: %.c prepare scripts FORCE
+	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+
+# FIXME Should go into a make.lib or something
+# ===========================================================================
+
+quiet_cmd_rmdirs = $(if $(wildcard $(rm-dirs)),CLEAN   $(wildcard $(rm-dirs)))
+      cmd_rmdirs = rm -rf $(rm-dirs)
+
+quiet_cmd_rmfiles = $(if $(wildcard $(rm-files)),CLEAN   $(wildcard $(rm-files)))
+      cmd_rmfiles = rm -f $(rm-files)
+
+# read all saved command lines
+
+targets := $(wildcard $(sort $(targets)))
+cmd_files := $(wildcard .*.cmd $(foreach f,$(targets),$(dir $(f)).$(notdir $(f)).cmd))
+
+ifneq ($(cmd_files),)
+  $(cmd_files): ;	# Do not try to update included dependency files
+  include $(cmd_files)
 endif
 
-qemu: eeos
-ifeq ("$(SRCARCH)", "aarch64")
-	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 2048 -nographic \
-		-serial mon:stdio -kernel $(MBUILD_IMAGE) $(QEMU_FLAG)
-endif
-
-ifeq ("$(SRCARCH)", "arm64")
-	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 2048 -nographic \
-		-serial mon:stdio -kernel $(MBUILD_IMAGE) $(QEMU_FLAG)
-endif
-
-ifeq ("$(SRCARCH)", "riscv64")
-	qemu-system-riscv64 -machine virt -smp 1 -m 1024 -nographic -serial mon:stdio -bios $(MBUILD_IMAGE) $(QEMU_FLAG)
-endif
-
-ifeq ("$(SRCARCH)", "riscv32")
-	qemu-system-riscv32 -machine virt -smp 1 -m 1024 -nographic -serial mon:stdio -bios $(MBUILD_IMAGE_ELF) $(QEMU_FLAG)
-endif
+endif	# skip-makefile
 
 PHONY += FORCE
 FORCE:
 
-# Declare the contents of the PHONY variable as phony.  We keep that
-# information in a variable so we can use it in if_changed and friend)
+# Declare the contents of the .PHONY variable as phony.  We keep that
+# information in a variable so we can use it in if_changed and friends.
 .PHONY: $(PHONY)

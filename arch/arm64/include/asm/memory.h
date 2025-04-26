@@ -20,7 +20,6 @@
 #ifndef __ASM_MEMORY_H
 #define __ASM_MEMORY_H
 
-#include <config.h>
 #include <type.h>
 
 #include <ee/sizes.h>
