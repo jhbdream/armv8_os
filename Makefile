@@ -672,7 +672,7 @@ headerdep:
 
 # Directories & files removed with 'make clean'
 CLEAN_DIRS  +=
-CLEAN_FILES +=	eeos
+CLEAN_FILES +=	eeos eeos.dis eeos.bin
 
 # Directories & files removed with 'make mrproper'
 MRPROPER_DIRS  += include/config include/generated .tmp_objdiff
