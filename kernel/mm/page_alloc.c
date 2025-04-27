@@ -24,7 +24,7 @@ static void inline page_base_set(struct page *page)
     page_base = page;
 }
 
-static struct page *page_base_get(void)
+__attribute__((unused)) static struct page *page_base_get(void)
 {
     return page_base;
 }
@@ -41,7 +41,7 @@ int vmemmap_page_init(unsigned long mem_start, unsigned long mem_end)
 
     struct page *page;
 
-    unsigned long size, align, page_count;
+    unsigned long size, page_count;
 
     page_count = DIV_ROUND_UP((mem_end - mem_start), PAGE_SIZE);
     size       = sizeof(struct page) * page_count;
@@ -195,9 +195,6 @@ void set_compound_order(struct page *page, unsigned int order)
 
 void prep_compound_page(struct page *page, unsigned int order)
 {
-    int i;
-    int nr_pages = 1 << order;
-
     __SetPageHead(page);
     set_compound_order(page, order);
 }
@@ -255,7 +252,9 @@ void __free_pages(struct page *page, unsigned int order)
 {
     unsigned long pfn;
     unsigned long buddy_pfn;
-    struct page  *buddy;
+    unsigned long combined_pfn;
+
+    struct page *buddy;
 
     if (PageHead(page))
         __ClearPageHead(page);
@@ -305,9 +304,10 @@ void __free_pages(struct page *page, unsigned int order)
 
         del_page_from_free_list(buddy, order);
 
-        unsigned long combined_pfn = pfn & buddy_pfn;
-        page                       = page + (combined_pfn - pfn);
-        pfn                        = combined_pfn;
+        combined_pfn = pfn & buddy_pfn;
+
+        page = page + (combined_pfn - pfn);
+        pfn  = combined_pfn;
         order++;
     }
 

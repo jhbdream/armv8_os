@@ -43,8 +43,6 @@ struct memblock memblock = {
 	.reserved.name    = "reserved",
 };
 
-static struct memblock_type *memblock_memory = &memblock.memory;
-
 #define for_each_memblock_type(i, memblock_type, rgn) \
 	for (i = 0, rgn = &memblock_type->regions[0]; i < memblock_type->cnt; \
 	     i++, rgn   = &memblock_type->regions[i])
@@ -470,9 +468,9 @@ int memblock_phys_free(phys_addr_t base, phys_addr_t size)
 
 void *memblock_alloc(phys_addr_t size, phys_addr_t align)
 {
-	memblock_dbg("%s: %llu bytes align = 0x%llx\n", __func__, (u64)size, (u64)align);
-
 	phys_addr_t alloc;
+
+	memblock_dbg("%s: %llu bytes align = 0x%llx\n", __func__, (u64)size, (u64)align);
 
 	alloc = memblock_phys_alloc_align(size, align);
 
