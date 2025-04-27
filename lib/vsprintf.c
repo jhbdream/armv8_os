@@ -138,6 +138,9 @@ static char *put_dec(char *buf, unsigned long long n)
 	return put_dec_trunc8(buf, n);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpsabi"
+
 static char *number(char *buf, char *end, unsigned long long num,
 		    struct printf_spec spec)
 {
@@ -265,6 +268,7 @@ static char *number(char *buf, char *end, unsigned long long num,
 
 	return buf;
 }
+#pragma GCC diagnostic pop
 
 static char *pointer_string(char *buf, char *end, const void *ptr,
 			    struct printf_spec spec)

@@ -272,6 +272,7 @@ KBUILD_CPPFLAGS := -D__EEOS__
 KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
+		   -Wno-psabi \
 		   -Wno-format-security \
 		   --static -nostdlib  -nostartfiles -fno-builtin \
 		   -std=gnu99
@@ -435,7 +436,7 @@ endif # $(dot-config)
 # command line.
 # This allow a user to issue only 'make' to build the application
 # Defaults to eeos, but the arch makefile usually adds further targets
-all: eeos
+all: eeos eeos.bin eeos.dis
 
 # The arch Makefile can set ARCH_{CPP,A,C}FLAGS to override the default
 # values of the respective KBUILD_* variables
@@ -581,16 +582,20 @@ quiet_cmd_eeos = LD      $@
       -Wl,--start-group $(eeos-libs) $(eeos-objs) -Wl,--end-group \
       -T arch/arm64/ld_script/kernel.lds
 
-quiet_cmd_eeos_bin = OBJCOPY $@.bin
-      cmd_eeos_bin = $(OBJCOPY) -O binary $@ $@.bin
+quiet_cmd_eeos_bin = OBJCOPY $@
+      cmd_eeos_bin = $(OBJCOPY) -O binary $< $@
 
-quiet_cmd_eeos_dis = OBJDUMP $@.dis
-      cmd_eeos_dis = $(OBJDUMP) -D $@ > $@.dis
+quiet_cmd_eeos_dis = OBJDUMP $@
+      cmd_eeos_dis = $(OBJDUMP) -D $< > $@
 
 eeos: $(eeos-all) FORCE
 	+$(call if_changed,eeos)
-	+$(call if_changed,eeos_dis)
+
+eeos.bin: eeos FORCE
 	+$(call if_changed,eeos_bin)
+
+eeos.dis: eeos FORCE
+	+$(call if_changed,eeos_dis)
 
 # The actual objects are generated when descending,
 # make sure no implicit rule kicks in

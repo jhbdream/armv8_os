@@ -46,14 +46,11 @@ void start_kernel(void)
     // 把 memblock 剩余可以使用内存分配到 page 管理器
     free_memory_core();
 
-    buddy_page_test();
-
     slob_test();
 
 #if 0
 
-
-
+    buddy_page_test();
 
 	u64 base = memblock_start_of_DRAM();
 	u64 size = memblock_end_of_DRAM() - memblock_start_of_DRAM();
