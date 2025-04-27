@@ -17,6 +17,19 @@ extern void slob_test(void);
 
 extern unsigned long __kimage_start[], __kimage_end[];
 
+void eeos_printlogo(void)
+{
+    printk("\n"
+           "    #######  #######   #####    #######\n"
+           "    ##       ##       ##   ##   #      \n"
+           "    ######   #######  ##   ##   ######\n"
+           "    ##       ##       ##   ##        #\n"
+           "    #######  #######   #####    #######\n"
+           "\n"
+           "    Embedded Easy Operating System\n"
+           "\n");
+}
+
 void start_kernel(void)
 {
     u64 base, size;
@@ -30,8 +43,10 @@ void start_kernel(void)
 
     console_init();
 
+    eeos_printlogo();
+
     /* 初始化memblock内存管理器 */
-    memblock_debug_set(1);
+    memblock_debug_set(0);
 
     memblock_add(base, size);
     memblock_reserve(virt_to_phys(__kimage_start), __kimage_end - __kimage_start);
@@ -46,7 +61,7 @@ void start_kernel(void)
     // 把 memblock 剩余可以使用内存分配到 page 管理器
     free_memory_core();
 
-    slob_test();
+    // slob_test();
 
 #if 0
 
@@ -74,7 +89,6 @@ void start_kernel(void)
 	vmalloc_test();
 #endif
 
-    printk("====== run end ======\n");
     for (;;)
         ;
 }
