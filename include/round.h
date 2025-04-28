@@ -30,24 +30,23 @@
  * Rounds @x down to next multiple of @y (which must be a power of 2).
  * To perform arbitrary rounding down, use rounddown() below.
  */
-#define round_down(x, y) ((x) & ~__round_mask(x, y))
+#define round_down(x, y)   ((x) & ~__round_mask(x, y))
 
 #define DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))
 
-#define DIV_ROUND_DOWN_ULL(ll, d)                                              \
-	({                                                                     \
-		unsigned long long _tmp = (ll);                                \
-		do_div(_tmp, d);                                               \
-		_tmp;                                                          \
-	})
+#define DIV_ROUND_DOWN_ULL(ll, d) \
+    ({ \
+        unsigned long long _tmp = (ll); \
+        do_div(_tmp, d); \
+        _tmp; \
+    })
 
-#define DIV_ROUND_UP_ULL(ll, d)                                                \
-	DIV_ROUND_DOWN_ULL((unsigned long long)(ll) + (d)-1, (d))
+#define DIV_ROUND_UP_ULL(ll, d) DIV_ROUND_DOWN_ULL((unsigned long long)(ll) + (d)-1, (d))
 
 #if BITS_PER_LONG == 32
-#define DIV_ROUND_UP_SECTOR_T(ll, d) DIV_ROUND_UP_ULL(ll, d)
+#    define DIV_ROUND_UP_SECTOR_T(ll, d) DIV_ROUND_UP_ULL(ll, d)
 #else
-#define DIV_ROUND_UP_SECTOR_T(ll, d) DIV_ROUND_UP(ll, d)
+#    define DIV_ROUND_UP_SECTOR_T(ll, d) DIV_ROUND_UP(ll, d)
 #endif
 
 /**
@@ -58,11 +57,11 @@
  * Rounds @x up to next multiple of @y. If @y will always be a power
  * of 2, consider using the faster round_up().
  */
-#define roundup(x, y)                                                          \
-	({                                                                     \
-		typeof(y) __y = y;                                             \
-		(((x) + (__y - 1)) / __y) * __y;                               \
-	})
+#define roundup(x, y) \
+    ({ \
+        typeof(y) __y = y; \
+        (((x) + (__y - 1)) / __y) * __y; \
+    })
 /**
  * rounddown - round down to next specified multiple
  * @x: the value to round
@@ -71,10 +70,10 @@
  * Rounds @x down to next multiple of @y. If @y will always be a power
  * of 2, consider using the faster round_down().
  */
-#define rounddown(x, y)                                                        \
-	({                                                                     \
-		typeof(x) __x = (x);                                           \
-		__x - (__x % (y));                                             \
-	})
+#define rounddown(x, y) \
+    ({ \
+        typeof(x) __x = (x); \
+        __x - (__x % (y)); \
+    })
 
 #endif

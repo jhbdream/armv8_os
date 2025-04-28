@@ -5,8 +5,8 @@
 #include <kernel/task.h>
 
 struct semaphore {
-	struct task *wait_task;
-	uint32_t value;
+    struct task *wait_task;
+    uint32_t     value;
 };
 
 int sem_init(struct semaphore *sem, uint32_t count);

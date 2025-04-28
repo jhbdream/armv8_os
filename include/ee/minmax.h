@@ -3,7 +3,7 @@
 
 #define __typecheck(x, y) (!!(sizeof((typeof(x) *)1 == (typeof(y) *)1)))
 
-#define __cmp(x, y, op) ((x)op(y) ? (x) : (y))
+#define __cmp(x, y, op)   ((x)op(y) ? (x) : (y))
 
 /**
  * min - return minimum of two values of the same or compatible types

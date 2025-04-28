@@ -18,10 +18,10 @@
 #define __GIC_H__
 #include <stdint.h>
 
-int gic_init(void);
-void irq_mask(uint32_t hwirq);
-void irq_unmask(uint32_t hwirq);
+int      gic_init(void);
+void     irq_mask(uint32_t hwirq);
+void     irq_unmask(uint32_t hwirq);
 uint32_t irq_read_iar(void);
-void irq_eoi(uint32_t hwirq);
+void     irq_eoi(uint32_t hwirq);
 
 #endif /* __GIC_H__ */

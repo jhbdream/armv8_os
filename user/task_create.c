@@ -12,13 +12,13 @@ extern struct task taskb;
  *
  */
 struct task taska;
-char taska_stack[4096 * 8];
+char        taska_stack[4096 * 8];
 
 void taska_fun(void)
 {
-	while (1) {
-		task_sleep_ms(1000);
-	}
+    while (1) {
+        task_sleep_ms(1000);
+    }
 }
 
 /**
@@ -26,22 +26,22 @@ void taska_fun(void)
  *
  */
 struct task taskb;
-char taskb_stack[4096 * 8];
+char        taskb_stack[4096 * 8];
 
 void taskb_fun(void)
 {
-	while (1) {
-		task_sleep_ms(500);
-	}
+    while (1) {
+        task_sleep_ms(500);
+    }
 }
 
-char task_idle_stack[4096];
+char            task_idle_stack[4096];
 static uint64_t idel_count = 0;
-void task_idle(void)
+void            task_idle(void)
 {
-	while (1) {
-		idel_count++;
-	}
+    while (1) {
+        idel_count++;
+    }
 }
 
 /**
@@ -50,13 +50,11 @@ void task_idle(void)
  */
 void user_task_init(void)
 {
-	struct task *taskp;
+    struct task *taskp;
 
-	taskp = task_create("taskA", taska_stack + sizeof(taska_stack),
-			    taska_fun, 20);
-	task_create("taskB", taskb_stack + sizeof(taskb_stack), taskb_fun, 21);
-	task_create("idle", task_idle_stack + sizeof(task_idle_stack),
-		    task_idle, 0);
+    taskp = task_create("taskA", taska_stack + sizeof(taska_stack), taska_fun, 20);
+    task_create("taskB", taskb_stack + sizeof(taskb_stack), taskb_fun, 21);
+    task_create("idle", task_idle_stack + sizeof(task_idle_stack), task_idle, 0);
 
-	task_switch_to(taskp);
+    task_switch_to(taskp);
 }

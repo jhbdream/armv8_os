@@ -5,16 +5,16 @@
 #include <compiler_types.h>
 
 extern void *__kmalloc(size_t size);
-extern void __kfree(const void *block);
+extern void  __kfree(const void *block);
 
 static __always_inline void *kmalloc(size_t size)
 {
-	return __kmalloc(size);
+    return __kmalloc(size);
 }
 
 static __always_inline void kfree(const void *block)
 {
-	__kfree(block);
+    __kfree(block);
 }
 
 #endif

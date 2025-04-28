@@ -12,58 +12,58 @@
 #define __raw_writeb __raw_writeb
 static inline void __raw_writeb(u8 val, volatile void *addr)
 {
-	asm volatile("strb %w0, [%1]" : : "rZ"(val), "r"(addr));
+    asm volatile("strb %w0, [%1]" : : "rZ"(val), "r"(addr));
 }
 
 #define __raw_writew __raw_writew
 static inline void __raw_writew(u16 val, volatile void *addr)
 {
-	asm volatile("strh %w0, [%1]" : : "rZ"(val), "r"(addr));
+    asm volatile("strh %w0, [%1]" : : "rZ"(val), "r"(addr));
 }
 
 #define __raw_writel __raw_writel
 static __always_inline void __raw_writel(u32 val, volatile void *addr)
 {
-	asm volatile("str %w0, [%1]" : : "rZ"(val), "r"(addr));
+    asm volatile("str %w0, [%1]" : : "rZ"(val), "r"(addr));
 }
 
 #define __raw_writeq __raw_writeq
 static inline void __raw_writeq(u64 val, volatile void *addr)
 {
-	asm volatile("str %x0, [%1]" : : "rZ"(val), "r"(addr));
+    asm volatile("str %x0, [%1]" : : "rZ"(val), "r"(addr));
 }
 
 #define __raw_readb __raw_readb
 static inline u8 __raw_readb(const volatile void *addr)
 {
-	u8 val;
-	asm volatile("ldrb %w0, [%1]" : "=r"(val) : "r"(addr));
-	return val;
+    u8 val;
+    asm volatile("ldrb %w0, [%1]" : "=r"(val) : "r"(addr));
+    return val;
 }
 
 #define __raw_readw __raw_readw
 static inline u16 __raw_readw(const volatile void *addr)
 {
-	u16 val;
+    u16 val;
 
-	asm volatile("ldrh %w0, [%1]" : "=r"(val) : "r"(addr));
-	return val;
+    asm volatile("ldrh %w0, [%1]" : "=r"(val) : "r"(addr));
+    return val;
 }
 
 #define __raw_readl __raw_readl
 static __always_inline u32 __raw_readl(const volatile void *addr)
 {
-	u32 val;
-	asm volatile("ldr %w0, [%1]" : "=r"(val) : "r"(addr));
-	return val;
+    u32 val;
+    asm volatile("ldr %w0, [%1]" : "=r"(val) : "r"(addr));
+    return val;
 }
 
 #define __raw_readq __raw_readq
 static inline u64 __raw_readq(const volatile void *addr)
 {
-	u64 val;
-	asm volatile("ldr %0, [%1]" : "=r"(val) : "r"(addr));
-	return val;
+    u64 val;
+    asm volatile("ldr %0, [%1]" : "=r"(val) : "r"(addr));
+    return val;
 }
 
 /* IO barriers */
@@ -74,14 +74,14 @@ static inline u64 __raw_readq(const volatile void *addr)
  */
 
 #define __iormb(v) \
-	({ \
-		unsigned long tmp; \
-		asm volatile("eor	%0, %1, %1\n" \
-			     "cbnz	%0, ." \
-			     : "=r"(tmp) \
-			     : "r"((unsigned long)(v)) \
-			     : "memory"); \
-	})
+    ({ \
+        unsigned long tmp; \
+        asm volatile("eor	%0, %1, %1\n" \
+                     "cbnz	%0, ." \
+                     : "=r"(tmp) \
+                     : "r"((unsigned long)(v)) \
+                     : "memory"); \
+    })
 
 #define isb()       asm volatile("isb" : : : "memory")
 #define dmb(opt)    asm volatile("dmb " #opt : : : "memory")
@@ -97,25 +97,25 @@ static inline u64 __raw_readq(const volatile void *addr)
  * accesses.
  */
 #define readb_relaxed(c) \
-	({ \
-		u8 __r = __raw_readb(c); \
-		__r; \
-	})
+    ({ \
+        u8 __r = __raw_readb(c); \
+        __r; \
+    })
 #define readw_relaxed(c) \
-	({ \
-		u16 __r = __raw_readw(c); \
-		__r; \
-	})
+    ({ \
+        u16 __r = __raw_readw(c); \
+        __r; \
+    })
 #define readl_relaxed(c) \
-	({ \
-		u32 __r = __raw_readl(c); \
-		__r; \
-	})
+    ({ \
+        u32 __r = __raw_readl(c); \
+        __r; \
+    })
 #define readq_relaxed(c) \
-	({ \
-		u64 __r = __raw_readq(c); \
-		__r; \
-	})
+    ({ \
+        u64 __r = __raw_readq(c); \
+        __r; \
+    })
 
 #define writeb_relaxed(v, c) ((void)__raw_writeb((v), (c)))
 #define writew_relaxed(v, c) ((void)__raw_writew((v), (c)))
@@ -128,49 +128,49 @@ static inline u64 __raw_readq(const volatile void *addr)
  * Normal memory access.
  */
 #define readb(c) \
-	({ \
-		u8 __v = readb_relaxed(c); \
-		__iormb(__v); \
-		__v; \
-	})
+    ({ \
+        u8 __v = readb_relaxed(c); \
+        __iormb(__v); \
+        __v; \
+    })
 #define readw(c) \
-	({ \
-		u16 __v = readw_relaxed(c); \
-		__iormb(__v); \
-		__v; \
-	})
+    ({ \
+        u16 __v = readw_relaxed(c); \
+        __iormb(__v); \
+        __v; \
+    })
 #define readl(c) \
-	({ \
-		u32 __v = readl_relaxed(c); \
-		__iormb(__v); \
-		__v; \
-	})
+    ({ \
+        u32 __v = readl_relaxed(c); \
+        __iormb(__v); \
+        __v; \
+    })
 #define readq(c) \
-	({ \
-		u64 __v = readq_relaxed(c); \
-		__iormb(__v); \
-		__v; \
-	})
+    ({ \
+        u64 __v = readq_relaxed(c); \
+        __iormb(__v); \
+        __v; \
+    })
 
 #define writeb(v, c) \
-	({ \
-		__iowmb(); \
-		writeb_relaxed((v), (c)); \
-	})
+    ({ \
+        __iowmb(); \
+        writeb_relaxed((v), (c)); \
+    })
 #define writew(v, c) \
-	({ \
-		__iowmb(); \
-		writew_relaxed((v), (c)); \
-	})
+    ({ \
+        __iowmb(); \
+        writew_relaxed((v), (c)); \
+    })
 #define writel(v, c) \
-	({ \
-		__iowmb(); \
-		writel_relaxed((v), (c)); \
-	})
+    ({ \
+        __iowmb(); \
+        writel_relaxed((v), (c)); \
+    })
 #define writeq(v, c) \
-	({ \
-		__iowmb(); \
-		writeq_relaxed((v), (c)); \
-	})
+    ({ \
+        __iowmb(); \
+        writeq_relaxed((v), (c)); \
+    })
 
 #endif /* __ASM_ARM_IO_H */
