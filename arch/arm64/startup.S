@@ -172,6 +172,9 @@ __cpu_setup:
     mov x1, #3 << 20
     msr cpacr_el1, x1           // Enable FP/ASIMD
 
+    /* disable all exception */
+    msr daifset, 0xf
+
 __enable_mmu:
     tlbi    vmalle1             // Invalidate local TLB
     dsb nsh
@@ -203,6 +206,10 @@ __enable_mmu:
     blr x8
 
 __mmu_on:
+
+    ldr x8, =vectors
+    msr	vbar_el1, x8
+
 bss_clear:
     // Zero the bss
     ldr x2, =__bss_start__ // Start of block
