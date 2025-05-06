@@ -195,14 +195,14 @@ void create_kernel_map(void)
     // 创建1G线性映射
     va   = PAGE_OFFSET;
     pa   = PHYS_OFFSET;
-    size = 0x40000000;
+    size = PHYS_SIZE;
 
     create_simple_map(va, pa, size, MT_NORMAL);
 
-    // 创建UART DEVICE映射
-    va   = EARLY_UART_BASE;
-    pa   = 0x09000000;
-    size = 0x200000;
+    // 创建DEVICE映射
+    va   = DEVICE_START;
+    pa   = DEVICE_PHYS_OFFSET;
+    size = DEVICE_PHYS_SIZE;
     create_simple_map(va, pa, size, MT_DEVICE_nGnRnE);
 
     switch_mm(pgd_table);

@@ -6,11 +6,10 @@
 
 #include <asm/memory.h>
 
-#define QEMU_UART_DR ((void *)(EARLY_UART_BASE + UART01x_DR))
-#define QEMU_UART_FR ((void *)(EARLY_UART_BASE + UART01x_FR))
+#define QEMU_UART_DR ((void *)(DEVICE_START + 0x09000000 + UART01x_DR))
+#define QEMU_UART_FR ((void *)(DEVICE_START + 0x09000000 + UART01x_FR))
 
 #if 0
-
 static u64 early_mm_base;
 
 #    ifdef CONFIG_ARCH_AARCH64

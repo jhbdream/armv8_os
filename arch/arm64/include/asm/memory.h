@@ -28,14 +28,15 @@
 
 /* 物理内存基地址 */
 #define PHYS_OFFSET (0x40000000)
+#define PHYS_SIZE   (0x40000000)
+
+#define PHYS_OFFSET (0x40000000)
 
 /* 虚拟内存偏移地址 */
 #define VIRT_OFFSET (0xFFFF000000000000)
 
 /* 代码链接地址 */
-#define KIMAGE_VADDR    (0xFFFF000000080000)
-
-#define EARLY_UART_BASE (0xFFFF000080000000)
+#define KIMAGE_VADDR (0xFFFF000000080000)
 
 /* 线性映射起始地址 */
 #define PAGE_OFFSET (0xFFFF000100000000)
@@ -44,6 +45,14 @@
 /* VMALLOC 虚拟地址 */
 #define VMALLOC_START (0xFFFF000200000000)
 #define VMALLOC_END   (0xFFFF0002FFFFFFFF)
+
+/* DEVICE BASE */
+
+#define DEVICE_PHYS_OFFSET (0x00000000)
+#define DEVICE_PHYS_SIZE   (0x20000000)
+
+#define DEVICE_START       (0xFFFF000300000000)
+#define DEVICE_END         (0xFFFF0003FFFFFFFF)
 
 /*
  * Memory types available.
