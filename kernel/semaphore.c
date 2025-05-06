@@ -1,6 +1,8 @@
-#include <kernel/semaphore.h>
-#include <common/interrupt.h>
 #include <stddef.h>
+
+#include <kernel/semaphore.h>
+
+#include <ee/irqflags.h>
 
 int sem_init(struct semaphore *sem, uint32_t count)
 {

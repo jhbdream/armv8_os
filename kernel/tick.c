@@ -1,6 +1,7 @@
 #include <kernel/tick.h>
 #include <kernel/task.h>
-#include <common/interrupt.h>
+
+#include <ee/irqflags.h>
 
 volatile uint64_t g_systic = 0;
 
@@ -38,16 +39,20 @@ uint64_t ms_to_tick(uint64_t ms)
  */
 void task_sleep_ms(uint64_t ms)
 {
+    struct task *t;
+
     local_irq_disable();
 
-    //设置睡眠任务的状态
-    struct task *t = g_current_task;
-    t->task_state  = TASK_STATE_SLEEP;
+    // 设置睡眠任务的状态
 
-    //设置任务的唤醒时间
+    t = g_current_task;
+
+    t->task_state = TASK_STATE_SLEEP;
+
+    // 设置任务的唤醒时间
     t->sleep_timeout = g_systic + ms_to_tick(ms);
 
-    //发起调度，切出任务
+    // 发起调度，切出任务
     schedle();
 
     local_irq_enable();
