@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <printk.h>
+#include <kernel/task.h>
 #include <driver/interrupt.h>
 
 uint64_t cpu_khz = 0;
@@ -100,6 +101,8 @@ static inline void arch_timer_interrupt_disable(void)
     }
 }
 
+volatile extern uint64_t g_systic;
+
 void arm64_arch_timer_tandler(struct irq_desc *desc)
 {
 #if 0
@@ -109,6 +112,9 @@ void arm64_arch_timer_tandler(struct irq_desc *desc)
     printk("boot ticks is :0x%llx\n", boot_tick);
 #endif
 
+    g_systic = g_systic + 1;
+
+    schedle_interrupt();
     write_cntp_tval_el0(cpu_khz * 10);
 }
 

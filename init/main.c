@@ -10,6 +10,8 @@
 
 #include <driver/console.h>
 
+#include <kernel/task.h>
+
 #include <printk.h>
 
 extern void buddy_page_test(void);
@@ -64,6 +66,8 @@ void start_kernel(void)
 
     // 把 memblock 剩余可以使用内存分配到 page 管理器
     free_memory_core();
+
+    kernel_task_init();
 
     gicv3_driver_init();
 
