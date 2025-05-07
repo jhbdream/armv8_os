@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <errno.h>
 #include <compiler_types.h>
+#include <printk.h>
 
 unsigned long task_interrupt_from_thread;
 unsigned long task_interrupt_to_thread;
@@ -22,6 +23,8 @@ int is_interrupt_nest(void)
  */
 void unexpected_exception(int val)
 {
+    printk("unexpected exception: [%d]\n", val);
+
     while (1) {
         /* code */
     }
@@ -42,7 +45,6 @@ void handle_bad_irq(struct irq_desc *desc)
 }
 
 struct irq_chip _irq_chip = {
-    .irq_eoi    = NULL,
     .irq_mask   = NULL,
     .irq_unmask = NULL,
 };
@@ -111,7 +113,6 @@ int set_irq_chip(struct irq_chip *irq_chip)
 
     _irq_chip.irq_unmask = irq_chip->irq_unmask;
     _irq_chip.irq_mask   = irq_chip->irq_mask;
-    _irq_chip.irq_eoi    = irq_chip->irq_eoi;
 
     return 0;
 }

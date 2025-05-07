@@ -15,6 +15,8 @@
 extern void buddy_page_test(void);
 extern void slob_test(void);
 
+int gicv3_driver_init(void);
+
 extern unsigned long __kimage_start[], __kimage_end[];
 
 void eeos_printlogo(void)
@@ -60,6 +62,8 @@ void start_kernel(void)
 
     // 把 memblock 剩余可以使用内存分配到 page 管理器
     free_memory_core();
+
+    gicv3_driver_init();
 
     // slob_test();
 

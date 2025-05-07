@@ -92,7 +92,6 @@ typedef void (*irq_handler_t)(struct irq_desc *desc);
 struct irq_chip {
     void (*irq_mask)(unsigned int irq);
     void (*irq_unmask)(unsigned int irq);
-    void (*irq_eoi)(unsigned int irq);
 };
 
 /**
