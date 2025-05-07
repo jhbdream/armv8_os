@@ -91,3 +91,5 @@ compile_commands.json
 eeos
 eeos.bin
 eeos.dis
+
+include/generated/
