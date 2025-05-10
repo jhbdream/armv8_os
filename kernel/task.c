@@ -1,3 +1,4 @@
+#include "irqflags.h"
 #include <kernel/task.h>
 #include <kernel/tick.h>
 #include <stdio.h>
@@ -118,6 +119,7 @@ struct task *task_create(char *name, void *sp_addr, void *pc_addr, long priority
     struct task *new_task;
 
     new_task = requset_task();
+
     if (new_task != NULL) {
         task_init(new_task, name, sp_addr, pc_addr, priority);
         return new_task;
@@ -213,10 +215,16 @@ void schedle_interrupt(void)
     static struct task *to;
 
     from = g_current_task;
-    to   = task_schedule_alog_priority();
+    to   = task_schedule_alog_average();
 
     // TODO: 没有需要调度的任务？
-    if (from == NULL && to == NULL) {
+    if (from == NULL || to == NULL) {
+        printk("task schedle no need\n");
+        return;
+    }
+
+    // 同一个任务
+    if (from == to) {
         return;
     }
 
@@ -229,13 +237,32 @@ void schedle_interrupt(void)
  */
 void schedle(void)
 {
+    unsigned long flag;
+
     static struct task *from;
     static struct task *to;
 
+    local_irq_save(flag);
+
     from = g_current_task;
-    to   = task_schedule_alog_priority();
+    to   = task_schedule_alog_average();
+
+
+    // TODO: 没有需要调度的任务？
+    if (from == NULL || to == NULL) {
+        local_irq_restore(flag);
+        return;
+    }
+
+    // 同一个任务
+    if (from == to) {
+        local_irq_restore(flag);
+        return;
+    }
 
     task_switch_from_to(from, to);
+
+    local_irq_restore(flag);
 }
 
 /**

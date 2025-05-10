@@ -31,11 +31,11 @@ task_switch_to:
     msr elr_el1, x2
 
     //4. 恢复任务的通用寄存器
-    ldp x0, x1, [sp, #16 * 0]
-    ldp x2, x3, [sp, #16 * 1]
-    ldp x4, x5, [sp, #16 * 2]
-    ldp x6, x7, [sp, #16 * 3]
-    ldp x8, x9, [sp, #16 * 4]
+    ldp  x0,  x1, [sp, #16 * 0]
+    ldp  x2,  x3, [sp, #16 * 1]
+    ldp  x4,  x5, [sp, #16 * 2]
+    ldp  x6,  x7, [sp, #16 * 3]
+    ldp  x8,  x9, [sp, #16 * 4]
     ldp x10, x11, [sp, #16 * 5]
     ldp x12, x13, [sp, #16 * 6]
     ldp x14, x15, [sp, #16 * 7]
@@ -46,7 +46,7 @@ task_switch_to:
     ldp x24, x25, [sp, #16 * 12]
     ldp x26, x27, [sp, #16 * 13]
     ldp x28, x29, [sp, #16 * 14]
-    ldr x30, [sp, #16 * 15]
+    ldr x30,      [sp, #16 * 15]
 
     //数据从堆栈取出之后，堆栈指针移动
     sub sp, sp, #30 * 8

@@ -21,6 +21,8 @@ int  gicv3_driver_init(void);
 void arm64_arch_timer_init(void);
 void arm64_arch_timer_init(void);
 
+void user_task_init(void);
+
 extern unsigned long __kimage_start[], __kimage_end[];
 
 void eeos_printlogo(void)
@@ -67,13 +69,13 @@ void start_kernel(void)
     // 把 memblock 剩余可以使用内存分配到 page 管理器
     free_memory_core();
 
-    kernel_task_init();
-
     gicv3_driver_init();
 
-    local_irq_enable();
-
     arm64_arch_timer_init();
+
+    kernel_task_init();
+
+    user_task_init();
 
     // slob_test();
 

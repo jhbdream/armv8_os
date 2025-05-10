@@ -39,9 +39,11 @@ uint64_t ms_to_tick(uint64_t ms)
  */
 void task_sleep_ms(uint64_t ms)
 {
+    unsigned long flag;
+
     struct task *t;
 
-    local_irq_disable();
+    local_irq_save(flag);
 
     // 设置睡眠任务的状态
 
@@ -55,5 +57,5 @@ void task_sleep_ms(uint64_t ms)
     // 发起调度，切出任务
     schedle();
 
-    local_irq_enable();
+    local_irq_restore(flag);
 }

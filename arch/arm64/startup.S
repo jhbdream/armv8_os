@@ -122,6 +122,9 @@ _startup:
 __init_el1:
     mov   x0, 0x3c5
     msr spsr_el1, x0
+
+    msr spsel, #1
+
     adr x8, __init_el1_done
     msr elr_el1, x8
     eret
@@ -228,10 +231,8 @@ memset_loop:
     adr x8, __stack_top
     mov sp, x8
 
-#if __DEBUG_USE_GDB__ == 1
     b .
     nop
-#endif
 
     // 创建临时的镜像映射 此时的页表是使用链接脚本分配的空间
     // 正式的页表需要后续使用动态分配内存创建映射关系、然后在切换页表

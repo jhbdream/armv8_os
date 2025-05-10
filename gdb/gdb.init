@@ -7,8 +7,13 @@ target remote localhost:1234
 #source gdb/verfy.py
 #source gdb/write_r.py
 
-add-symbol-file -o -(0xffff000000080000-0x40080000) eeos
+# add-symbol-file -o -(0xffff000000080000-0x40080000) eeos
 
 # add-symbol-file eeos.elf
 
 # dashboard registers -style list "x0 x1 x2 x3 x4 x5 x6 x7 sp pc"
+#
+define run 
+    set $pc += 4
+    add-symbol-file eeos
+end
