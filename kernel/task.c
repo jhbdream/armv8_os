@@ -94,7 +94,7 @@ static void task_init(struct task *t, char *name, void *sp_addr, void *pc_addr,
     // 初始化任务栈
     for (int i = 0; i < 31; i++) {
         sp_init  = sp_init - 1;
-        *sp_init = i;
+        *sp_init = 30 - i;
     }
 
     t->sp   = sp_init;
@@ -219,11 +219,10 @@ void schedle_interrupt(void)
 
     // TODO: 没有需要调度的任务？
     if (from == NULL || to == NULL) {
-        printk("task schedle no need\n");
         return;
     }
 
-    // 同一个任务
+    // 同一个任务 也不需要触发切换
     if (from == to) {
         return;
     }
@@ -246,7 +245,6 @@ void schedle(void)
 
     from = g_current_task;
     to   = task_schedule_alog_average();
-
 
     // TODO: 没有需要调度的任务？
     if (from == NULL || to == NULL) {
