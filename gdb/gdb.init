@@ -16,4 +16,5 @@ target remote localhost:1234
 define run 
     set $pc += 4
     add-symbol-file eeos
+    b SynchronousInterruptHandler
 end
