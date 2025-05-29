@@ -166,7 +166,7 @@ exit_irq_with_task_switch:
 	//保存from任务的状态到堆栈
 
     //1 保存from任务通用寄存器状态
-    sub sp, sp, #30 * 8
+    sub sp, sp, #31 * 8
 
     stp x0, x1, [sp, #16 * 0]
     stp x2, x3, [sp, #16 * 1]
@@ -261,7 +261,7 @@ exit_irq_with_task_switch:
     ldr x30, [sp, #16 * 15]
 
     //数据从堆栈取出之后，堆栈指针移动
-    add sp, sp, #30 * 8
+    add sp, sp, #31 * 8
 
 	//当前处理器状态已经切换到了to任务，异常返回之后到to任务执行
     eret

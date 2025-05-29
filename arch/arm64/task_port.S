@@ -49,7 +49,7 @@ task_switch_to:
     ldr x30,      [sp, #16 * 15]
 
     //数据从堆栈取出之后，堆栈指针移动
-    sub sp, sp, #30 * 8
+    add sp, sp, #31 * 8
 
     //异常返回
     //1 cpsr = spsr
@@ -65,7 +65,7 @@ task_switch_from_to:
     //第一件事情，保存from任务的状态
 
     //1 保存from任务通用寄存器状态
-    sub sp, sp, #30 * 8
+    sub sp, sp, #31 * 8
 
     stp x0, x1, [sp, #16 * 0]
     stp x2, x3, [sp, #16 * 1]
@@ -156,7 +156,7 @@ task_switch_from_to:
     ldr x30, [sp, #16 * 15]
 
     //数据从堆栈取出之后，堆栈指针移动
-    add sp, sp, #30 * 8
+    add sp, sp, #31 * 8
 
 	//该指令原意是从异常返回
     // 1. 把spsr寄存器恢复到cpcr寄存器中
