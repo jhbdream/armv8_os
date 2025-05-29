@@ -26,7 +26,7 @@ void taska_fun(void)
 {
     static uint64_t taska_count = 0;
     while (1) {
-        // task_sleep_ms(1000);
+        task_sleep_ms(1000);
         printk("taska: [%d]\n", taska_count++);
     }
 }
@@ -35,7 +35,7 @@ void taskb_fun(void)
 {
     static uint64_t taskb_count = 0;
     while (1) {
-        // task_sleep_ms(500);
+        task_sleep_ms(500);
         printk("taskb: [%d]\n", taskb_count++);
     }
 }

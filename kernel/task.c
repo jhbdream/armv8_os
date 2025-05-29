@@ -215,7 +215,7 @@ void schedle_interrupt(void)
     static struct task *to;
 
     from = g_current_task;
-    to   = task_schedule_alog_average();
+    to   = task_schedule_alog_priority();
 
     // TODO: 没有需要调度的任务？
     if (from == NULL || to == NULL) {
