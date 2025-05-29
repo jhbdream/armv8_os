@@ -5,9 +5,9 @@
 #include <compiler_types.h>
 #include <printk.h>
 
-unsigned long task_interrupt_from_thread;
-unsigned long task_interrupt_to_thread;
-unsigned long task_thread_switch_interrupt_flag;
+unsigned long task_interrupt_from_thread        = 0;
+unsigned long task_interrupt_to_thread          = 0;
+unsigned long task_thread_switch_interrupt_flag = 0;
 
 unsigned long interrupt_nest = 0;
 
