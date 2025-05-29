@@ -101,7 +101,7 @@ static inline void arch_timer_interrupt_disable(void)
     }
 }
 
-volatile extern uint64_t g_systic;
+extern volatile uint64_t g_systic;
 
 void arm64_arch_timer_tandler(struct irq_desc *desc)
 {
@@ -115,6 +115,7 @@ void arm64_arch_timer_tandler(struct irq_desc *desc)
     g_systic = g_systic + 1;
 
     schedle_interrupt();
+
     write_cntp_tval_el0(cpu_khz * 10);
 }
 
