@@ -1,6 +1,5 @@
 #include <kernel/task.h>
 #include <kernel/tick.h>
-#include <common/delay.h>
 #include <stddef.h>
 #include <printk.h>
 #include <string.h>
