@@ -6,9 +6,9 @@
 
 #include <asm/memory.h>
 
-#include <compiler_attribute.h>
-
 #include <io.h>
+
+#define __aligned(x) __attribute__((__aligned__(x)))
 
 /*
  * Hardware page table definitions.

@@ -14,15 +14,15 @@
     ((page->page_type & (PAGE_TYPE_BASE | flag)) == PAGE_TYPE_BASE)
 
 #define PAGE_TYPE_OPS(uname, lname) \
-    static __always_inline int Page##uname(struct page *page) \
+    static inline int Page##uname(struct page *page) \
     { \
         return PageType(page, PG_##lname); \
     } \
-    static __always_inline void __SetPage##uname(struct page *page) \
+    static inline void __SetPage##uname(struct page *page) \
     { \
         page->page_type &= ~PG_##lname; \
     } \
-    static __always_inline void __ClearPage##uname(struct page *page) \
+    static inline void __ClearPage##uname(struct page *page) \
     { \
         page->page_type |= PG_##lname; \
     }

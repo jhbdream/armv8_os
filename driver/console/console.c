@@ -19,6 +19,7 @@ void console_init(void)
         }
 
         uart_console = con;
+
         return;
     }
 }

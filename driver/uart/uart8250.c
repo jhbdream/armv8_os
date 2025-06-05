@@ -257,4 +257,11 @@ static void _write(struct console *con, const char *s, unsigned n)
         uart8250_putc(*s);
     }
 }
-CONSOLE_DECLARE(uart8250, NULL, _init, _write, NULL);
+
+struct console __console_uart8250 SECTION_CONSOLE = {
+    .name  = "uart8250",
+    .arg   = NULL,
+    .init  = _init,
+    .write = write,
+    .read  = NULL,
+};

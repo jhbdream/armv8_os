@@ -1,7 +1,6 @@
 #ifndef __ASM_GENERIC_GETORDER_H
 #define __ASM_GENERIC_GETORDER_H
 
-#include <compiler_types.h>
 #include <stddef.h>
 #include <pgtable.h>
 
