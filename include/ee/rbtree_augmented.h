@@ -14,6 +14,19 @@
 
 #include <ee/rbtree.h>
 
+#define __READ_ONCE(x) (*(const volatile typeof(x) *)&(x))
+#define READ_ONCE(x)   ({ __READ_ONCE(x); })
+
+#define __WRITE_ONCE(x, val) \
+    do { \
+        *(volatile typeof(x) *)&(x) = (val); \
+    } while (0)
+
+#define WRITE_ONCE(x, val) \
+    do { \
+        __WRITE_ONCE(x, val); \
+    } while (0)
+
 /*
  * Please note - only struct rb_augment_callbacks and the prototypes for
  * rb_insert_augmented() and rb_erase_augmented() are intended to be public.
@@ -168,21 +181,6 @@ static inline void __rb_change_child(struct rb_node *old, struct rb_node *new,
         WRITE_ONCE(root->rb_node, new);
 }
 
-#if 0
-static inline void
-__rb_change_child_rcu(struct rb_node *old, struct rb_node *new,
-		      struct rb_node *parent, struct rb_root *root)
-{
-	if (parent) {
-		if (parent->rb_left == old)
-			rcu_assign_pointer(parent->rb_left, new);
-		else
-			rcu_assign_pointer(parent->rb_right, new);
-	} else
-		rcu_assign_pointer(root->rb_node, new);
-}
-#endif
-
 extern void __rb_erase_color(struct rb_node *parent, struct rb_root *root,
                              void (*augment_rotate)(struct rb_node *old,
                                                     struct rb_node *new));
@@ -290,16 +288,16 @@ __rb_erase_augmented(struct rb_node *node, struct rb_root *root,
 }
 
 static inline void rb_erase_augmented(struct rb_node *node, struct rb_root *root,
-                                               const struct rb_augment_callbacks *augment)
+                                      const struct rb_augment_callbacks *augment)
 {
     struct rb_node *rebalance = __rb_erase_augmented(node, root, augment);
     if (rebalance)
         __rb_erase_color(rebalance, root, augment->rotate);
 }
 
-static inline void
-rb_erase_augmented_cached(struct rb_node *node, struct rb_root_cached *root,
-                          const struct rb_augment_callbacks *augment)
+static inline void rb_erase_augmented_cached(struct rb_node                    *node,
+                                             struct rb_root_cached             *root,
+                                             const struct rb_augment_callbacks *augment)
 {
     if (root->rb_leftmost == node)
         root->rb_leftmost = rb_next(node);

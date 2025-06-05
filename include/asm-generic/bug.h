@@ -4,21 +4,17 @@
 
 #include <printk.h>
 
-#ifndef HAVE_ARCH_BUG
-#    define BUG() \
-        do { \
-            printk("BUG: failure at %s:%d/%s()!\n", __FILE__, __LINE__, __func__); \
-            while (1) \
-                ; \
-        } while (0)
-#endif
+#define BUG() \
+    do { \
+        printk("BUG: failure at %s:%d/%s()!\n", __FILE__, __LINE__, __func__); \
+        while (1) \
+            ; \
+    } while (0)
 
-#ifndef HAVE_ARCH_BUG_ON
-#    define BUG_ON(condition) \
-        do { \
-            if ((condition)) \
-                BUG(); \
-        } while (0)
-#endif
+#define BUG_ON(condition) \
+    do { \
+        if ((condition)) \
+            BUG(); \
+    } while (0)
 
-#endif
+#endif /* _ASM_GENERIC_BUG_H */

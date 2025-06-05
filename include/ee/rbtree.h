@@ -23,7 +23,6 @@
 #include <stdint.h>
 #include <type.h>
 #include <ee/container_of.h>
-#include <asm-generic/rwonce.h>
 
 #define rb_parent(r)                ((struct rb_node *)((r)->__rb_parent_color & ~3))
 
