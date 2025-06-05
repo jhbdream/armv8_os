@@ -4,9 +4,6 @@
 #ifndef __ASSEMBLY__
 
 #    include <stdint.h>
-#    include <bitops.h>
-
-#    define DECLARE_BITMAP(name, bits) unsigned long name[BITS_TO_LONGS(bits)]
 
 typedef int8_t  __s8;
 typedef uint8_t __u8;

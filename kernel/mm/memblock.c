@@ -20,8 +20,9 @@
 #include <asm/memory.h>
 #include <ee/pfn.h>
 #include <mm/page_alloc.h>
-#include <bitops.h>
 #include <mm/page_alloc.h>
+
+#include <round.h>
 
 #define INIT_MEMBLOCK_REGIONS          128
 #define INIT_PHYSMEM_REGIONS           4
@@ -53,6 +54,49 @@ struct memblock memblock = {
         if (memblock_debug) \
             printk(fmt, ##__VA_ARGS__); \
     } while (0)
+
+/**
+ * __ffs - find first bit in word.
+ * @word: The word to search
+ *
+ * Undefined if no bit exists, so code should check against 0 first.
+ */
+static inline unsigned long __ffs(unsigned long word)
+{
+    int num = 0;
+
+    /* BUG: only support 64bit arch */
+    if ((word & 0xffffffff) == 0) {
+        num += 32;
+        word >>= 32;
+    }
+
+    if ((word & 0xffff) == 0) {
+        num += 16;
+        word >>= 16;
+    }
+
+    if ((word & 0xff) == 0) {
+        num += 8;
+        word >>= 8;
+    }
+
+    if ((word & 0xf) == 0) {
+        num += 4;
+        word >>= 4;
+    }
+
+    if ((word & 0x3) == 0) {
+        num += 2;
+        word >>= 2;
+    }
+
+    if ((word & 0x1) == 0) {
+        num += 1;
+    }
+
+    return num;
+}
 
 static int memblock_debug;
 

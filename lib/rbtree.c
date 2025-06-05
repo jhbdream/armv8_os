@@ -79,9 +79,9 @@ static inline void __rb_rotate_set_parents(struct rb_node *old, struct rb_node *
     __rb_change_child(old, new, parent, root);
 }
 
-static __always_inline void __rb_insert(struct rb_node *node, struct rb_root *root,
-                                        void (*augment_rotate)(struct rb_node *old,
-                                                               struct rb_node *new))
+static inline void __rb_insert(struct rb_node *node, struct rb_root *root,
+                               void (*augment_rotate)(struct rb_node *old,
+                                                      struct rb_node *new))
 {
     struct rb_node *parent = rb_red_parent(node), *gparent, *tmp;
 
@@ -89,7 +89,7 @@ static __always_inline void __rb_insert(struct rb_node *node, struct rb_root *ro
         /*
          * Loop invariant: node is red.
          */
-        if (unlikely(!parent)) {
+        if (!parent) {
             /*
              * The inserted node is root. Either this is the
              * first node, or we recursed at Case 1 below and
@@ -219,9 +219,9 @@ static __always_inline void __rb_insert(struct rb_node *node, struct rb_root *ro
  * Inline version for rb_erase() use - we want to be able to inline
  * and eliminate the dummy_rotate callback there
  */
-static __always_inline void
-____rb_erase_color(struct rb_node *parent, struct rb_root *root,
-                   void (*augment_rotate)(struct rb_node *old, struct rb_node *new))
+static inline void ____rb_erase_color(struct rb_node *parent, struct rb_root *root,
+                                      void (*augment_rotate)(struct rb_node *old,
+                                                             struct rb_node *new))
 {
     struct rb_node *node = NULL, *sibling, *tmp1, *tmp2;
 
@@ -432,7 +432,7 @@ void rb_erase(struct rb_node *node, struct rb_root *root)
 /*
  * Augmented rbtree manipulation functions.
  *
- * This instantiates the same __always_inline functions as in the non-augmented
+ * This instantiates the same inline functions as in the non-augmented
  * case, but this time with user-defined callbacks.
  */
 

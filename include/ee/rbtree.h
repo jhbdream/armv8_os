@@ -150,7 +150,7 @@ static inline void rb_replace_node_cached(struct rb_node *victim, struct rb_node
  *
  * Returns @node when it is the new leftmost, or NULL.
  */
-static __always_inline struct rb_node *
+static inline struct rb_node *
 rb_add_cached(struct rb_node *node, struct rb_root_cached *tree,
               bool (*less)(struct rb_node *, const struct rb_node *))
 {
@@ -180,7 +180,7 @@ rb_add_cached(struct rb_node *node, struct rb_root_cached *tree,
  * @tree: tree to insert @node into
  * @less: operator defining the (partial) node order
  */
-static __always_inline void rb_add(struct rb_node *node, struct rb_root *tree,
+static inline void rb_add(struct rb_node *node, struct rb_root *tree,
                                    bool (*less)(struct rb_node *, const struct rb_node *))
 {
     struct rb_node **link   = &tree->rb_node;
@@ -207,7 +207,7 @@ static __always_inline void rb_add(struct rb_node *node, struct rb_root *tree,
  * Returns the rb_node matching @node, or NULL when no match is found and @node
  * is inserted.
  */
-static __always_inline struct rb_node *
+static inline struct rb_node *
 rb_find_add(struct rb_node *node, struct rb_root *tree,
             int (*cmp)(struct rb_node *, const struct rb_node *))
 {
@@ -240,7 +240,7 @@ rb_find_add(struct rb_node *node, struct rb_root *tree,
  *
  * Returns the rb_node matching @key or NULL.
  */
-static __always_inline struct rb_node *
+static inline struct rb_node *
 rb_find(const void *key, const struct rb_root *tree,
         int (*cmp)(const void *key, const struct rb_node *))
 {
@@ -268,7 +268,7 @@ rb_find(const void *key, const struct rb_root *tree,
  *
  * Returns the leftmost node matching @key, or NULL.
  */
-static __always_inline struct rb_node *
+static inline struct rb_node *
 rb_find_first(const void *key, const struct rb_root *tree,
               int (*cmp)(const void *key, const struct rb_node *))
 {
@@ -298,7 +298,7 @@ rb_find_first(const void *key, const struct rb_root *tree,
  *
  * Returns the next node matching @key, or NULL.
  */
-static __always_inline struct rb_node *
+static inline struct rb_node *
 rb_next_match(const void *key, struct rb_node *node,
               int (*cmp)(const void *key, const struct rb_node *))
 {
