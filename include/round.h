@@ -2,8 +2,6 @@
 #ifndef _LINUX_ROUND_H
 #define _LINUX_ROUND_H
 
-#include <bits.h>
-
 /*
  * This looks more complex than it should be. But we need to
  * get the type for the ~ right in round_down (it needs to be
@@ -42,12 +40,6 @@
     })
 
 #define DIV_ROUND_UP_ULL(ll, d) DIV_ROUND_DOWN_ULL((unsigned long long)(ll) + (d)-1, (d))
-
-#if BITS_PER_LONG == 32
-#    define DIV_ROUND_UP_SECTOR_T(ll, d) DIV_ROUND_UP_ULL(ll, d)
-#else
-#    define DIV_ROUND_UP_SECTOR_T(ll, d) DIV_ROUND_UP(ll, d)
-#endif
 
 /**
  * roundup - round up to the next specified multiple
