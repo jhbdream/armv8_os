@@ -10,8 +10,6 @@
 
 #include <io.h>
 
-#include "mmu_v3.h"
-
 /*
  * Hardware page table definitions.
  *
