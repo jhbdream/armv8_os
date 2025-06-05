@@ -22,8 +22,6 @@
 
 #include <type.h>
 
-#include <ee/sizes.h>
-
 #define VA_BITS (48)
 
 /* 物理内存基地址 */

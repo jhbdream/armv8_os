@@ -5,6 +5,5 @@
 #include <stddef.h>
 
 #include <type.h>
-#include <ee/sizes.h>
 
 #endif

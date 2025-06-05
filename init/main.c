@@ -1,6 +1,5 @@
 #include <stddef.h>
 
-#include <ee/init.h>
 #include <ee/irqflags.h>
 
 #include <asm/memory.h>
@@ -21,6 +20,7 @@ int  gicv3_driver_init(void);
 void arm64_arch_timer_init(void);
 void arm64_arch_timer_init(void);
 
+void setup_arch(void);
 void user_task_init(void);
 
 extern unsigned long __kimage_start[], __kimage_end[];

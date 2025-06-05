@@ -2,6 +2,7 @@
 #define _EE_PGTABLE_H
 
 #include <type.h>
+#include <const.h>
 
 /**
  * page table 相关定义 尽量实现通用
