@@ -1,8 +1,6 @@
 #ifndef __LINKAGE_H
 #define __LINKAGE_H
 
-#include <compiler_attribute.h>
-
 /* Some toolchains use other characters (e.g. '`') to mark new line in macro */
 #ifndef ASM_NL
 #    define ASM_NL ;
@@ -31,5 +29,6 @@
 #        define END(name) .size name, .- name
 #    endif
 
-#endif
-#endif
+#endif /* __ASSEMBLY__ */
+
+#endif /* __LINKAGE_H */

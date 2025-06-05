@@ -1,5 +1,7 @@
 #ifndef _LINUX_MEMBLOCK_H
-#define _LINUX_MEMBLOCK_H #include <type.h>
+#define _LINUX_MEMBLOCK_H
+
+#include <type.h>
 #include <limits.h>
 #include <stddef.h>
 
