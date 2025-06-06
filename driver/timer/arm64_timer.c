@@ -105,13 +105,6 @@ extern volatile uint64_t g_systic;
 
 void arm64_arch_timer_tandler(struct irq_desc *desc)
 {
-#if 0
-    uint64_t boot_tick;
-
-    boot_tick = read_cntpct_el0();
-    printk("boot ticks is :0x%llx\n", boot_tick);
-#endif
-
     g_systic = g_systic + 1;
 
     schedle_interrupt();
@@ -126,8 +119,8 @@ void arm64_arch_timer_init(void)
     boot_tick = read_cntpct_el0();
     cpu_khz   = read_cntfrq_el0() / 1000;
 
-    printk("boot ticks is :0x%llx\n", boot_tick);
-    printk("clock freq from reg: %dKhz\n", cpu_khz);
+    printk("boot ticks : [ 0x%llx ]\n", boot_tick);
+    printk("clock freq : [ %dKhz ]\n", cpu_khz);
 
     arch_timer_interrupt_disable();
     arch_timer_stop();
@@ -140,12 +133,4 @@ void arm64_arch_timer_init(void)
     arch_timer_start();
 
     arch_timer_interrupt_enable();
-
-#if 0
-
-    arch_timer_interrupt_disable();
-    arch_timer_start();
-    arch_timer_compare(arch_timer_frequecy());
-    arch_timer_interrupt_enable();
-#endif
 }
