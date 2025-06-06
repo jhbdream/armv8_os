@@ -23,7 +23,7 @@
 
 #include <eeos/types.h>
 
-#include <eeos/rbtree_types.h>
+#include <lib/rbtree_types.h>
 #include <eeos/container_of.h>
 
 #define rb_parent(r)                ((struct rb_node *)((r)->__rb_parent_color & ~3))

@@ -12,7 +12,7 @@
 #ifndef _LINUX_RBTREE_AUGMENTED_H
 #define _LINUX_RBTREE_AUGMENTED_H
 
-#include <eeos/rbtree.h>
+#include <lib/rbtree.h>
 
 #define __READ_ONCE(x) (*(const volatile typeof(x) *)&(x))
 #define READ_ONCE(x)   ({ __READ_ONCE(x); })

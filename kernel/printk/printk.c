@@ -6,7 +6,7 @@
 
 #include <eeos/limits.h>
 #include <eeos/types.h>
-#include <eeos/ctype.h>
+#include <lib/ctype.h>
 #include <eeos/div64.h>
 
 #include <printk.h>
