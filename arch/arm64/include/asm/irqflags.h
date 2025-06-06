@@ -1,7 +1,6 @@
 #ifndef __ASM_IRQFLAGS_H
 #define __ASM_IRQFLAGS_H
 
-
 /*
  * CPU interrupt mask handling.
  */
