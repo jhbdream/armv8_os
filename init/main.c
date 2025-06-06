@@ -1,6 +1,6 @@
 #include <stddef.h>
 
-#include <ee/irqflags.h>
+#include <eeos/irqflags.h>
 
 #include <asm/memory.h>
 

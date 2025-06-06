@@ -1,4 +1,4 @@
-#include <ctype.h>
+#include <eeos/ctype.h>
 
 const unsigned char _ctype[] = {
     _C,       _C,      _C,      _C,      _C,      _C,      _C,      _C, /* 0-7 */

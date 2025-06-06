@@ -1,7 +1,7 @@
 #ifndef _PAGE_ALLOC_H_
 #define _PAGE_ALLOC_H_
 
-#include <type.h>
+#include <eeos/types.h>
 #include <asm/memory.h>
 
 #define MAX_ORDER 11

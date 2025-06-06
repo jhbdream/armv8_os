@@ -1,8 +1,8 @@
 #include <stdint.h>
 
-#include <ee/pgtable.h>
+#include <eeos/pgtable.h>
 
-#include <type.h>
+#include <eeos/types.h>
 
 #include <asm/memory.h>
 

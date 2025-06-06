@@ -1,7 +1,7 @@
 #ifndef __PAGE_FLAG_H_
 #define __PAGE_FLAG_H_
 
-#include <type.h>
+#include <eeos/types.h>
 #include <mm/page_alloc.h>
 
 #define PAGE_TYPE_BASE 0xf0000000

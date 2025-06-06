@@ -1,7 +1,7 @@
 #ifndef __ASM_ARM_IO_H
 #define __ASM_ARM_IO_H
 
-#include <type.h>
+#include <eeos/types.h>
 
 /*
  * Generic IO read/write.  These perform native-endian accesses.

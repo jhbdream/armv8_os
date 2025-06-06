@@ -1,7 +1,7 @@
 #ifndef __SLAB_H__
 #define __SLAB_H__
 
-#include <type.h>
+#include <eeos/types.h>
 
 extern void *__kmalloc(size_t size);
 extern void  __kfree(const void *block);

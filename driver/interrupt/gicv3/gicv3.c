@@ -1,6 +1,6 @@
 #include <driver/interrupt.h>
 
-#include <type.h>
+#include <eeos/types.h>
 #include <io.h>
 #include <asm/memory.h>
 

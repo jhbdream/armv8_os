@@ -3,7 +3,7 @@
 #ifndef _LINUX_INTERRUPT_H
 #define _LINUX_INTERRUPT_H
 
-#include <irqflags.h>
+#include <eeos/irqflags.h>
 
 #define NR_IRQS 8192
 

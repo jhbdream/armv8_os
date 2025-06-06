@@ -14,14 +14,14 @@
 
 #include <asm/memory.h>
 
-#include <ee/minmax.h>
-#include <ee/errno.h>
-#include <ee/pgtable.h>
+#include <eeos/minmax.h>
+#include <eeos/errno.h>
+#include <eeos/pgtable.h>
 
-#include <type.h>
-#include <round.h>
+#include <eeos/types.h>
+#include <eeos/round.h>
 #include <printk.h>
-#include <limits.h>
+#include <eeos/limits.h>
 
 #include <mm/memblock.h>
 #include <mm/page_alloc.h>

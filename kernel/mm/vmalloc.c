@@ -1,14 +1,14 @@
-#include "errno.h"
+#include "eeos/errno.h"
 #include "mm.h"
 #include "mm/memblock.h"
 #include "mm/slab.h"
 #include <mm/page_alloc.h>
-#include "pgtable.h"
+#include "eeos/pgtable.h"
 #include "printk.h"
-#include <type.h>
+#include <eeos/types.h>
 #include <stddef.h>
-#include <asm-generic/bug.h>
-#include <ee/align.h>
+#include <eeos/bug.h>
+#include <eeos/align.h>
 
 struct vm_struct {
     void             *addr;

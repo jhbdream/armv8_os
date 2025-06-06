@@ -1,9 +1,9 @@
 #include "mm/page_alloc.h"
-#include "type.h"
+#include "eeos/types.h"
 #include <ee/mm.h>
-#include <pgtable.h>
+#include <eeos/pgtable.h>
 #include <string.h>
-#include <errno.h>
+#include <eeos/errno.h>
 
 int __pud_alloc(pgd_t *pgd, unsigned long address)
 {

@@ -1,6 +1,6 @@
 #include "printk.h"
 #include <libfdt.h>
-#include <pgtable.h>
+#include <eeos/pgtable.h>
 #include <mm/memblock.h>
 #include <ee/init.h>
 

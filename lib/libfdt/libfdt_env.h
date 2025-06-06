@@ -12,8 +12,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
-#include <type.h>
+#include <eeos/limits.h>
+#include <eeos/types.h>
 
 #ifdef __CHECKER__
 #    define FDT_FORCE   __attribute__((force))

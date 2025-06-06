@@ -20,7 +20,7 @@
 #ifndef __ASM_MEMORY_H
 #define __ASM_MEMORY_H
 
-#include <type.h>
+#include <eeos/types.h>
 
 #define VA_BITS (48)
 

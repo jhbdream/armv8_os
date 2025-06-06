@@ -2,10 +2,10 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
-#include <limits.h>
-#include <type.h>
-#include <ctype.h>
-#include <div64.h>
+#include <eeos/limits.h>
+#include <eeos/types.h>
+#include <eeos/ctype.h>
+#include <eeos/div64.h>
 
 const char hex_asc[]       = "0123456789abcdef";
 const char hex_asc_upper[] = "0123456789ABCDEF";

@@ -1,8 +1,8 @@
 #ifndef _LINUX_MEMBLOCK_H
 #define _LINUX_MEMBLOCK_H
 
-#include <type.h>
-#include <limits.h>
+#include <eeos/types.h>
+#include <eeos/limits.h>
 #include <stddef.h>
 
 struct memblock_region {

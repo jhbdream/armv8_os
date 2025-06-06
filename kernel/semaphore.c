@@ -2,7 +2,7 @@
 
 #include <kernel/semaphore.h>
 
-#include <ee/irqflags.h>
+#include <eeos/irqflags.h>
 
 int sem_init(struct semaphore *sem, uint32_t count)
 {

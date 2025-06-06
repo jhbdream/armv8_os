@@ -9,7 +9,7 @@
   linux/lib/rbtree.c
 */
 
-#include <ee/rbtree_augmented.h>
+#include <eeos/rbtree_augmented.h>
 
 /*
  * red-black trees properties:  https://en.wikipedia.org/wiki/Rbtree

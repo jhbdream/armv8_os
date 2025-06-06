@@ -1,4 +1,4 @@
-#include "irqflags.h"
+#include "eeos/irqflags.h"
 #include <kernel/task.h>
 #include <kernel/tick.h>
 #include <stdio.h>

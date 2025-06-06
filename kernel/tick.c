@@ -1,7 +1,7 @@
 #include <kernel/tick.h>
 #include <kernel/task.h>
 
-#include <ee/irqflags.h>
+#include <eeos/irqflags.h>
 
 volatile uint64_t g_systic = 0;
 

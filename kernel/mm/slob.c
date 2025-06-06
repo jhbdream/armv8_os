@@ -1,13 +1,13 @@
 #include "printk.h"
-#include "type.h"
+#include "eeos/types.h"
 #include <stddef.h>
 #include <stdint.h>
-#include <list.h>
+#include <eeos/list.h>
 #include <mm/page_alloc.h>
-#include <round.h>
-#include <ee/align.h>
-#include <asm-generic/bug.h>
-#include <asm-generic/get_order.h>
+#include <eeos/round.h>
+#include <eeos/align.h>
+#include <eeos/bug.h>
+#include <eeos/get_order.h>
 #include <mm/page_flag.h>
 #include <mm/slab.h>
 

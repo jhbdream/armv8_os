@@ -1,15 +1,17 @@
-#include "asm-generic/get_order.h"
-#include "errno.h"
-#include "mm/memblock.h"
-#include "printk.h"
-#include "type.h"
+#include <mm/memblock.h>
 #include <mm/page_alloc.h>
 #include <mm/page_flag.h>
-#include <ee/pgtable.h>
-#include <round.h>
+
+#include <printk.h>
+#include <eeos/round.h>
 #include <stddef.h>
-#include <asm-generic/bug.h>
-#include <list.h>
+#include <eeos/list.h>
+
+#include <eeos/types.h>
+#include <eeos/get_order.h>
+#include <eeos/errno.h>
+#include <eeos/pgtable.h>
+#include <eeos/bug.h>
 
 /* use buddy page alloc */
 static struct zone _zone;

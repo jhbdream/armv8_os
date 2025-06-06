@@ -264,8 +264,7 @@ EEOSINCLUDE    := \
 		-Iinclude -include include/generated/autoconf.h \
 		-I$(srctree)/arch/$(ARCH)/include \
 		-I$(srctree)/include/libc \
-		-I$(srctree)/include/ee \
-		-I$(srctree)/include/kernel \
+		-I$(srctree)/include/kernel
 
 KBUILD_CPPFLAGS := -D__EEOS__
 

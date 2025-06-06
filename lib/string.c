@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
-#include <ctype.h>
+#include <eeos/ctype.h>
 
 char *strcpy(char *dest, const char *src)
 {
