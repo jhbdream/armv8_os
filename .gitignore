@@ -88,7 +88,7 @@ include/config/*
 .cache/
 compile_commands.json
 
-eeos
+eeos.elf
 eeos.bin
 eeos.dis
 

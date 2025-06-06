@@ -435,7 +435,7 @@ endif # $(dot-config)
 # command line.
 # This allow a user to issue only 'make' to build the application
 # Defaults to eeos, but the arch makefile usually adds further targets
-all: eeos eeos.bin eeos.dis
+all: eeos.elf eeos.bin eeos.dis
 
 # The arch Makefile can set ARCH_{CPP,A,C}FLAGS to override the default
 # values of the respective KBUILD_* variables
@@ -538,7 +538,7 @@ KBUILD_CFLAGS   += $(ARCH_CFLAGS)   $(KCFLAGS)
 # set in the environment
 # Also any assignments in arch/$(ARCH)/Makefile take precedence over
 # this default value
-export KBUILD_IMAGE ?= eeos
+export KBUILD_IMAGE ?= eeos.elf
 
 #
 # INSTALL_PATH specifies where to place the updated kernel and system map
@@ -554,8 +554,8 @@ eeos-objs	:= $(patsubst %,%/built-in.o, $(objs-y))
 eeos-libs	:= $(patsubst %,%/lib.a, $(libs-y))
 eeos-all	:= $(eeos-objs) $(eeos-libs)
 
-quiet_cmd_eeos = LD      $@
-      cmd_eeos = $(CC) $(LDFLAGS) -static -nostdlib -o $@                          \
+quiet_cmd_eeos_elf = LD      $@
+      cmd_eeos_elf = $(CC) $(LDFLAGS) -static -nostdlib -o $@                          \
       -Wl,--start-group $(eeos-libs) $(eeos-objs) -Wl,--end-group \
       -T arch/arm64/ld_script/kernel.lds
 
@@ -565,13 +565,13 @@ quiet_cmd_eeos_bin = OBJCOPY $@
 quiet_cmd_eeos_dis = OBJDUMP $@
       cmd_eeos_dis = $(OBJDUMP) -D $< > $@
 
-eeos: $(eeos-all) FORCE
-	+$(call if_changed,eeos)
+eeos.elf: $(eeos-all) FORCE
+	+$(call if_changed,eeos_elf)
 
-eeos.bin: eeos FORCE
+eeos.bin: eeos.elf FORCE
 	+$(call if_changed,eeos_bin)
 
-eeos.dis: eeos FORCE
+eeos.dis: eeos.elf FORCE
 	+$(call if_changed,eeos_dis)
 
 # The actual objects are generated when descending,
@@ -654,7 +654,7 @@ headerdep:
 
 # Directories & files removed with 'make clean'
 CLEAN_DIRS  +=
-CLEAN_FILES +=	eeos eeos.dis eeos.bin
+CLEAN_FILES +=	eeos.elf eeos.dis eeos.bin
 
 # Directories & files removed with 'make mrproper'
 MRPROPER_DIRS  += include/config include/generated .tmp_objdiff
