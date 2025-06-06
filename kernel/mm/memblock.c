@@ -8,21 +8,24 @@
  *
  */
 
-#include "type.h"
-#include <mm/memblock.h>
-#include <ee/minmax.h>
-#include <ee/errno.h>
 #include <stdint.h>
 #include <string.h>
 #include <stddef.h>
+
+#include <asm/memory.h>
+
+#include <ee/minmax.h>
+#include <ee/errno.h>
+#include <ee/pgtable.h>
+
+#include <type.h>
+#include <round.h>
 #include <printk.h>
 #include <limits.h>
-#include <asm/memory.h>
-#include <ee/pfn.h>
-#include <mm/page_alloc.h>
-#include <mm/page_alloc.h>
 
-#include <round.h>
+#include <mm/memblock.h>
+#include <mm/page_alloc.h>
+#include <mm/page_alloc.h>
 
 #define INIT_MEMBLOCK_REGIONS          128
 #define INIT_PHYSMEM_REGIONS           4
@@ -54,6 +57,9 @@ struct memblock memblock = {
         if (memblock_debug) \
             printk(fmt, ##__VA_ARGS__); \
     } while (0)
+
+#define PFN_UP(x)   (((x) + PAGE_SIZE - 1) >> PAGE_SHIFT)
+#define PFN_DOWN(x) ((x) >> PAGE_SHIFT)
 
 /**
  * __ffs - find first bit in word.

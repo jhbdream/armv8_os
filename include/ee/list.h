@@ -1,8 +1,6 @@
 #ifndef _LINUX_LIST_H
 #define _LINUX_LIST_H
 
-#include <stddef.h>
-#include <type.h>
 #include <ee/container_of.h>
 
 /*
