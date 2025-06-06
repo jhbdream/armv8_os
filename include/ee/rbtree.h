@@ -17,11 +17,13 @@
 #ifndef _LINUX_RBTREE_H
 #define _LINUX_RBTREE_H
 
-#include <ee/rbtree_types.h>
 
 #include <stddef.h>
 #include <stdint.h>
+
 #include <type.h>
+
+#include <ee/rbtree_types.h>
 #include <ee/container_of.h>
 
 #define rb_parent(r)                ((struct rb_node *)((r)->__rb_parent_color & ~3))
