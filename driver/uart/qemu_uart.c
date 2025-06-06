@@ -1,8 +1,8 @@
-#include <type.h>
-#include <io.h>
-#include <driver/console.h>
-#include <driver/uart.h>
 #include <stddef.h>
+
+#include <io.h>
+#include <type.h>
+#include <driver/console.h>
 
 #include <asm/memory.h>
 
