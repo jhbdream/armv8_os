@@ -1,4 +1,3 @@
-obj-y += string.o
 obj-y += ctype.o
-obj-y += rbtree.o
-# obj-y += libfdt/ 
+obj-y += libc/string.o
+obj-y += rbtree/rbtree.o
