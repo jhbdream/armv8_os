@@ -1,4 +1,3 @@
-#include <eeos.h>
 #include <asm/csr.h>
 #include <io.h>
 

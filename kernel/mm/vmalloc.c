@@ -6,7 +6,6 @@
 #include "pgtable.h"
 #include "printk.h"
 #include <type.h>
-#include <eeos.h>
 #include <stddef.h>
 #include <asm-generic/bug.h>
 #include <ee/align.h>

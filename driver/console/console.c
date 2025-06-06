@@ -1,4 +1,3 @@
-#include <eeos.h>
 #include <string.h>
 #include <driver/console.h>
 
