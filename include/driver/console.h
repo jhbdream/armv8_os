@@ -1,7 +1,7 @@
 #ifndef __CONSOLE_H__
 #define __CONSOLE_H__
 
-#define SECTION_CONSOLE  __attribute__((section("__console")))
+#define SECTION_CONSOLE __attribute__((section("__console")))
 
 struct console {
     char  name[16];
@@ -12,6 +12,7 @@ struct console {
 };
 
 void console_init(void);
+void console_write(const char *s, int n);
 
 extern struct console __console_device_begin[];
 extern struct console __console_device_end[];

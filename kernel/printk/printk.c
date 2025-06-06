@@ -3,22 +3,17 @@
 #include <stddef.h>
 
 #include <printk.h>
-#include <driver/console.h>
 
-struct console *uart_console = NULL;
+#include <driver/console.h>
 
 int vprintk(const char *fmt, va_list args)
 {
     char p_buf[1024];
     int  len;
 
-    if (uart_console == NULL) {
-        return 0;
-    }
-
     len = vsnprintf(p_buf, sizeof(p_buf), fmt, args);
 
-    uart_console->write(uart_console, p_buf, len);
+    console_write(p_buf, len);
 
     return len;
 }

@@ -1,12 +1,10 @@
 #include <stdint.h>
 
-#include <eeos/pgtable.h>
-
-#include <eeos/types.h>
-
+#include <io.h>
 #include <asm/memory.h>
 
-#include <io.h>
+#include <eeos/pgtable.h>
+#include <eeos/types.h>
 
 #define __aligned(x) __attribute__((__aligned__(x)))
 
