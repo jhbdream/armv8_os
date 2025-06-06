@@ -16,14 +16,14 @@
 extern void buddy_page_test(void);
 extern void slob_test(void);
 
+extern unsigned long __kimage_start[], __kimage_end[];
+
 int  gicv3_driver_init(void);
 void arm64_arch_timer_init(void);
 void arm64_arch_timer_init(void);
 
 void setup_arch(void);
 void user_task_init(void);
-
-extern unsigned long __kimage_start[], __kimage_end[];
 
 void eeos_printlogo(void)
 {
@@ -40,10 +40,10 @@ void eeos_printlogo(void)
 
 void start_kernel(void)
 {
-    u64 base, size;
+    u64 phys_base, phys_size;
 
-    base = 0x40000000;
-    size = 0x40000000;
+    phys_base = 0x40000000;
+    phys_size = 0x40000000;
 
     local_irq_disable();
 
@@ -56,11 +56,11 @@ void start_kernel(void)
     /* 初始化memblock内存管理器 */
     memblock_debug_set(0);
 
-    memblock_add(base, size);
+    memblock_add(phys_base, phys_size);
     memblock_reserve(virt_to_phys(__kimage_start), __kimage_end - __kimage_start);
 
     /* 从 memblock 分配page数据结构 */
-    vmemmap_page_init(base, base + size);
+    vmemmap_page_init(phys_base, phys_base + phys_size);
 
     memblock_dump_all();
 

@@ -27,9 +27,23 @@
 #include <mm/page_alloc.h>
 #include <mm/page_alloc.h>
 
-#define INIT_MEMBLOCK_REGIONS          128
-#define INIT_PHYSMEM_REGIONS           4
-#define INIT_MEMBLOCK_RESERVED_REGIONS INIT_MEMBLOCK_REGIONS
+#define INIT_MEMBLOCK_REGIONS          (128)
+#define INIT_MEMBLOCK_RESERVED_REGIONS (128)
+
+static int memblock_debug;
+
+#define for_each_memblock_type(i, memblock_type, rgn) \
+    for (i = 0, rgn = &memblock_type->regions[0]; i < memblock_type->cnt; \
+         i++, rgn   = &memblock_type->regions[i])
+
+#define memblock_dbg(fmt, ...) \
+    do { \
+        if (memblock_debug) \
+            printk(fmt, ##__VA_ARGS__); \
+    } while (0)
+
+#define PFN_UP(x)   (((x) + PAGE_SIZE - 1) >> PAGE_SHIFT)
+#define PFN_DOWN(x) ((x) >> PAGE_SHIFT)
 
 static struct memblock_region memblock_memory_init_regions[INIT_MEMBLOCK_REGIONS];
 static struct memblock_region
@@ -47,19 +61,6 @@ struct memblock memblock = {
     .reserved.max     = INIT_MEMBLOCK_RESERVED_REGIONS,
     .reserved.name    = "reserved",
 };
-
-#define for_each_memblock_type(i, memblock_type, rgn) \
-    for (i = 0, rgn = &memblock_type->regions[0]; i < memblock_type->cnt; \
-         i++, rgn   = &memblock_type->regions[i])
-
-#define memblock_dbg(fmt, ...) \
-    do { \
-        if (memblock_debug) \
-            printk(fmt, ##__VA_ARGS__); \
-    } while (0)
-
-#define PFN_UP(x)   (((x) + PAGE_SIZE - 1) >> PAGE_SHIFT)
-#define PFN_DOWN(x) ((x) >> PAGE_SHIFT)
 
 /**
  * __ffs - find first bit in word.
@@ -103,8 +104,6 @@ static inline unsigned long __ffs(unsigned long word)
 
     return num;
 }
-
-static int memblock_debug;
 
 static void memblock_insert_region(struct memblock_type *type, int idx, phys_addr_t base,
                                    phys_addr_t size)
@@ -165,21 +164,30 @@ static void memblock_merge_regions(struct memblock_type *type)
 static int memblock_add_range(struct memblock_type *type, phys_addr_t base,
                               phys_addr_t size)
 {
-    bool                    insert = false;
-    phys_addr_t             obase  = base;
-    phys_addr_t             end    = base + size;
-    int                     idx, nr_new;
     struct memblock_region *rgn;
 
-    if (!size) {
+    int idx, nr_new;
+
+    bool insert = false;
+
+    phys_addr_t obase = base;
+    phys_addr_t end   = base + size;
+
+    if (type == NULL) {
+        return -1;
+    }
+
+    if (size == 0) {
         return 0;
     }
 
     // first add range
     if (type->regions[0].size == 0) {
+
         type->regions[0].base = base;
         type->regions[0].size = size;
         type->total_size      = size;
+
         return 0;
     }
 
@@ -251,11 +259,16 @@ repeat:
     }
 }
 
+/**
+ * @brief 向 memblock 增加一片物理内存区域
+ *
+ * @param base
+ * @param size
+ *
+ * @return
+ */
 int memblock_add(phys_addr_t base, phys_addr_t size)
 {
-    phys_addr_t end = base + size - 1;
-    memblock_dbg("%s: [%pa-%pa]\n", __func__, &base, &end);
-
     return memblock_add_range(&memblock.memory, base, size);
 }
 

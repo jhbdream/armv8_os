@@ -1,9 +1,10 @@
 #ifndef _LINUX_MEMBLOCK_H
 #define _LINUX_MEMBLOCK_H
 
+#include <stddef.h>
+
 #include <eeos/types.h>
 #include <eeos/limits.h>
-#include <stddef.h>
 
 struct memblock_region {
     phys_addr_t base;
