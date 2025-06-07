@@ -12,11 +12,11 @@ struct memblock_region {
 };
 
 struct memblock_type {
-    unsigned long           cnt;
-    unsigned long           max;
-    phys_addr_t             total_size;
-    struct memblock_region *regions;
-    char                   *name;
+    char                   *name;       /* region 名称 */
+    unsigned long           cnt;        /* 当前有效region数量 */
+    phys_addr_t             total_size; /* 总大小 */
+    struct memblock_region *regions;    /* 现象region */
+    unsigned long           max;        /* 支持的最大region数量 */
 };
 
 struct memblock {
