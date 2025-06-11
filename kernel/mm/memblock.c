@@ -146,6 +146,14 @@ static inline unsigned long __ffs(unsigned long word)
     return num;
 }
 
+/**
+ * @brief 插入一个 region 到指定位置
+ *
+ * @param type
+ * @param idx
+ * @param base
+ * @param size
+ */
 static void memblock_insert_region(struct memblock_type *type, int idx, phys_addr_t base,
                                    phys_addr_t size)
 {
@@ -160,12 +168,19 @@ static void memblock_insert_region(struct memblock_type *type, int idx, phys_add
     type->total_size += size;
 }
 
-static void memblock_remove_region(struct memblock_type *type, int r)
+/**
+ * @brief 删除一个region
+ *
+ * @param type
+ * @param r
+ */
+static void memblock_remove_region(struct memblock_type *type, int idx)
 {
-    type->total_size -= type->regions[r].size;
-    memmove(&type->regions[r], &type->regions[r + 1],
-            (type->cnt - (r + 1)) * sizeof(type->regions[r]));
+    type->total_size -= type->regions[idx].size;
     type->cnt--;
+
+    memmove(&type->regions[idx], &type->regions[idx + 1],
+            (type->cnt - (idx + 1)) * sizeof(type->regions[idx]));
 
     if (type->cnt == 0) {
         type->cnt             = 1;
@@ -174,6 +189,11 @@ static void memblock_remove_region(struct memblock_type *type, int r)
     }
 }
 
+/**
+ * @brief 如果2个regions是连续的则合并为一个region
+ *
+ * @param type
+ */
 static void memblock_merge_regions(struct memblock_type *type)
 {
     int i = 0;
@@ -190,6 +210,7 @@ static void memblock_merge_regions(struct memblock_type *type)
         this->size += next->size;
 
         memmove(next, next + 1, (type->cnt - (i + 2)) * sizeof(*next));
+
         type->cnt--;
     }
 }
@@ -211,8 +232,7 @@ static int memblock_add_range(struct memblock_type *type, phys_addr_t base,
 
     bool insert = false;
 
-    phys_addr_t obase = base;
-    phys_addr_t end   = base + size;
+    phys_addr_t end;
 
     if (type == NULL) {
         return -1;
@@ -233,7 +253,8 @@ static int memblock_add_range(struct memblock_type *type, phys_addr_t base,
     }
 
 repeat:
-    base   = obase;
+
+    end    = base + size;
     nr_new = 0;
 
     for_each_memblock_type(idx, type, rgn)
