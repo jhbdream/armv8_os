@@ -53,16 +53,12 @@ void start_kernel(void)
 
     eeos_printlogo();
 
-    /* 初始化memblock内存管理器 */
-    memblock_debug_set(0);
-
     memblock_add(phys_base, phys_size);
     memblock_reserve(virt_to_phys(__kimage_start), __kimage_end - __kimage_start);
 
     /* 从 memblock 分配page数据结构 */
     vmemmap_page_init(phys_base, phys_base + phys_size);
 
-    memblock_dump_all();
 
     buddy_zone_init();
 

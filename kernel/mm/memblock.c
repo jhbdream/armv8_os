@@ -30,7 +30,48 @@
 #define INIT_MEMBLOCK_REGIONS          (128)
 #define INIT_MEMBLOCK_RESERVED_REGIONS (128)
 
+struct memblock_region {
+    phys_addr_t base;
+    phys_addr_t size;
+};
+
+struct memblock_type {
+    char                   *name;       /* region 名称 */
+    unsigned long           cnt;        /* 当前有效region数量 */
+    phys_addr_t             total_size; /* 总大小 */
+    struct memblock_region *regions;    /* 现象region */
+    unsigned long           max;        /* 支持的最大region数量 */
+};
+
+struct memblock {
+    struct memblock_type memory;
+    struct memblock_type reserved;
+};
+
 static int memblock_debug;
+
+#define __for_each_mem_range(i, type_a, type_b, p_start, p_end) \
+    for (i = (u64)0, __next_mem_range(&i, type_a, type_b, p_start, p_end); \
+         i != (u64)ULLONG_MAX; __next_mem_range(&i, type_a, type_b, p_start, p_end))
+
+#define __for_each_mem_range_rev(i, type_a, type_b, p_start, p_end) \
+    for (i = (u64)ULLONG_MAX, __next_mem_range_rev(&i, type_a, type_b, p_start, p_end); \
+         i != (u64)ULLONG_MAX; __next_mem_range_rev(&i, type_a, type_b, p_start, p_end))
+
+#define for_each_mem_range(i, p_start, p_end) \
+    __for_each_mem_range(i, &memblock.memory, NULL, p_start, p_end)
+
+#define for_each_mem_range_rev(i, p_start, p_end) \
+    __for_each_mem_range_rev(i, &memblock.memory, NULL, p_start, p_end)
+
+#define for_each_free_mem_range(i, p_start, p_end) \
+    __for_each_mem_range(i, &memblock.memory, &memblock.reserved, p_start, p_end)
+
+#define for_each_free_mem_range_reverse(i, p_start, p_end) \
+    __for_each_mem_range_rev(i, &memblock.memory, &memblock.reserved, p_start, p_end)
+
+#define for_each_reserved_mem_range(i, p_start, p_end) \
+    __for_each_mem_range(i, &memblock.reserved, NULL, p_start, p_end)
 
 #define for_each_memblock_type(i, memblock_type, rgn) \
     for (i = 0, rgn = &memblock_type->regions[0]; i < memblock_type->cnt; \
