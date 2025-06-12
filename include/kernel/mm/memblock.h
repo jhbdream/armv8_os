@@ -2,7 +2,6 @@
 #define _LINUX_MEMBLOCK_H
 
 #include <stddef.h>
-
 #include <eeos/types.h>
 
 int memblock_add(phys_addr_t base, phys_addr_t size);

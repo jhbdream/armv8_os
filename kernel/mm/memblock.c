@@ -12,20 +12,17 @@
 #include <string.h>
 #include <stddef.h>
 
-#include <asm/memory.h>
-
-#include <eeos/minmax.h>
-#include <eeos/errno.h>
 #include <eeos/pgtable.h>
-
-#include <eeos/types.h>
-#include <eeos/round.h>
-#include <printk.h>
+#include <eeos/minmax.h>
 #include <eeos/limits.h>
+#include <eeos/types.h>
+#include <eeos/errno.h>
+#include <eeos/round.h>
 
 #include <mm/memblock.h>
 #include <mm/page_alloc.h>
-#include <mm/page_alloc.h>
+
+#include <printk.h>
 
 #define INIT_MEMBLOCK_REGIONS          (128)
 #define INIT_MEMBLOCK_RESERVED_REGIONS (128)
@@ -393,8 +390,9 @@ static int memblock_remove_range(struct memblock_type *type, phys_addr_t base,
     int i, ret;
 
     ret = memblock_isolate_range(type, base, size, &start_rgn_idx, &end_rgn_idx);
-    if (ret)
+    if (ret) {
         return ret;
+    }
 
     for (i = end_rgn_idx - 1; i > start_rgn_idx; i--) {
         memblock_remove_region(type, i);
@@ -406,6 +404,7 @@ static int memblock_remove_range(struct memblock_type *type, phys_addr_t base,
 int memblock_remove(phys_addr_t base, phys_addr_t size)
 {
     phys_addr_t end = base + size - 1;
+
     memblock_dbg("%s: [%pa-%pa]\n", __func__, &base, &end);
 
     return memblock_remove_range(&memblock.memory, base, size);
@@ -414,7 +413,9 @@ int memblock_remove(phys_addr_t base, phys_addr_t size)
 int memblock_reserve(phys_addr_t base, phys_addr_t size)
 {
     phys_addr_t end = base + size - 1;
+
     memblock_dbg("%s: [%pa-%pa]\n", __func__, &base, &end);
+
     return memblock_add_range(&memblock.reserved, base, size);
 }
 
@@ -423,14 +424,16 @@ void __next_mem_range(u64 *idx, struct memblock_type *type_a,
                       phys_addr_t *out_end)
 {
     // 使用一个64位变量 低32位表示可用mem序号 高32位表示保留mem序号
-    int                     idx_a = *idx & 0xffffffff;
-    int                     idx_b = *idx >> 32;
+    int idx_a = *idx & 0xffffffff;
+    int idx_b = *idx >> 32;
+
     struct memblock_region *m;
     struct memblock_region *r;
-    phys_addr_t             m_start;
-    phys_addr_t             m_end;
-    phys_addr_t             r_start;
-    phys_addr_t             r_end;
+
+    phys_addr_t m_start;
+    phys_addr_t m_end;
+    phys_addr_t r_start;
+    phys_addr_t r_end;
 
     //  首先遍历可用mem空间 找到第一块可用空间
     for (; idx_a < type_a->cnt; idx_a++) {
@@ -442,11 +445,13 @@ void __next_mem_range(u64 *idx, struct memblock_type *type_a,
         if (!type_b) {
             if (out_start)
                 *out_start = m_start;
+
             if (out_end)
                 *out_end = m_end;
 
             idx_a++;
             *idx = (u32)idx_a | (u64)idx_b << 32;
+
             return;
         }
 
@@ -463,6 +468,7 @@ void __next_mem_range(u64 *idx, struct memblock_type *type_a,
             if (m_start < r_end) {
                 if (out_start)
                     *out_start = max(m_start, r_start);
+
                 if (out_end)
                     *out_end = min(m_end, r_end);
 
@@ -591,6 +597,7 @@ phys_addr_t memblock_phys_alloc_align(phys_addr_t size, phys_addr_t align)
 int memblock_phys_free(phys_addr_t base, phys_addr_t size)
 {
     phys_addr_t end = base + size - 1;
+
     memblock_dbg("%s: [%pa-%pa]\n", __func__, &base, &end);
 
     return memblock_remove_range(&memblock.reserved, base, size);
@@ -618,7 +625,8 @@ void memblock_free(void *ptr, size_t size)
 
 void __free_mem_core(phys_addr_t start, phys_addr_t end)
 {
-    int           order;
+    int order;
+
     unsigned long start_pfn = PFN_UP(start);
     unsigned long end_pfn   = PFN_DOWN(end);
 
@@ -656,8 +664,9 @@ void free_memory_core(void)
 static void memblock_dump(struct memblock_type *type)
 {
     struct memblock_region *rgn;
-    int                     idx;
-    phys_addr_t             base, end, size;
+
+    int         idx;
+    phys_addr_t base, end, size;
 
     printk("%s.cnt = 0x%lx\n", type->name, type->cnt);
 
