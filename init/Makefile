@@ -1,2 +1,2 @@
 obj-y += main.o
-obj-y += task_start.o
+obj-y += idle_task.o

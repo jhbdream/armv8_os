@@ -126,8 +126,6 @@ int gicv3_hw_init(void *dist_base, void *rdist_base, uint32_t nr_redist_regions)
     type     = readl(gicd_base + GICD_TYPER);
     nr_lines = 32 * ((type & 0x1f));
 
-    printk("gicv3 typer: [0x%x] nr_lines: [%d]\n", type, nr_lines);
-
     /* default all golbal IRQS to level, active low */
     for (i = GICV3_NR_LOCAL_IRQS; i < nr_lines; i += 16) {
         writel(0, gicd_base + GICD_ICFGR + (i / 16) * 4);
