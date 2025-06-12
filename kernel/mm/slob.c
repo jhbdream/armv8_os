@@ -1,21 +1,25 @@
-#include "printk.h"
-#include "eeos/types.h"
 #include <stddef.h>
 #include <stdint.h>
-#include <eeos/list.h>
-#include <mm/page_alloc.h>
-#include <eeos/round.h>
-#include <eeos/align.h>
-#include <eeos/bug.h>
+
 #include <eeos/get_order.h>
+#include <eeos/round.h>
+#include <eeos/types.h>
+#include <eeos/align.h>
+#include <eeos/list.h>
+#include <eeos/bug.h>
+
+#include <mm/page_alloc.h>
 #include <mm/page_flag.h>
 #include <mm/slab.h>
+
+#include <printk.h>
 
 typedef s16 slobidx_t;
 
 struct slob_block {
     slobidx_t units;
 };
+
 typedef struct slob_block slob_t;
 
 #define SLOB_ALIGN        8
