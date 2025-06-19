@@ -3,8 +3,6 @@
 #ifndef _LINUX_INTERRUPT_H
 #define _LINUX_INTERRUPT_H
 
-#include <eeos/irqflags.h>
-
 #define NR_IRQS 8192
 
 struct irq_desc;
