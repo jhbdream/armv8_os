@@ -1,5 +1,4 @@
 #include <asm/memory.h>
-#include <mm/memblock.h>
 
 void create_kernel_map(void);
 
