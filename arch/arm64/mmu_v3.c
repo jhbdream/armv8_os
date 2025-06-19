@@ -4,7 +4,7 @@
 #include <asm/memory.h>
 
 #include <eeos/types.h>
-#include <eeos/pgtable.h>
+#include <eeos/const.h>
 
 #define __aligned(x) __attribute__((__aligned__(x)))
 
@@ -13,73 +13,99 @@
  *
  * Level -1 descriptor (PGD).
  */
-#define PGD_TYPE_TABLE ((pgdval_t)3 << 0)
-#define PGD_TABLE_BIT  ((pgdval_t)1 << 1)
-#define PGD_TYPE_MASK  ((pgdval_t)3 << 0)
-#define PGD_TABLE_AF   ((pgdval_t)1 << 10) /* Ignored if no FEAT_HAFT */
-#define PGD_TABLE_PXN  ((pgdval_t)1 << 59)
-#define PGD_TABLE_UXN  ((pgdval_t)1 << 60)
+#define PGD_TYPE_TABLE (3 << 0)
+#define PGD_TABLE_BIT  (1 << 1)
+#define PGD_TYPE_MASK  (3 << 0)
+#define PGD_TABLE_AF   (1 << 10) /* Ignored if no FEAT_HAFT */
+#define PGD_TABLE_PXN  (1 << 59)
+#define PGD_TABLE_UXN  (1 << 60)
 
 /*
  * Level 1 descriptor (PUD).
  */
-#define PUD_TYPE_TABLE  ((pudval_t)3 << 0)
-#define PUD_TABLE_BIT   ((pudval_t)1 << 1)
-#define PUD_TYPE_MASK   ((pudval_t)3 << 0)
-#define PUD_TYPE_SECT   ((pudval_t)1 << 0)
-#define PUD_SECT_RDONLY ((pudval_t)1 << 7)  /* AP[2] */
-#define PUD_TABLE_AF    ((pudval_t)1 << 10) /* Ignored if no FEAT_HAFT */
-#define PUD_TABLE_PXN   ((pudval_t)1 << 59)
-#define PUD_TABLE_UXN   ((pudval_t)1 << 60)
+#define PUD_TYPE_TABLE  (3 << 0)
+#define PUD_TABLE_BIT   (1 << 1)
+#define PUD_TYPE_MASK   (3 << 0)
+#define PUD_TYPE_SECT   (1 << 0)
+#define PUD_SECT_RDONLY (1 << 7)  /* AP[2] */
+#define PUD_TABLE_AF    (1 << 10) /* Ignored if no FEAT_HAFT */
+#define PUD_TABLE_PXN   (1 << 59)
+#define PUD_TABLE_UXN   (1 << 60)
 
 /*
  * Level 2 descriptor (PMD).
  */
-#define PMD_TYPE_MASK  ((pmdval_t)3 << 0)
-#define PMD_TYPE_TABLE ((pmdval_t)3 << 0)
-#define PMD_TYPE_SECT  ((pmdval_t)1 << 0)
-#define PMD_TABLE_BIT  ((pmdval_t)1 << 1)
-#define PMD_TABLE_AF   ((pmdval_t)1 << 10) /* Ignored if no FEAT_HAFT */
+#define PMD_TYPE_MASK  (3 << 0)
+#define PMD_TYPE_TABLE (3 << 0)
+#define PMD_TYPE_SECT  (1 << 0)
+#define PMD_TABLE_BIT  (1 << 1)
+#define PMD_TABLE_AF   (1 << 10) /* Ignored if no FEAT_HAFT */
 
 /*
  * Section
  */
-#define PMD_SECT_USER   ((pmdval_t)1 << 6) /* AP[1] */
-#define PMD_SECT_RDONLY ((pmdval_t)1 << 7) /* AP[2] */
-#define PMD_SECT_S      ((pmdval_t)3 << 8)
-#define PMD_SECT_AF     ((pmdval_t)1 << 10)
-#define PMD_SECT_NG     ((pmdval_t)1 << 11)
-#define PMD_SECT_CONT   ((pmdval_t)1 << 52)
-#define PMD_SECT_PXN    ((pmdval_t)1 << 53)
-#define PMD_SECT_UXN    ((pmdval_t)1 << 54)
-#define PMD_TABLE_PXN   ((pmdval_t)1 << 59)
-#define PMD_TABLE_UXN   ((pmdval_t)1 << 60)
+#define PMD_SECT_USER   (1 << 6) /* AP[1] */
+#define PMD_SECT_RDONLY (1 << 7) /* AP[2] */
+#define PMD_SECT_S      (3 << 8)
+#define PMD_SECT_AF     (1 << 10)
+#define PMD_SECT_NG     (1 << 11)
+#define PMD_SECT_CONT   (1 << 52)
+#define PMD_SECT_PXN    (1 << 53)
+#define PMD_SECT_UXN    (1 << 54)
+#define PMD_TABLE_PXN   (1 << 59)
+#define PMD_TABLE_UXN   (1 << 60)
 
-#define PMD_ATTRINDX(t) ((pmdval_t)(t) << 2)
+#define PMD_ATTRINDX(t) ((t) << 2)
 
 /*
  * Level 3 descriptor (PTE).
  */
-#define PTE_VALID     ((pteval_t)1 << 0)
-#define PTE_TYPE_MASK ((pteval_t)3 << 0)
-#define PTE_TYPE_PAGE ((pteval_t)3 << 0)
-#define PTE_TABLE_BIT ((pteval_t)1 << 1)
-#define PTE_USER      ((pteval_t)1 << 6)  /* AP[1] */
-#define PTE_RDONLY    ((pteval_t)1 << 7)  /* AP[2] */
-#define PTE_SHARED    ((pteval_t)3 << 8)  /* SH[1:0], inner shareable */
-#define PTE_AF        ((pteval_t)1 << 10) /* Access Flag */
-#define PTE_NG        ((pteval_t)1 << 11) /* nG */
-#define PTE_GP        ((pteval_t)1 << 50) /* BTI guarded */
-#define PTE_DBM       ((pteval_t)1 << 51) /* Dirty Bit Management */
-#define PTE_CONT      ((pteval_t)1 << 52) /* Contiguous range */
-#define PTE_PXN       ((pteval_t)1 << 53) /* Privileged XN */
-#define PTE_UXN       ((pteval_t)1 << 54) /* User XN */
+#define PTE_VALID     (1 << 0)
+#define PTE_TYPE_MASK (3 << 0)
+#define PTE_TYPE_PAGE (3 << 0)
+#define PTE_TABLE_BIT (1 << 1)
+#define PTE_USER      (1 << 6)  /* AP[1] */
+#define PTE_RDONLY    (1 << 7)  /* AP[2] */
+#define PTE_SHARED    (3 << 8)  /* SH[1:0], inner shareable */
+#define PTE_AF        (1 << 10) /* Access Flag */
+#define PTE_NG        (1 << 11) /* nG */
+#define PTE_GP        (1 << 50) /* BTI guarded */
+#define PTE_DBM       (1 << 51) /* Dirty Bit Management */
+#define PTE_CONT      (1 << 52) /* Contiguous range */
+#define PTE_PXN       (1 << 53) /* Privileged XN */
+#define PTE_UXN       (1 << 54) /* User XN */
+
+#define PAGE_SHIFT    (12)
+#define PAGE_SIZE     (_AC(1, UL) << PAGE_SHIFT)
+#define PAGE_MASK     (~(PAGE_SIZE - 1))
+#define PTE_ADDR_MASK (PAGE_MASK)
+#define PTRS_PER_PTE  (512)
+
+#define PMD_SHIFT     (21)
+#define PMD_SIZE      (_AC(1, UL) << PMD_SHIFT)
+#define PMD_MASK      (~(PMD_SIZE - 1))
+#define PTRS_PER_PMD  (512)
+
+#define PUD_SHIFT     (30)
+#define PUD_SIZE      (_AC(1, UL) << PUD_SHIFT)
+#define PUD_MASK      (~(PUD_SIZE - 1))
+#define PTRS_PER_PUD  (512)
+
+#define PGDIR_SHIFT   (39)
+#define PGDIR_SIZE    (_AC(1, UL) << PGDIR_SHIFT)
+#define PGDIR_MASK    (~(PGDIR_SIZE - 1))
+#define PTRS_PER_PGD  (512)
+
+#define PGD_INDEX(va) (((va) >> PGDIR_SHIFT) & (PTRS_PER_PGD - 1))
+#define PUD_INDEX(va) (((va) >> PUD_SHIFT) & (PTRS_PER_PUD - 1))
+#define PMD_INDEX(va) (((va) >> PMD_SHIFT) & (PTRS_PER_PMD - 1))
+#define PTE_INDEX(va) (((va) >> PAGE_SHIFT) & (PTRS_PER_PTE - 1))
 
 uint64_t kimage_voffset = 0;
 
-static pgd_t pgd_table[PTRS_PER_PGD] __aligned(4096);
-static pud_t pud_table[PTRS_PER_PUD] __aligned(4096);
-static pmd_t pmd_table[PTRS_PER_PMD * 16] __aligned(4096);
+static uint64_t pgd_table[PTRS_PER_PGD] __aligned(4096);
+static uint64_t pud_table[PTRS_PER_PUD] __aligned(4096);
+static uint64_t pmd_table[PTRS_PER_PMD * 16] __aligned(4096);
 
 static void init_pagetables(void)
 {
@@ -92,8 +118,8 @@ static void init_pagetables(void)
     uint64_t pud_phys;
     uint64_t pmd_phys;
 
-    pud_t *pud_entry;
-    pgd_t *pgd_entry;
+    uint64_t *pud_entry;
+    uint64_t *pgd_entry;
 
     if (init_pagetables_done != 0)
         return;
@@ -127,11 +153,11 @@ static void init_pagetables(void)
 static void create_simple_map(uint64_t va, uint64_t pa, uint64_t size, uint64_t type)
 {
     uint64_t va_end;
-    pmdval_t pmd;
+    uint64_t pmd;
 
-    pud_t *pud_entry;
-    pmd_t *pmd_entry;
-    pmd_t *pmd_page_table;
+    uint64_t *pud_entry;
+    uint64_t *pmd_entry;
+    uint64_t *pmd_page_table;
 
     va_end = va + size;
 
@@ -139,7 +165,7 @@ static void create_simple_map(uint64_t va, uint64_t pa, uint64_t size, uint64_t 
 
         pud_entry = &pud_table[PUD_INDEX(va)];
 
-        pmd_page_table = (pmd_t *)__phys_to_kimg(pud_entry->pud & 0xFFFFFFFFFFFFF000);
+        pmd_page_table = (uint64_t *)__phys_to_kimg(*pud_entry & 0xFFFFFFFFFFFFF000);
 
         pmd_entry = &pmd_page_table[PMD_INDEX(va)];
 
@@ -155,7 +181,7 @@ static void create_simple_map(uint64_t va, uint64_t pa, uint64_t size, uint64_t 
     }
 }
 
-static void switch_mm(pgd_t *pgd)
+static void switch_mm(uint64_t *pgd)
 {
     phys_addr_t pgd_phys;
 
