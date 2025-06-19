@@ -103,10 +103,11 @@ void kernel_task_init(void)
 static void task_init(struct task *t, char *name, void *sp_addr, void *pc_addr,
                       long priority)
 {
+    int       i;
     uint64_t *sp_init = sp_addr;
 
     // 初始化任务栈
-    for (int i = 0; i < 31; i++) {
+    for (i = 0; i < 31; i++) {
         sp_init  = sp_init - 1;
         *sp_init = 30 - i;
     }
@@ -151,6 +152,8 @@ struct task *task_create(char *name, void *sp_addr, void *pc_addr, long priority
  */
 struct task *task_schedule_alog_average(void)
 {
+    int i;
+
     // 获取下一个任务
     struct task *next_task;
 
@@ -161,7 +164,7 @@ struct task *task_schedule_alog_average(void)
         next_task = g_current_task + 1;
     }
 
-    for (int i = 0; i < TASK_NUMBER; i++) {
+    for (i = 0; i < TASK_NUMBER; i++) {
         if (next_task->task_state & TASK_STATE_READY) {
             // 找到一个有效任务 返回任务
             return next_task;
