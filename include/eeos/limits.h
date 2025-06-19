@@ -1,5 +1,6 @@
 #ifndef __LIMITS_H__
 #define __LIMITS_H__
+
 #include <eeos/types.h>
 
 #define PHYS_ADDR_MAX (~(phys_addr_t)0)

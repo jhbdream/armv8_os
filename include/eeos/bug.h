@@ -2,8 +2,6 @@
 #ifndef _ASM_GENERIC_BUG_H
 #define _ASM_GENERIC_BUG_H
 
-#include <printk.h>
-
 #define BUG() \
     do { \
         printk("BUG: failure at %s:%d/%s()!\n", __FILE__, __LINE__, __func__); \
