@@ -18,14 +18,13 @@
 #define TASK_STATE_SLEEP    BIT(3) // 任务睡眠
 #define TASK_STATE_WAIT_SEM BIT(4) // 等待信号量挂起
 
-#define G_TASK_MAX_PRIORITY 256
-#define G_TASK_NUMBER       64
+#define TASK_NUMBER         64
 
 /**
  * @brief 全局变量，任务数组
  *
  */
-struct task g_task[G_TASK_NUMBER];
+struct task g_task[TASK_NUMBER];
 
 /**
  * @brief 保存与记录当前正在执行的任务
@@ -42,7 +41,7 @@ static struct task *requset_task(void)
 {
     int i;
 
-    for (i = 0; i < G_TASK_NUMBER; i++) {
+    for (i = 0; i < TASK_NUMBER; i++) {
 
         // 找到一个空闲任务块
         if (g_task[i].pid == -1) {
@@ -77,7 +76,7 @@ static int task_deinit(void)
 {
     int i;
 
-    for (i = 0; i < G_TASK_NUMBER; i++) {
+    for (i = 0; i < TASK_NUMBER; i++) {
         free_task(&g_task[i]);
     }
 
@@ -155,18 +154,18 @@ struct task *task_schedule_alog_average(void)
     // 获取下一个任务
     struct task *next_task;
 
-    if (g_current_task == &g_task[G_TASK_NUMBER - 1]) {
+    if (g_current_task == &g_task[TASK_NUMBER - 1]) {
         // 如果现在任务是在任务快末尾，从任务快开头遍历
         next_task = &g_task[0];
     } else {
         next_task = g_current_task + 1;
     }
 
-    for (int i = 0; i < G_TASK_NUMBER; i++) {
+    for (int i = 0; i < TASK_NUMBER; i++) {
         if (next_task->task_state & TASK_STATE_READY) {
             // 找到一个有效任务 返回任务
             return next_task;
-        } else if (next_task == &g_task[G_TASK_NUMBER - 1]) {
+        } else if (next_task == &g_task[TASK_NUMBER - 1]) {
             // 如果遍历到了末尾，回到头部
             next_task = &g_task[0];
         } else {
