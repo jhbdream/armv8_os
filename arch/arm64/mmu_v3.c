@@ -3,8 +3,8 @@
 #include <io.h>
 #include <asm/memory.h>
 
-#include <eeos/pgtable.h>
 #include <eeos/types.h>
+#include <eeos/pgtable.h>
 
 #define __aligned(x) __attribute__((__aligned__(x)))
 
