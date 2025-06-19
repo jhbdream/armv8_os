@@ -35,21 +35,6 @@ typedef struct {
     prot_val_t pgprot;
 } pgprot_t;
 
-#define pgd_val(x)    ((x).pgd)
-#define _pgd(x)       ((pgd_t){ (x) })
-
-#define pud_val(x)    ((x).pud)
-#define _pud(x)       ((pud_t){ (x) })
-
-#define pmd_val(x)    ((x).pmd)
-#define _pmd(x)       ((pmd_t){ (x) })
-
-#define pte_val(x)    ((x).pte)
-#define _pte(x)       ((pte_t){ (x) })
-
-#define pgprot_val(x) ((x).pgprot)
-#define _pgprot(x)    ((pgprot_t){ (x) })
-
 /* 公共宏定义 */
 /* config for 48bit va + 4 level page table */
 #define PAGE_SHIFT    (12)
@@ -77,9 +62,5 @@ typedef struct {
 #define PUD_INDEX(va) (((va) >> PUD_SHIFT) & (PTRS_PER_PUD - 1))
 #define PMD_INDEX(va) (((va) >> PMD_SHIFT) & (PTRS_PER_PMD - 1))
 #define PTE_INDEX(va) (((va) >> PAGE_SHIFT) & (PTRS_PER_PTE - 1))
-
-/* 页表属性类型,底层判断实现 */
-#define PAGE_MEMORY (0x1)
-#define PAGE_DEVICE (0x2)
 
 #endif

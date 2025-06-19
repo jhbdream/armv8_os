@@ -77,8 +77,6 @@
 
 uint64_t kimage_voffset = 0;
 
-extern unsigned long __kimage_start[], __kimage_end[];
-
 static pgd_t pgd_table[PTRS_PER_PGD] __aligned(4096);
 static pud_t pud_table[PTRS_PER_PUD] __aligned(4096);
 static pmd_t pmd_table[PTRS_PER_PMD * 16] __aligned(4096);
@@ -171,6 +169,8 @@ static void switch_mm(pgd_t *pgd)
     asm volatile("dsb sy");
     asm volatile("isb");
 }
+
+extern unsigned long __kimage_start[], __kimage_end[];
 
 /**
  * @brief 创建3级页表，内核映射线性 + 镜像映射
