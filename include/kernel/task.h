@@ -2,6 +2,7 @@
 #define __TASK_H__
 
 #include <stdint.h>
+
 #include <eeos/bits.h>
 
 #define TASK_NAME_LEN 64

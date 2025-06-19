@@ -165,47 +165,6 @@ struct task *task_schedule_alog_average(void)
 }
 
 /**
- * @brief 优先级模式任务调度器，返回比当前任务更高优先级任务
- *
- * @return struct task*
- */
-struct task *task_schedule_alog_priority(void)
-{
-    // 获取下一个任务
-    struct task *t;
-    struct task *priority_max_task = NULL;
-
-    // 直接使用循环遍历全部任务
-    for (int i = 0; i < G_TASK_NUMBER; i++) {
-        t = &g_task[i];
-
-        // 如果是处于睡眠状态的任务 判断tick是否超时
-        // 如果睡眠tick超时 就把任务状态修改为 run
-        if (t->task_state == TASK_STATE_SLEEP) {
-            if (g_systic >= t->sleep_timeout) {
-                t->task_state = TASK_STATE_READY;
-            }
-        }
-
-        // 为了找到任务 零时处理
-        if (t->task_state & TASK_STATE_READY && priority_max_task == NULL) {
-            priority_max_task = t;
-        }
-
-        if (priority_max_task != NULL) {
-            // 找到正在运行且优先级最高的任务 作为to任务
-            if (t->task_state & TASK_STATE_READY &&
-                t->priority > priority_max_task->priority) {
-                // 比较有效任务的优先级 找到更高优先级任务
-                priority_max_task = t;
-            }
-        }
-    }
-
-    return priority_max_task;
-}
-
-/**
  * @brief 在中断环境下进行任务切换
  *
  */
@@ -215,7 +174,7 @@ void schedle_interrupt(void)
     static struct task *to;
 
     from = g_current_task;
-    to   = task_schedule_alog_priority();
+    to   = task_schedule_alog_average();
 
     // TODO: 没有需要调度的任务？
     if (from == NULL || to == NULL) {
