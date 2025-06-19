@@ -1,7 +1,10 @@
 #include <stddef.h>
 #include <stdint.h>
+
 #include <printk.h>
+
 #include <kernel/task.h>
+
 #include <driver/interrupt.h>
 
 uint64_t cpu_khz = 0;
@@ -34,8 +37,6 @@ static inline uint64_t read_cntfrq_el0(void)
 
     return cnt;
 }
-
-#include <stdint.h>
 
 /* 读 CNTPS_CTL_EL0 */
 static inline uint64_t read_cntp_ctl_el0(void)

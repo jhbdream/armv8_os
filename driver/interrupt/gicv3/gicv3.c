@@ -1,8 +1,8 @@
 #include <driver/interrupt.h>
 
-#include <eeos/types.h>
 #include <io.h>
 #include <asm/memory.h>
+#include <eeos/types.h>
 
 #include <printk.h>
 
