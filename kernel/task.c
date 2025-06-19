@@ -1,10 +1,25 @@
-#include "eeos/irqflags.h"
-#include <kernel/task.h>
-#include <kernel/tick.h>
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
-#include <printk.h>
+
+#include <eeos/irqflags.h>
+
+#include <kernel/task.h>
+
+/**
+ * @brief
+ *
+ *  TASK_STATE_NONE ----->> TASK_STATE_READY <<----->> TASK_STATE_SLEEP
+ */
+
+#define TASK_STATE_NONE     BIT(0) // 初始任务状态
+#define TASK_STATE_READY    BIT(1) // 任务已经创建，未运行
+#define TASK_STATE_RUN      BIT(2) // 任务已经创建，并且正在运行(保留)
+#define TASK_STATE_SLEEP    BIT(3) // 任务睡眠
+#define TASK_STATE_WAIT_SEM BIT(4) // 等待信号量挂起
+
+#define G_TASK_MAX_PRIORITY 256
+#define G_TASK_NUMBER       64
 
 /**
  * @brief 全局变量，任务数组

@@ -23,38 +23,15 @@ struct task {
     char     task_name[TASK_NAME_LEN];
 };
 
-/**
- * @brief
- *
- *  TASK_STATE_NONE ----->> TASK_STATE_READY <<----->> TASK_STATE_SLEEP
- */
-
-#define TASK_STATE_NONE     BIT(0) // 初始任务状态
-#define TASK_STATE_READY    BIT(1) // 任务已经创建，未运行
-#define TASK_STATE_RUN      BIT(2) // 任务已经创建，并且正在运行(保留)
-#define TASK_STATE_SLEEP    BIT(3) // 任务睡眠
-#define TASK_STATE_WAIT_SEM BIT(4) // 等待信号量挂起
-
-typedef struct task *task_t;
-
-#define G_TASK_MAX_PRIORITY 256
-#define G_TASK_NUMBER       64
-
-extern struct task  g_task[G_TASK_NUMBER];
-extern struct task *g_current_task;
+void     kernel_task_init(void);
+uint32_t getpid(void);
 
 int  task_switch_to(struct task *task_to);
 int  task_switch_from_to(struct task *task_from, struct task *task_to);
 void interrupt_task_switch_from_to(struct task *task_from, struct task *task_to);
 
-struct task *task_create(char *name, void *sp_addr, void *pc_addr, long priority);
-struct task *task_schedule_alog_average(void);
-struct task *task_schedule_alog_priority(void);
-
 void schedle_interrupt(void);
-void schedle(void);
 
-void     kernel_task_init(void);
-uint32_t getpid(void);
+struct task *task_create(char *name, void *sp_addr, void *pc_addr, long priority);
 
 #endif // !__TASK_H__
