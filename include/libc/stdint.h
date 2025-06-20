@@ -13,4 +13,11 @@ typedef signed long    int64_t;
 typedef unsigned long size_t;
 typedef signed long   ssize_t;
 
+typedef int bool;
+typedef unsigned long uintptr_t;
+typedef unsigned long phys_addr_t;
+
+#define true 1
+#define false 0
+
 #endif

@@ -9,7 +9,7 @@
 #    define TIMECMP_BASE 0x02004000
 #endif
 
-static u64 get_ticks(void)
+static uint64_t get_ticks(void)
 {
     unsigned long n;
 
@@ -19,9 +19,9 @@ static u64 get_ticks(void)
 
 void riscv_timer_init(void)
 {
-    u64   val  = -1ULL;
-    u32   mask = -1U;
-    void *addr;
+    uint64_t val  = -1ULL;
+    uint32_t mask = -1U;
+    void    *addr;
 
     /* init compare val */
     addr = (void *)(TIMECMP_BASE);

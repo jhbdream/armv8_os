@@ -1,8 +1,8 @@
+#include <stdint.h>
 #include <driver/interrupt.h>
 
 #include <io.h>
 #include <asm/memory.h>
-#include <eeos/types.h>
 
 #include <printk.h>
 
@@ -12,41 +12,41 @@ void *gicd_base;
 void *gicr_base;
 void *gicr_sgi_base;
 
-static inline u32 icc_sre_el1(void)
+static inline uint32_t icc_sre_el1(void)
 {
-    u32 x;
+    uint32_t x;
     asm volatile("mrs %0, S3_0_C12_C12_5" : "=r"(x));
     return x;
 }
 
-static inline void w_icc_sre_el1(u32 x)
+static inline void w_icc_sre_el1(uint32_t x)
 {
     asm volatile("msr S3_0_C12_C12_5, %0" : : "r"(x));
 }
 
-static inline void w_icc_igrpen1_el1(u32 x)
+static inline void w_icc_igrpen1_el1(uint32_t x)
 {
     asm volatile("msr S3_0_C12_C12_7, %0" : : "r"(x));
 }
 
-static inline void w_icc_pmr_el1(u32 x)
+static inline void w_icc_pmr_el1(uint32_t x)
 {
     asm volatile("msr S3_0_C4_C6_0, %0" : : "r"(x));
 }
 
-static inline void w_icc_eoir1_el1(u32 x)
+static inline void w_icc_eoir1_el1(uint32_t x)
 {
     asm volatile("msr S3_0_C12_C12_1, %0" : : "r"(x));
 }
 
-static inline u32 icc_iar1_el1(void)
+static inline uint32_t icc_iar1_el1(void)
 {
-    u32 x;
+    uint32_t x;
     asm volatile("mrs %0, S3_0_C12_C12_0" : "=r"(x));
     return x;
 }
 
-void gicv3_mask_irq(u32 hwirq)
+void gicv3_mask_irq(uint32_t hwirq)
 {
     uint32_t mask;
 
@@ -59,7 +59,7 @@ void gicv3_mask_irq(u32 hwirq)
     }
 }
 
-void gicv3_unmask_irq(u32 hwirq)
+void gicv3_unmask_irq(uint32_t hwirq)
 {
     uint32_t mask;
 
@@ -72,12 +72,12 @@ void gicv3_unmask_irq(u32 hwirq)
     }
 }
 
-void gicv3_eoi_irq(u32 hwirq)
+void gicv3_eoi_irq(uint32_t hwirq)
 {
     w_icc_eoir1_el1(hwirq);
 }
 
-u32 gic_read_iar(void)
+uint32_t gic_read_iar(void)
 {
     return icc_iar1_el1();
 }
@@ -89,7 +89,7 @@ static struct irq_chip gicv3_chip = {
 
 static void gicv3_handle_irq(void *reg)
 {
-    u32 irqnr;
+    uint32_t irqnr;
 
     irqnr = gic_read_iar();
 

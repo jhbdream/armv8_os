@@ -20,7 +20,9 @@
 #ifndef __ASM_MEMORY_H
 #define __ASM_MEMORY_H
 
-#include <eeos/types.h>
+#ifndef __ASSEMBLY__
+#    include <stdint.h>
+#endif
 
 #define VA_BITS (48)
 
@@ -74,13 +76,14 @@ extern uint64_t kimage_voffset;
  * lives in the [PAGE_OFFSET, PAGE_END) interval at the bottom of the
  * kernel's TTBR1 address range.
  */
-#    define __is_lm_address(addr) (((u64)(addr)-PAGE_OFFSET) < (PAGE_END - PAGE_OFFSET))
+#    define __is_lm_address(addr) \
+        (((uint64_t)(addr)-PAGE_OFFSET) < (PAGE_END - PAGE_OFFSET))
 
-#    define __lm_to_phys(addr)    (((addr)-PAGE_OFFSET) + PHYS_OFFSET)
-#    define __kimg_to_phys(addr)  ((addr)-kimage_voffset)
+#    define __lm_to_phys(addr)   (((addr)-PAGE_OFFSET) + PHYS_OFFSET)
+#    define __kimg_to_phys(addr) ((addr)-kimage_voffset)
 
-#    define __phys_to_lm(x)       ((unsigned long)((x)-PHYS_OFFSET) | PAGE_OFFSET)
-#    define __phys_to_kimg(x)     ((unsigned long)((x) + kimage_voffset))
+#    define __phys_to_lm(x)      ((unsigned long)((x)-PHYS_OFFSET) | PAGE_OFFSET)
+#    define __phys_to_kimg(x)    ((unsigned long)((x) + kimage_voffset))
 
 #    define __virt_to_phys(x) \
         ({ __is_lm_address(x) ? __lm_to_phys(x) : __kimg_to_phys(x); })

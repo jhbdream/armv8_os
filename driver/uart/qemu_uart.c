@@ -1,7 +1,7 @@
 #include <stddef.h>
+#include <stdint.h>
 
 #include <io.h>
-#include <eeos/types.h>
 #include <driver/console.h>
 
 #include <asm/memory.h>

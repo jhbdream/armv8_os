@@ -19,10 +19,10 @@
 #    define _AT(T, X)  ((T)(X))
 #endif
 
-#define _UL(x)                       (_AC(x, UL))
-#define _ULL(x)                      (_AC(x, ULL))
+#define _UL(x)  (_AC(x, UL))
+#define _ULL(x) (_AC(x, ULL))
 
-#define UL(x)                        (_UL(x))
-#define ULL(x)                       (_ULL(x))
+#define UL(x)   (_UL(x))
+#define ULL(x)  (_ULL(x))
 
 #endif /* _LINUX_CONST_H */

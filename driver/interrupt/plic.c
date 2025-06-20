@@ -17,8 +17,8 @@ static void *plic_regs;
 
 static void plic_toggle(void *base, int hwirq, int enable)
 {
-    u32 *reg        = base + PLIC_ENABLE_BASE + (hwirq / 32) * sizeof(u32);
-    u32  hwirq_mask = 1 << (hwirq % 32);
+    uint32_t *reg        = base + PLIC_ENABLE_BASE + (hwirq / 32) * sizeof(uint32_t);
+    uint32_t  hwirq_mask = 1 << (hwirq % 32);
 
     if (enable) {
         writel(readl(reg) | hwirq_mask, reg);
@@ -29,29 +29,29 @@ static void plic_toggle(void *base, int hwirq, int enable)
 
 static void plic_set_prio(void *base, int hwirq, int prio)
 {
-    u32 *reg = base + PLIC_PRIORITY_BASE + hwirq * 4;
+    uint32_t *reg = base + PLIC_PRIORITY_BASE + hwirq * 4;
     writel(prio, reg);
 }
 
 static void plic_eoi(void *base, int hwirq)
 {
-    u32 *reg = base + PLIC_CONTEXT_BASE + 0x04;
+    uint32_t *reg = base + PLIC_CONTEXT_BASE + 0x04;
     writel(hwirq, reg);
 }
 
-static u32 plic_claim(void *base)
+static uint32_t plic_claim(void *base)
 {
-    u32 *reg = base + PLIC_CONTEXT_BASE + 0x04;
+    uint32_t *reg = base + PLIC_CONTEXT_BASE + 0x04;
     return readl(reg);
 }
 
 void plic_init(void *base, int nr_irqs, int nr_contexts)
 {
     int i;
-    plic_regs       = base;
-    u32   threshold = 0;
-    int   hwirq;
-    void *reg;
+    plic_regs          = base;
+    uint32_t threshold = 0;
+    int      hwirq;
+    void    *reg;
 
     for (i = 0; i < nr_contexts; i++) {
         reg = base + PLIC_ENABLE_BASE + i * 0x1000 + 0x00;

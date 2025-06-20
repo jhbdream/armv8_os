@@ -53,8 +53,8 @@ struct printf_spec {
     signed int   precision : 16;   /* # of digits/chars */
 };
 
-static const u16 decpair[100] = {
-#define _(x) (u16)(((x % 10) | ((x / 10) << 8)) + 0x3030)
+static const uint16_t decpair[100] = {
+#define _(x) (uint16_t)(((x % 10) | ((x / 10) << 8)) + 0x3030)
     _(0),  _(1),  _(2),  _(3),  _(4),  _(5),  _(6),  _(7),  _(8),  _(9),  _(10), _(11),
     _(12), _(13), _(14), _(15), _(16), _(17), _(18), _(19), _(20), _(21), _(22), _(23),
     _(24), _(25), _(26), _(27), _(28), _(29), _(30), _(31), _(32), _(33), _(34), _(35),
@@ -76,8 +76,8 @@ static char *put_dec_trunc8(char *buf, unsigned r)
         goto out_r;
 
     /* 100 <= r < 10^8 */
-    q             = (r * (u64)0x28f5c29) >> 32;
-    *((u16 *)buf) = decpair[r - 100 * q];
+    q                  = (r * (uint64_t)0x28f5c29) >> 32;
+    *((uint16_t *)buf) = decpair[r - 100 * q];
     buf += 2;
 
     /* 1 <= q < 10^6 */
@@ -85,8 +85,8 @@ static char *put_dec_trunc8(char *buf, unsigned r)
         goto out_q;
 
     /*  100 <= q < 10^6 */
-    r             = (q * (u64)0x28f5c29) >> 32;
-    *((u16 *)buf) = decpair[q - 100 * r];
+    r                  = (q * (uint64_t)0x28f5c29) >> 32;
+    *((uint16_t *)buf) = decpair[q - 100 * r];
     buf += 2;
 
     /* 1 <= r < 10^4 */
@@ -94,15 +94,15 @@ static char *put_dec_trunc8(char *buf, unsigned r)
         goto out_r;
 
     /* 100 <= r < 10^4 */
-    q             = (r * 0x147b) >> 19;
-    *((u16 *)buf) = decpair[r - 100 * q];
+    q                  = (r * 0x147b) >> 19;
+    *((uint16_t *)buf) = decpair[r - 100 * q];
     buf += 2;
 out_q:
     /* 1 <= q < 100 */
     r = q;
 out_r:
     /* 1 <= r < 100 */
-    *((u16 *)buf) = decpair[r];
+    *((uint16_t *)buf) = decpair[r];
     buf += r < 10 ? 1 : 2;
     return buf;
 }
@@ -112,22 +112,22 @@ static char *put_dec_full8(char *buf, unsigned r)
     unsigned q;
 
     /* 0 <= r < 10^8 */
-    q             = (r * (u64)0x28f5c29) >> 32;
-    *((u16 *)buf) = decpair[r - 100 * q];
+    q                  = (r * (uint64_t)0x28f5c29) >> 32;
+    *((uint16_t *)buf) = decpair[r - 100 * q];
     buf += 2;
 
     /* 0 <= q < 10^6 */
-    r             = (q * (u64)0x28f5c29) >> 32;
-    *((u16 *)buf) = decpair[q - 100 * r];
+    r                  = (q * (uint64_t)0x28f5c29) >> 32;
+    *((uint16_t *)buf) = decpair[q - 100 * r];
     buf += 2;
 
     /* 0 <= r < 10^4 */
-    q             = (r * 0x147b) >> 19;
-    *((u16 *)buf) = decpair[r - 100 * q];
+    q                  = (r * 0x147b) >> 19;
+    *((uint16_t *)buf) = decpair[r - 100 * q];
     buf += 2;
 
     /* 0 <= q < 100 */
-    *((u16 *)buf) = decpair[q];
+    *((uint16_t *)buf) = decpair[q];
     buf += 2;
     return buf;
 }

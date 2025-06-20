@@ -3,6 +3,10 @@
 
 #include <eeos/container_of.h>
 
+struct list_head {
+    struct list_head *next, *prev;
+};
+
 /*
  * Circular doubly linked list implementation.
  *

@@ -3,7 +3,6 @@
 #include <io.h>
 #include <asm/memory.h>
 
-#include <eeos/types.h>
 #include <eeos/const.h>
 
 #define __aligned(x) __attribute__((__aligned__(x)))
