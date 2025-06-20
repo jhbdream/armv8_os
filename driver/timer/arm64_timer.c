@@ -1,8 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <printk.h>
-
 #include <kernel/task.h>
 
 #include <driver/interrupt.h>
@@ -114,9 +112,6 @@ void arm64_arch_timer_init(void)
 
     boot_tick = read_cntpct_el0();
     cpu_khz   = read_cntfrq_el0() / 1000;
-
-    printk("boot ticks : [ 0x%llx ]\n", boot_tick);
-    printk("clock freq : [ %dKhz ]\n", cpu_khz);
 
     arch_timer_interrupt_disable();
     arch_timer_stop();
