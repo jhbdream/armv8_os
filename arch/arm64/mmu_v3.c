@@ -3,8 +3,6 @@
 #include <io.h>
 #include <asm/memory.h>
 
-#include <eeos/const.h>
-
 #define __aligned(x) __attribute__((__aligned__(x)))
 
 /*
@@ -12,86 +10,86 @@
  *
  * Level -1 descriptor (PGD).
  */
-#define PGD_TYPE_TABLE (3 << 0)
-#define PGD_TABLE_BIT  (1 << 1)
-#define PGD_TYPE_MASK  (3 << 0)
-#define PGD_TABLE_AF   (1 << 10) /* Ignored if no FEAT_HAFT */
-#define PGD_TABLE_PXN  (1 << 59)
-#define PGD_TABLE_UXN  (1 << 60)
+#define PGD_TYPE_TABLE (3UL << 0)
+#define PGD_TABLE_BIT  (1UL << 1)
+#define PGD_TYPE_MASK  (3UL << 0)
+#define PGD_TABLE_AF   (1UL << 10) /* Ignored if no FEAT_HAFT */
+#define PGD_TABLE_PXN  (1UL << 59)
+#define PGD_TABLE_UXN  (1UL << 60)
 
 /*
  * Level 1 descriptor (PUD).
  */
-#define PUD_TYPE_TABLE  (3 << 0)
-#define PUD_TABLE_BIT   (1 << 1)
-#define PUD_TYPE_MASK   (3 << 0)
-#define PUD_TYPE_SECT   (1 << 0)
-#define PUD_SECT_RDONLY (1 << 7)  /* AP[2] */
-#define PUD_TABLE_AF    (1 << 10) /* Ignored if no FEAT_HAFT */
-#define PUD_TABLE_PXN   (1 << 59)
-#define PUD_TABLE_UXN   (1 << 60)
+#define PUD_TYPE_TABLE  (3UL << 0)
+#define PUD_TABLE_BIT   (1UL << 1)
+#define PUD_TYPE_MASK   (3UL << 0)
+#define PUD_TYPE_SECT   (1UL << 0)
+#define PUD_SECT_RDONLY (1UL << 7)  /* AP[2] */
+#define PUD_TABLE_AF    (1UL << 10) /* Ignored if no FEAT_HAFT */
+#define PUD_TABLE_PXN   (1UL << 59)
+#define PUD_TABLE_UXN   (1UL << 60)
 
 /*
  * Level 2 descriptor (PMD).
  */
-#define PMD_TYPE_MASK  (3 << 0)
-#define PMD_TYPE_TABLE (3 << 0)
-#define PMD_TYPE_SECT  (1 << 0)
-#define PMD_TABLE_BIT  (1 << 1)
-#define PMD_TABLE_AF   (1 << 10) /* Ignored if no FEAT_HAFT */
+#define PMD_TYPE_MASK  (3UL << 0)
+#define PMD_TYPE_TABLE (3UL << 0)
+#define PMD_TYPE_SECT  (1UL << 0)
+#define PMD_TABLE_BIT  (1UL << 1)
+#define PMD_TABLE_AF   (1UL << 10) /* Ignored if no FEAT_HAFT */
 
 /*
  * Section
  */
-#define PMD_SECT_USER   (1 << 6) /* AP[1] */
-#define PMD_SECT_RDONLY (1 << 7) /* AP[2] */
-#define PMD_SECT_S      (3 << 8)
-#define PMD_SECT_AF     (1 << 10)
-#define PMD_SECT_NG     (1 << 11)
-#define PMD_SECT_CONT   (1 << 52)
-#define PMD_SECT_PXN    (1 << 53)
-#define PMD_SECT_UXN    (1 << 54)
-#define PMD_TABLE_PXN   (1 << 59)
-#define PMD_TABLE_UXN   (1 << 60)
+#define PMD_SECT_USER   (1UL << 6) /* AP[1] */
+#define PMD_SECT_RDONLY (1UL << 7) /* AP[2] */
+#define PMD_SECT_S      (3UL << 8)
+#define PMD_SECT_AF     (1UL << 10)
+#define PMD_SECT_NG     (1UL << 11)
+#define PMD_SECT_CONT   (1UL << 52)
+#define PMD_SECT_PXN    (1UL << 53)
+#define PMD_SECT_UXN    (1UL << 54)
+#define PMD_TABLE_PXN   (1UL << 59)
+#define PMD_TABLE_UXN   (1UL << 60)
 
 #define PMD_ATTRINDX(t) ((t) << 2)
 
 /*
  * Level 3 descriptor (PTE).
  */
-#define PTE_VALID     (1 << 0)
-#define PTE_TYPE_MASK (3 << 0)
-#define PTE_TYPE_PAGE (3 << 0)
-#define PTE_TABLE_BIT (1 << 1)
-#define PTE_USER      (1 << 6)  /* AP[1] */
-#define PTE_RDONLY    (1 << 7)  /* AP[2] */
-#define PTE_SHARED    (3 << 8)  /* SH[1:0], inner shareable */
-#define PTE_AF        (1 << 10) /* Access Flag */
-#define PTE_NG        (1 << 11) /* nG */
-#define PTE_GP        (1 << 50) /* BTI guarded */
-#define PTE_DBM       (1 << 51) /* Dirty Bit Management */
-#define PTE_CONT      (1 << 52) /* Contiguous range */
-#define PTE_PXN       (1 << 53) /* Privileged XN */
-#define PTE_UXN       (1 << 54) /* User XN */
+#define PTE_VALID     (1UL << 0)
+#define PTE_TYPE_MASK (3UL << 0)
+#define PTE_TYPE_PAGE (3UL << 0)
+#define PTE_TABLE_BIT (1UL << 1)
+#define PTE_USER      (1UL << 6)  /* AP[1] */
+#define PTE_RDONLY    (1UL << 7)  /* AP[2] */
+#define PTE_SHARED    (3UL << 8)  /* SH[1:0], inner shareable */
+#define PTE_AF        (1UL << 10) /* Access Flag */
+#define PTE_NG        (1UL << 11) /* nG */
+#define PTE_GP        (1UL << 50) /* BTI guarded */
+#define PTE_DBM       (1UL << 51) /* Dirty Bit Management */
+#define PTE_CONT      (1UL << 52) /* Contiguous range */
+#define PTE_PXN       (1UL << 53) /* Privileged XN */
+#define PTE_UXN       (1UL << 54) /* User XN */
 
 #define PAGE_SHIFT    (12)
-#define PAGE_SIZE     (_AC(1, UL) << PAGE_SHIFT)
+#define PAGE_SIZE     (1UL << PAGE_SHIFT)
 #define PAGE_MASK     (~(PAGE_SIZE - 1))
 #define PTE_ADDR_MASK (PAGE_MASK)
 #define PTRS_PER_PTE  (512)
 
 #define PMD_SHIFT     (21)
-#define PMD_SIZE      (_AC(1, UL) << PMD_SHIFT)
+#define PMD_SIZE      (1UL << PMD_SHIFT)
 #define PMD_MASK      (~(PMD_SIZE - 1))
 #define PTRS_PER_PMD  (512)
 
 #define PUD_SHIFT     (30)
-#define PUD_SIZE      (_AC(1, UL) << PUD_SHIFT)
+#define PUD_SIZE      (1UL << PUD_SHIFT)
 #define PUD_MASK      (~(PUD_SIZE - 1))
 #define PTRS_PER_PUD  (512)
 
 #define PGDIR_SHIFT   (39)
-#define PGDIR_SIZE    (_AC(1, UL) << PGDIR_SHIFT)
+#define PGDIR_SIZE    (1UL << PGDIR_SHIFT)
 #define PGDIR_MASK    (~(PGDIR_SIZE - 1))
 #define PTRS_PER_PGD  (512)
 
