@@ -1,8 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <kernel/task.h>
-
 #include <driver/interrupt.h>
 
 uint64_t cpu_khz = 0;
@@ -102,7 +100,6 @@ static inline void arch_timer_interrupt_disable(void)
 
 void arm64_arch_timer_tandler(struct irq_desc *desc)
 {
-    schedle_interrupt();
     write_cntp_tval_el0(cpu_khz * 10);
 }
 

@@ -6,12 +6,9 @@
 
 #include <driver/console.h>
 
-#include <kernel/task.h>
-
 #include <printk.h>
 
 void arm64_arch_timer_init(void);
-void idle_task_init(void);
 void setup_arch(void);
 
 int gicv3_driver_init(void);
@@ -42,10 +39,6 @@ void start_kernel(void)
     gicv3_driver_init();
 
     arm64_arch_timer_init();
-
-    kernel_task_init();
-
-    idle_task_init();
 
     for (;;)
         ;
