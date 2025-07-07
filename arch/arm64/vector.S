@@ -1,92 +1,80 @@
-
-.macro saveregister
-	stp		X0,X1, [sp,#-0x10]!
-	stp		X2,X3, [sp,#-0x10]!
-	stp		X4,X5, [sp,#-0x10]!
-	stp		X6,X7, [sp,#-0x10]!
-	stp		X8,X9, [sp,#-0x10]!
-	stp		X10,X11, [sp,#-0x10]!
-	stp		X12,X13, [sp,#-0x10]!
-	stp		X14,X15, [sp,#-0x10]!
-	stp		X16,X17, [sp,#-0x10]!
-	stp 	X18,X19, [sp,#-0x10]!
-	stp 	X29,X30, [sp,#-0x10]!
-
-	mrs x0, CPACR_EL1
-	mrs x1, ELR_EL1
-	mrs	x2, SPSR_EL1
-	stp	x0, x1, [sp,#-0x10]!
-	str	x2, [sp,#-0x10]!
+.macro save_context
+    // push SPSR_EL1, ELR_EL1, x30–x0
+    mrs     x0, SPSR_EL1
+    str     x0, [sp, #-8]!
+    mrs     x0, ELR_EL1
+    str     x0, [sp, #-8]!
+    str     x30, [sp, #-8]!
+    str     x29, [sp, #-8]!
+    str     x28, [sp, #-8]!
+    str     x27, [sp, #-8]!
+    str     x26, [sp, #-8]!
+    str     x25, [sp, #-8]!
+    str     x24, [sp, #-8]!
+    str     x23, [sp, #-8]!
+    str     x22, [sp, #-8]!
+    str     x21, [sp, #-8]!
+    str     x20, [sp, #-8]!
+    str     x19, [sp, #-8]!
+    str     x18, [sp, #-8]!
+    str     x17, [sp, #-8]!
+    str     x16, [sp, #-8]!
+    str     x15, [sp, #-8]!
+    str     x14, [sp, #-8]!
+    str     x13, [sp, #-8]!
+    str     x12, [sp, #-8]!
+    str     x11, [sp, #-8]!
+    str     x10, [sp, #-8]!
+    str      x9, [sp, #-8]!
+    str      x8, [sp, #-8]!
+    str      x7, [sp, #-8]!
+    str      x6, [sp, #-8]!
+    str      x5, [sp, #-8]!
+    str      x4, [sp, #-8]!
+    str      x3, [sp, #-8]!
+    str      x2, [sp, #-8]!
+    str      x1, [sp, #-8]!
+    str      x0, [sp, #-8]!
 .endm
 
-.macro restoreregister
-	ldr	x2,[sp],0x10
-	ldp	x0, x1, [sp],0x10
-	msr	CPACR_EL1, x0
-	msr	ELR_EL1, x1
-	msr	SPSR_EL1, x2
-
-	ldp 	X29,X30, [sp], #0x10
-	ldp 	X18,X19, [sp], #0x10
-	ldp		X16,X17, [sp], #0x10
-	ldp		X14,X15, [sp], #0x10
-	ldp		X12,X13, [sp], #0x10
-	ldp		X10,X11, [sp], #0x10
-	ldp		X8,X9, [sp], #0x10
-	ldp		X6,X7, [sp], #0x10
-	ldp		X4,X5, [sp], #0x10
-	ldp		X2,X3, [sp], #0x10
-	ldp		X0,X1, [sp], #0x10
-.endm
-
-.macro savefloatregister
-
-/* Save all the floating point register to the stack */
-	stp	q0,q1, [sp, #-0x20]!
-	stp	q2,q3, [sp, #-0x20]!
-	stp	q4,q5, [sp, #-0x20]!
-	stp	q6,q7, [sp, #-0x20]!
-	stp	q8,q9, [sp, #-0x20]!
-	stp	q10,q11, [sp, #-0x20]!
-	stp	q12,q13, [sp, #-0x20]!
-	stp	q14,q15, [sp, #-0x20]!
-	stp	q16,q17, [sp, #-0x20]!
-	stp	q18,q19, [sp, #-0x20]!
-	stp	q20,q21, [sp, #-0x20]!
-	stp	q22,q23, [sp, #-0x20]!
-	stp	q24,q25, [sp, #-0x20]!
-	stp	q26,q27, [sp, #-0x20]!
-	stp	q28,q29, [sp, #-0x20]!
-	stp	q30,q31, [sp, #-0x20]!
-
-	mrs	x2, FPCR
-	mrs	x3, FPSR
-	stp	x2, x3, [sp, #-0x10]!
-.endm
-
-.macro restorefloatregister
-
-/* Restore all the floating point register from the stack */
-	ldp	x2, x3, [sp] ,#0x10
-	msr	FPCR, x2
-	msr	FPSR, x3
-
-	ldp	q30,q31, [sp] ,#0x20
-	ldp	q28,q29, [sp] ,#0x20
-	ldp	q26,q27, [sp] ,#0x20
-	ldp	q24,q25, [sp] ,#0x20
-	ldp	q22,q23, [sp] ,#0x20
-	ldp	q20,q21, [sp] ,#0x20
-	ldp	q18,q19, [sp] ,#0x20
-	ldp	q16,q17, [sp] ,#0x20
-	ldp	q14,q15, [sp] ,#0x20
-	ldp	q12,q13, [sp] ,#0x20
-	ldp	q10,q11, [sp] ,#0x20
-	ldp	q8,q9, [sp] ,#0x20
-	ldp	q6,q7, [sp] ,#0x20
-	ldp	q4,q5, [sp] ,#0x20
-	ldp	q2,q3, [sp] ,#0x20
-	ldp	q0,q1, [sp] ,#0x20
+.macro restore_context
+    // pop x0–x30, ELR_EL1, SPSR_EL1
+    ldr      x0, [sp], #8
+    msr     SPSR_EL1, x0
+    ldr      x0, [sp], #8
+    msr     ELR_EL1, x0
+    ldr      x0, [sp], #8
+    mov     x30, x0
+    ldr     x29, [sp], #8
+    ldr     x28, [sp], #8
+    ldr     x27, [sp], #8
+    ldr     x26, [sp], #8
+    ldr     x25, [sp], #8
+    ldr     x24, [sp], #8
+    ldr     x23, [sp], #8
+    ldr     x22, [sp], #8
+    ldr     x21, [sp], #8
+    ldr     x20, [sp], #8
+    ldr     x19, [sp], #8
+    ldr     x18, [sp], #8
+    ldr     x17, [sp], #8
+    ldr     x16, [sp], #8
+    ldr     x15, [sp], #8
+    ldr     x14, [sp], #8
+    ldr     x13, [sp], #8
+    ldr     x12, [sp], #8
+    ldr     x11, [sp], #8
+    ldr     x10, [sp], #8
+    ldr      x9, [sp], #8
+    ldr      x8, [sp], #8
+    ldr      x7, [sp], #8
+    ldr      x6, [sp], #8
+    ldr      x5, [sp], #8
+    ldr      x4, [sp], #8
+    ldr      x3, [sp], #8
+    ldr      x2, [sp], #8
+    ldr      x1, [sp], #8
+    ldr      x0, [sp], #8
 .endm
 
 .macro ventry label
@@ -100,221 +88,68 @@
 	.align	11
     .globl  vectors
 vectors:
+    // current el with sp0
 	ventry invalid_exception
 	ventry invalid_exception
 	ventry invalid_exception
 	ventry invalid_exception
 
+    // current el with spx
 	ventry SynchronousInterruptHandler
 	ventry IRQInterruptHandler
 	ventry FIQInterruptHandler
 	ventry SErrorInterruptHandler
 
+    // lower el aarch64
 	ventry invalid_exception
 	ventry invalid_exception
 	ventry invalid_exception
 	ventry invalid_exception
 
+    // lower el aarch32
 	ventry invalid_exception
 	ventry invalid_exception
 	ventry invalid_exception
 	ventry invalid_exception
 
 SynchronousInterruptHandler:
-	saveregister
+    save_context
 
-	mov x0, 2
 	bl unexpected_exception
 
-    restoreregister
-	eret
+    restore_context
+    eret
 
 IRQInterruptHandler:
-	//进入中断，保存寄存器
-	saveregister
-	savefloatregister
+    save_context
 
-	//执行中断处理函数
 	bl handle_domain_irq
 
-	//判断退出中断时候是否需要进行任务切换
-    adr x2, task_thread_switch_interrupt_flag
-    ldr x3, [x2]
-	cmp x3, #1
-	beq exit_irq_with_task_switch
-
-	//不需要任务切换，恢复寄存器之后退出中断
-	restorefloatregister
-	restoreregister
-	eret
-
-//如果标志置位，需要在退出中断的时候进行任务切换
-exit_irq_with_task_switch:
-	//将中断切换标志位清零
-    adr x2, task_thread_switch_interrupt_flag
-	mov x3, #0
-    str x3, [x2]
-
-	//恢复寄存器，恢复到进入中断之前的状态
-	restorefloatregister
-	restoreregister
-
-	//此时的状态是进入中断之前的状态，也就是from任务的状态
-
-	//开始进行任务切换
-
-	//保存from任务的状态到堆栈
-
-    //1 保存from任务通用寄存器状态
-    str x0, [sp, -8]!
-    str x1, [sp, -8]!
-    str x2, [sp, -8]!
-    str x3, [sp, -8]!
-    str x4, [sp, -8]!
-    str x5, [sp, -8]!
-    str x6, [sp, -8]!
-    str x7, [sp, -8]!
-    str x8, [sp, -8]!
-    str x9, [sp, -8]!
-    str x10, [sp, -8]!
-    str x11, [sp, -8]!
-    str x12, [sp, -8]!
-    str x13, [sp, -8]!
-    str x14, [sp, -8]!
-    str x15, [sp, -8]!
-    str x16, [sp, -8]!
-    str x17, [sp, -8]!
-    str x18, [sp, -8]!
-    str x19, [sp, -8]!
-    str x20, [sp, -8]!
-    str x21, [sp, -8]!
-    str x22, [sp, -8]!
-    str x23, [sp, -8]!
-    str x24, [sp, -8]!
-    str x25, [sp, -8]!
-    str x26, [sp, -8]!
-    str x27, [sp, -8]!
-    str x28, [sp, -8]!
-    str x29, [sp, -8]!
-    str x30, [sp, -8]!
-
-	//将from任务和to任务的任务信息恢复到x0、x1寄存器
-    adr x2, task_interrupt_from_thread
-    ldr x0, [x2]
-
-    adr x2, task_interrupt_to_thread
-    ldr x1, [x2]
-
-    // 即将进行任务切换，更新to任务到当前任务信息 g_current_task
-    adr x2, g_current_task
-    str x1, [x2]
-
-    //2 保存from任务sp状态
-    //获取当前任务sp状态
-    //获取任务结构体中变量地址
-    //保存sp地址到任务结构体中对应位置
-    mov x3, sp
-    mov x2, x0
-    add x2, x2, #8 * 0
-    str x3, [x2]
-
-    //3 保存from任务cpcr状态
-    //获取当前任务spsr状态
-    //获取任务结构体中spsr变量位置
-    //保存spsr到任务结构体中对应位置
-    mrs x3, spsr_el1
-    mov x2, x0
-    add x2, x2, #8 * 1
-    str x3, [x2]
-
-    //4 保存from任务的返回地址
-    //获取当前任务返回地址
-    //获取任务结构体中变量地址
-    //保存返回地址到任务结构体中对应位置
-    mrs x3, elr_el1
-    mov x2, x0
-    add x2, x2, #8 * 2
-    str x3, [x2]
-
-	//开始从to任务堆栈恢复to任务
-    //1 恢复to任务sp寄存器
-    mov x2, x1
-    add x2, x2, #8 * 0
-    ldr x3, [x2]
-    mov sp, x3
-
-    //2 恢复to任务spsr状态寄存器
-    mov x2, x1
-    add x2, x2, #8 * 1
-    ldr x3, [x2]
-    msr spsr_el1, x3
-
-    //3 恢复to任务异常返回地址
-    mov x2, x1
-    add x2, x2, #8 * 2
-    ldr x3, [x2]
-    msr elr_el1, x3
-
-    //4 恢复to任务通用寄存器
-    ldr x0, [sp, +8]!
-    ldr x1, [sp, +8]!
-    ldr x2, [sp, +8]!
-    ldr x3, [sp, +8]!
-    ldr x4, [sp, +8]!
-    ldr x5, [sp, +8]!
-    ldr x6, [sp, +8]!
-    ldr x7, [sp, +8]!
-    ldr x8, [sp, +8]!
-    ldr x9, [sp, +8]!
-    ldr x10, [sp, +8]!
-    ldr x11, [sp, +8]!
-    ldr x12, [sp, +8]!
-    ldr x13, [sp, +8]!
-    ldr x14, [sp, +8]!
-    ldr x15, [sp, +8]!
-    ldr x16, [sp, +8]!
-    ldr x17, [sp, +8]!
-    ldr x18, [sp, +8]!
-    ldr x19, [sp, +8]!
-    ldr x20, [sp, +8]!
-    ldr x21, [sp, +8]!
-    ldr x22, [sp, +8]!
-    ldr x23, [sp, +8]!
-    ldr x24, [sp, +8]!
-    ldr x25, [sp, +8]!
-    ldr x26, [sp, +8]!
-    ldr x27, [sp, +8]!
-    ldr x28, [sp, +8]!
-    ldr x29, [sp, +8]!
-    ldr x30, [sp, +8]!
-
-	//当前处理器状态已经切换到了to任务，异常返回之后到to任务执行
+    restore_context
     eret
 
 FIQInterruptHandler:
-	saveregister
+    save_context
 
     bl unexpected_exception
 
-    restoreregister
+    restore_context
 	eret
 
 SErrorInterruptHandler:
-	saveregister
+    save_context
 
-	mov x0, sp
 	bl unexpected_exception
 
-	restoreregister
+    restore_context
 	eret
 
 invalid_exception:
-	saveregister
+    save_context
 
-	mov x0, 1
 	bl unexpected_exception
 
-	restoreregister
+    restore_context
 	eret
 
     .type vectors, @function

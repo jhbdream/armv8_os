@@ -9,7 +9,12 @@
 
 #define TASK_COUNT (32)
 
-unsigned long g_current_task;
+struct gp_regs {
+    uint64_t regs[31]; // 31 个通用寄存器
+    uint64_t sp;
+    uint64_t elr_el1;
+    uint64_t spsr_el1;
+};
 
 static struct task task_table[TASK_COUNT] = { 0 };
 
@@ -39,9 +44,11 @@ static struct task *alloc_task(void)
 struct task *create_task(char *name, task_func_t func, void *stack_base,
                          uint32_t stack_size, uint32_t flags)
 {
-    int reg;
+    int i;
 
     struct task *p;
+
+    struct gp_regs *regs;
 
     if (name == NULL) {
         return NULL;
@@ -62,15 +69,18 @@ struct task *create_task(char *name, task_func_t func, void *stack_base,
     p->stack_top    = stack_base + stack_size;
     p->stack_base   = p->stack_top;
 
-    for (reg = 0; reg <= 31; reg++) {
+    regs = p->stack_base - sizeof(struct gp_regs);
+
+    for (i = 0; i < 31; i++) {
+        regs->regs[i] = i;
     }
+
+    regs->sp       = (uint64_t)p->stack_base;
+    regs->spsr_el1 = (uint64_t)0x345;
+    regs->elr_el1  = (uint64_t)func;
+
+    p->stack_base = regs;
+    p->state      = TASK_STATE_READY;
 
     return NULL;
 }
-
-struct gp_regs {
-    uint64_t regs[31]; // 31 个通用寄存器
-    uint64_t sp;
-    uint64_t spsr_el1;
-    uint64_t elr_el1;
-};
