@@ -42,7 +42,7 @@ int request_irq(unsigned int irq, irq_handler_t handler, unsigned long flags,
                 const char *name, void *data);
 
 int set_irq_chip(struct irq_chip *irq_chip);
-int set_handle_irq(void (*handle_irq)(void *));
+int set_handle_irq(void (*handle_irq)(void));
 int generic_handle_irq(unsigned int irq);
 
 int is_interrupt_nest(void);

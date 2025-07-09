@@ -13,7 +13,7 @@ unsigned long task_thread_switch_interrupt_flag = 0;
 
 unsigned long interrupt_nest = 0;
 
-void (*handle_arch_irq)(void *);
+void (*handle_arch_irq)(void);
 
 void handle_bad_irq(struct irq_desc *desc);
 
@@ -113,7 +113,7 @@ int set_irq_chip(struct irq_chip *irq_chip)
     return 0;
 }
 
-int set_handle_irq(void (*handle_irq)(void *))
+int set_handle_irq(void (*handle_irq)(void))
 {
     if (handle_arch_irq) {
         return -EBUSY;
@@ -123,12 +123,12 @@ int set_handle_irq(void (*handle_irq)(void *))
     return 0;
 }
 
-void handle_domain_irq(void *regs)
+void handle_domain_irq(void)
 {
     irq_enter();
 
     if (handle_arch_irq)
-        handle_arch_irq(regs);
+        handle_arch_irq();
 
     irq_exit();
 }

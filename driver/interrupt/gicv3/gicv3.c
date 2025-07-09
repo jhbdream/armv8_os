@@ -87,7 +87,7 @@ static struct irq_chip gicv3_chip = {
     .irq_unmask = gicv3_unmask_irq,
 };
 
-static void gicv3_handle_irq(void *reg)
+static void gicv3_handle_irq(void)
 {
     uint32_t irqnr;
 
