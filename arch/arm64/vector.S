@@ -126,6 +126,15 @@ IRQInterruptHandler:
 	bl handle_domain_irq
 
     restore_context
+
+    // 处理任务调度的内容 当前是 current thread 的状态
+    // 判断是否需要进行上下文切换
+    // 如果需要切换则保存状态到当前任务栈
+    // 从目标任务栈恢复状态
+
+
+
+    // 结束中断处理
     eret
 
 FIQInterruptHandler:

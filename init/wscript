@@ -2,6 +2,5 @@ def get_build_config(bld):
     return {
         'build_src' : [
             'main.c',
-            'idle_task.c',
         ],
     }
