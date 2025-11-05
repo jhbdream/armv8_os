@@ -1,0 +1,10 @@
+def get_build_config(bld):
+    return {
+        'build_src' : [
+            'uart/console.c',
+            'uart/qemu_uart.c',
+            'timer/arm64_timer.c',
+            'interrupt/interrupt.c',
+            'interrupt/gicv3/gicv3.c',
+        ],
+    }

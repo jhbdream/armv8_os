@@ -2,13 +2,9 @@ OUTPUT_FORMAT("elf64-littleaarch64")
 OUTPUT_ARCH("aarch64")
 ENTRY(_startup)
 
-#include <asm/memory.h>
-
-STACK_SIZE = 0x4000;
-
 SECTIONS
 {
-    . = KIMAGE_VADDR;
+    . = 0xFFFF000000080000;
     PROVIDE(__kimage_start = .);
 
     .startup :
@@ -173,8 +169,7 @@ SECTIONS
     .el1_stack (NOLOAD):
     {
         . = ALIGN(64);
-        . = . + STACK_SIZE;
-
+        . = . + 0x4000;
         . = ALIGN(64);
         __el1_stack = .;
         __stack_top = .;

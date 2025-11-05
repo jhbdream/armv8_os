@@ -93,3 +93,6 @@ eeos.bin
 eeos.dis
 
 include/generated/
+
+.lock-waf_linux_build
+build/
