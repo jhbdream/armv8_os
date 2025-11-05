@@ -1,0 +1,10 @@
+def get_build_config(bld):
+    return {
+        'build_src' : [
+            'startup.S',
+            'task_port.S',
+            'vector.S',
+            'setup.c',
+            'mmu_v3.c',
+        ],
+    }
