@@ -111,3 +111,23 @@ def build_dir_recursive(bld, dir_path, libname_set):
             sub_libs.extend(libs)
 
     return ([lib_name] if src_list else []) + sub_libs
+
+def qemu(ctx):
+    import os, sys
+
+    kernel = 'build/app.bin'  # 可以改成 build/eeos.bin 或通过参数传入
+    if not os.path.exists(kernel):
+        ctx.fatal(f"Kernel file not found: {kernel}")
+
+    cmd = (
+        'qemu-system-aarch64 '
+        '-machine virt,gic-version=3 '
+        '-cpu cortex-a57 '
+        '-smp 1 '
+        '-m 2048 '
+        '-nographic '
+        '-serial mon:stdio '
+        '-kernel build/app.bin'
+    )
+    ctx.exec_command(cmd, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
+
