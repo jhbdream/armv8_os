@@ -9,10 +9,13 @@ top = '.'
 from waflib import Configure, Logs, Utils
 
 def options(opt):
-    opt.load('gcc gas')
+    pass
 
 def configure(conf):
-    conf.load('gcc gas')
+    conf.env.CHOST = "aarch64-none-linux-gnu"
+    conf.load('cross_gnu gas')
+    conf.load('clang_compilation_database')
+    conf.load('color_gcc')
 
 def build(bld):
 
@@ -32,6 +35,7 @@ def build(bld):
         '-ggdb',
         '-Wno-psabi',
         '-std=gnu99',
+        '-fdiagnostics-color=always',
     ]
 
     bld.env.append_value('CFLAGS', cflags)
@@ -55,7 +59,7 @@ def build(bld):
 
     ld_script = bld.path.find_resource('arch/arm64/ld_script/kernel.lds.S').abspath()
 
-    bld.program(
+    bld(
         features='c cprogram',
         target='app',
         use=libs,
