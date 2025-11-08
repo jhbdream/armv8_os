@@ -28,17 +28,23 @@ void eeos_printlogo(void)
 
 void start_kernel(void)
 {
+    // 关闭全局中断
     local_irq_disable();
 
+    // 初始化内存映射
     setup_arch();
 
+    // 初始化串口控制台
     console_init();
 
-    eeos_printlogo();
-
+    // 初始化中断控制器
     gicv3_driver_init();
 
+    // 初始化定时器
     arm64_arch_timer_init();
+
+    // 输出 LOGO
+    eeos_printlogo();
 
     for (;;)
         ;
