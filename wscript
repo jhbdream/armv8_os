@@ -4,18 +4,19 @@
 import os
 import imp
 
-top = '.'
-
-from waflib import Configure, Logs, Utils
-
 def options(opt):
-    pass
+    opt.load('compiler_c')
 
 def configure(conf):
-    conf.env.CHOST = "aarch64-none-linux-gnu"
-    conf.load('cross_gnu gas')
+    conf.find_program('aarch64-none-linux-gnu-gcc', var='CC')
+    conf.find_program('aarch64-none-linux-gnu-g++', var='CXX')
+    conf.find_program('aarch64-none-linux-gnu-ar',  var='AR')
+    conf.find_program('aarch64-none-linux-gnu-gcc', var='AS')
+
+    conf.load('compiler_c')
+    conf.load('gas')
+
     conf.load('clang_compilation_database')
-    conf.load('color_gcc')
 
 def build(bld):
 
@@ -57,6 +58,8 @@ def build(bld):
         if not libs:
             bld.fatal(f"[{d}] 没有找到可构建的源文件")
 
+    bld.add_group()
+
     ld_script = bld.path.find_resource('arch/arm64/ld_script/kernel.lds.S').abspath()
 
     bld(
@@ -66,6 +69,8 @@ def build(bld):
         linkflags = ['-Wl,--whole-archive', '-Wl,--start-group',],
         ldflags   = ['-Wl,--end-group', '-Wl,--no-whole-archive', '-T{}'.format(ld_script), '--static', '-nostdlib', '-nostartfiles',],
     )
+
+    bld.add_group()
 
     bld(rule='aarch64-none-linux-gnu-objcopy -O binary ${SRC} ${TGT}', source='app', target='app.bin')
     bld(rule='aarch64-none-linux-gnu-objdump -d ${SRC} > ${TGT}', source='app', target='app.dis')
