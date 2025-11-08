@@ -38,9 +38,9 @@ int is_interrupt_nest(void)
  *
  * @param val
  */
-void unexpected_exception(int val)
+void unexpected_exception(char c)
 {
-    printk("unexpected exception: [%d]\n", val);
+    printk("unexpected exception handle: [%c]\n", c);
 
     while (1) {
         /* code */
@@ -127,8 +127,9 @@ void handle_domain_irq(void)
 {
     irq_enter();
 
-    if (handle_arch_irq)
+    if (handle_arch_irq) {
         handle_arch_irq();
+    }
 
     irq_exit();
 }

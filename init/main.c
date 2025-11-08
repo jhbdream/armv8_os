@@ -46,6 +46,8 @@ void start_kernel(void)
     // 输出 LOGO
     eeos_printlogo();
 
+    local_irq_enable();
+
     for (;;)
         ;
 }

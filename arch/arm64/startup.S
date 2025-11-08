@@ -317,7 +317,7 @@ memset_loop:
     adr x8, __stack_top
     mov sp, x8
 
-#if 0
+#if 1
     b .
     nop
 #endif

@@ -1,80 +1,61 @@
+// 栈空间按 16 字节对齐，偏移固定
+// SP 偏移：x0-x30 (31*8 = 248), SP=248, ELR_EL1=256, SPSR_EL1=264
+
 .macro save_context
-    // push SPSR_EL1, ELR_EL1, x30–x0
-    mrs     x0, SPSR_EL1
-    str     x0, [sp, #-8]!
-    mrs     x0, ELR_EL1
-    str     x0, [sp, #-8]!
-    str     x30, [sp, #-8]!
-    str     x29, [sp, #-8]!
-    str     x28, [sp, #-8]!
-    str     x27, [sp, #-8]!
-    str     x26, [sp, #-8]!
-    str     x25, [sp, #-8]!
-    str     x24, [sp, #-8]!
-    str     x23, [sp, #-8]!
-    str     x22, [sp, #-8]!
-    str     x21, [sp, #-8]!
-    str     x20, [sp, #-8]!
-    str     x19, [sp, #-8]!
-    str     x18, [sp, #-8]!
-    str     x17, [sp, #-8]!
-    str     x16, [sp, #-8]!
-    str     x15, [sp, #-8]!
-    str     x14, [sp, #-8]!
-    str     x13, [sp, #-8]!
-    str     x12, [sp, #-8]!
-    str     x11, [sp, #-8]!
-    str     x10, [sp, #-8]!
-    str      x9, [sp, #-8]!
-    str      x8, [sp, #-8]!
-    str      x7, [sp, #-8]!
-    str      x6, [sp, #-8]!
-    str      x5, [sp, #-8]!
-    str      x4, [sp, #-8]!
-    str      x3, [sp, #-8]!
-    str      x2, [sp, #-8]!
-    str      x1, [sp, #-8]!
-    str      x0, [sp, #-8]!
+    sub sp, sp, #(31*8 + 8 + 8 + 8)   // 分配 280 字节栈空间
+
+    // 保存通用寄存器 x0-x30
+    stp x0,  x1,  [sp, 0]
+    stp x2,  x3,  [sp, 16]
+    stp x4,  x5,  [sp, 32]
+    stp x6,  x7,  [sp, 48]
+    stp x8,  x9,  [sp, 64]
+    stp x10, x11, [sp, 80]
+    stp x12, x13, [sp, 96]
+    stp x14, x15, [sp, 112]
+    stp x16, x17, [sp, 128]
+    stp x18, x19, [sp, 144]
+    stp x20, x21, [sp, 160]
+    stp x22, x23, [sp, 176]
+    stp x24, x25, [sp, 192]
+    stp x26, x27, [sp, 208]
+    stp x28, x29, [sp, 224]
+    str x30, [sp, 240]          // LR
+
+    // 保存原 SP
+    str sp, [sp, 248]
+
+    // 保存 ELR_EL1 / SPSR_EL1
+    mrs x0, ELR_EL1
+    str x0, [sp, 256]
+    mrs x0, SPSR_EL1
+    str x0, [sp, 264]
 .endm
 
 .macro restore_context
-    // pop x0–x30, ELR_EL1, SPSR_EL1
-    ldr      x0, [sp], #8
-    msr     SPSR_EL1, x0
-    ldr      x0, [sp], #8
-    msr     ELR_EL1, x0
-    ldr      x0, [sp], #8
-    mov     x30, x0
-    ldr     x29, [sp], #8
-    ldr     x28, [sp], #8
-    ldr     x27, [sp], #8
-    ldr     x26, [sp], #8
-    ldr     x25, [sp], #8
-    ldr     x24, [sp], #8
-    ldr     x23, [sp], #8
-    ldr     x22, [sp], #8
-    ldr     x21, [sp], #8
-    ldr     x20, [sp], #8
-    ldr     x19, [sp], #8
-    ldr     x18, [sp], #8
-    ldr     x17, [sp], #8
-    ldr     x16, [sp], #8
-    ldr     x15, [sp], #8
-    ldr     x14, [sp], #8
-    ldr     x13, [sp], #8
-    ldr     x12, [sp], #8
-    ldr     x11, [sp], #8
-    ldr     x10, [sp], #8
-    ldr      x9, [sp], #8
-    ldr      x8, [sp], #8
-    ldr      x7, [sp], #8
-    ldr      x6, [sp], #8
-    ldr      x5, [sp], #8
-    ldr      x4, [sp], #8
-    ldr      x3, [sp], #8
-    ldr      x2, [sp], #8
-    ldr      x1, [sp], #8
-    ldr      x0, [sp], #8
+    // 恢复系统寄存器
+    ldr x0, [sp, 264]
+    msr SPSR_EL1, x0
+    ldr x0, [sp, 256]
+    msr ELR_EL1, x0
+
+    // 恢复通用寄存器 x0-x30
+    ldr x30, [sp, 240]
+    ldp x28, x29, [sp, 224]
+    ldp x26, x27, [sp, 208]
+    ldp x24, x25, [sp, 192]
+    ldp x22, x23, [sp, 176]
+    ldp x20, x21, [sp, 160]
+    ldp x18, x19, [sp, 144]
+    ldp x16, x17, [sp, 128]
+    ldp x14, x15, [sp, 112]
+    ldp x12, x13, [sp, 96]
+    ldp x10, x11, [sp, 80]
+    ldp x8, x9, [sp, 64]
+    ldp x6, x7, [sp, 48]
+    ldp x4, x5, [sp, 32]
+    ldp x2, x3, [sp, 16]
+    ldp x0, x1, [sp, 0]
 .endm
 
 .macro ventry label
@@ -112,13 +93,6 @@ vectors:
 	ventry invalid_exception
 	ventry invalid_exception
 
-SynchronousInterruptHandler:
-    save_context
-
-	bl unexpected_exception
-
-    restore_context
-    eret
 
 IRQInterruptHandler:
     save_context
@@ -132,34 +106,24 @@ IRQInterruptHandler:
     // 如果需要切换则保存状态到当前任务栈
     // 从目标任务栈恢复状态
 
-
-
     // 结束中断处理
     eret
 
-FIQInterruptHandler:
-    save_context
-
+SynchronousInterruptHandler:
+    mov x0, 'A'
     bl unexpected_exception
 
-    restore_context
-	eret
+FIQInterruptHandler:
+    mov x0, 'B'
+    bl unexpected_exception
 
 SErrorInterruptHandler:
-    save_context
-
-	bl unexpected_exception
-
-    restore_context
-	eret
+    mov x0, 'C'
+    bl unexpected_exception
 
 invalid_exception:
-    save_context
-
-	bl unexpected_exception
-
-    restore_context
-	eret
+    mov x0, 'D'
+    bl unexpected_exception
 
     .type vectors, @function
     .size vectors, .-vectors
