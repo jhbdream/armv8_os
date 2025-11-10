@@ -100,7 +100,6 @@ static inline void arch_timer_interrupt_disable(void)
 
 void arm64_arch_timer_tandler(struct irq_desc *desc)
 {
-    printk("timer\n");
     write_cntp_tval_el0(cpu_khz * 10);
 }
 

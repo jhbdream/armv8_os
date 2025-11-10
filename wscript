@@ -30,6 +30,7 @@ def build(bld):
     bld.env.append_value('INCLUDES', include_dirs)
     
     cflags = [
+        '-march=armv8-a',
         '-nostdinc',
         '-fno-builtin',
         '-O0',
