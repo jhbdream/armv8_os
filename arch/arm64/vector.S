@@ -1,61 +1,78 @@
-// 栈空间按 16 字节对齐，偏移固定
-// SP 偏移：x0-x30 (31*8 = 248), SP=248, ELR_EL1=256, SPSR_EL1=264
-
 .macro save_context
-    sub sp, sp, #(31*8 + 8 + 8 + 8)   // 分配 280 字节栈空间
+    // frame layout (bytes, offsets from new SP):
+    // 0x00  - x0
+    // 0x08  - x1
+    // 0x10  - x2
+    // ...
+    // 0xE0  - x30  (offset 240)
+    // 0xF8  - SPSR_EL1 (offset 248)
+    // 0x100 - ELR_EL1  (offset 256)
+    // total used = 264 -> round up to 272 for 16-byte alignment
 
-    // 保存通用寄存器 x0-x30
-    stp x0,  x1,  [sp, 0]
-    stp x2,  x3,  [sp, 16]
-    stp x4,  x5,  [sp, 32]
-    stp x6,  x7,  [sp, 48]
-    stp x8,  x9,  [sp, 64]
-    stp x10, x11, [sp, 80]
-    stp x12, x13, [sp, 96]
-    stp x14, x15, [sp, 112]
-    stp x16, x17, [sp, 128]
-    stp x18, x19, [sp, 144]
-    stp x20, x21, [sp, 160]
-    stp x22, x23, [sp, 176]
-    stp x24, x25, [sp, 192]
-    stp x26, x27, [sp, 208]
-    stp x28, x29, [sp, 224]
-    str x30, [sp, 240]          // LR
+    // 常量：帧大小（16 字节对齐）
+    .equ FRAME_SIZE, 272        // 0x110
 
-    // 保存原 SP
-    str sp, [sp, 248]
+    // allocate frame
+    sub     sp, sp, #FRAME_SIZE
 
-    // 保存 ELR_EL1 / SPSR_EL1
-    mrs x0, ELR_EL1
-    str x0, [sp, 256]
-    mrs x0, SPSR_EL1
-    str x0, [sp, 264]
+    // 保存通用寄存器 x0..x29 （15 对，每对占 16 字节）
+    stp     x0,  x1,  [sp, #0]       // x0 @0x00, x1 @0x08
+    stp     x2,  x3,  [sp, #16]      // x2 @0x10, x3 @0x18
+    stp     x4,  x5,  [sp, #32]
+    stp     x6,  x7,  [sp, #48]
+    stp     x8,  x9,  [sp, #64]
+    stp     x10, x11, [sp, #80]
+    stp     x12, x13, [sp, #96]
+    stp     x14, x15, [sp, #112]
+    stp     x16, x17, [sp, #128]
+    stp     x18, x19, [sp, #144]
+    stp     x20, x21, [sp, #160]
+    stp     x22, x23, [sp, #176]
+    stp     x24, x25, [sp, #192]
+    stp     x26, x27, [sp, #208]
+    stp     x28, x29, [sp, #224]
+
+    // 单独保存 x30 (LR)
+    str     x30, [sp, #240]          // x30 @0xF0 (240)
+
+    // 保存 SPSR_EL1 和 ELR_EL1 到栈（使用 x17 作临时）
+    mrs     x17, spsr_el1
+    str     x17, [sp, #248]          // SPSR_EL1 @0xF8 (248)
+
+    mrs     x17, elr_el1
+    str     x17, [sp, #256]          // ELR_EL1  @0x100 (256)
 .endm
 
 .macro restore_context
-    // 恢复系统寄存器
-    ldr x0, [sp, 264]
-    msr SPSR_EL1, x0
-    ldr x0, [sp, 256]
-    msr ELR_EL1, x0
+    // 恢复 EL 寄存器（ELR/SPSR）到寄存器 x17 再写回系统寄存器
+    ldr     x17, [sp, #256]
+    msr     elr_el1, x17
 
-    // 恢复通用寄存器 x0-x30
-    ldr x30, [sp, 240]
-    ldp x28, x29, [sp, 224]
-    ldp x26, x27, [sp, 208]
-    ldp x24, x25, [sp, 192]
-    ldp x22, x23, [sp, 176]
-    ldp x20, x21, [sp, 160]
-    ldp x18, x19, [sp, 144]
-    ldp x16, x17, [sp, 128]
-    ldp x14, x15, [sp, 112]
-    ldp x12, x13, [sp, 96]
-    ldp x10, x11, [sp, 80]
-    ldp x8, x9, [sp, 64]
-    ldp x6, x7, [sp, 48]
-    ldp x4, x5, [sp, 32]
-    ldp x2, x3, [sp, 16]
-    ldp x0, x1, [sp, 0]
+    ldr     x17, [sp, #248]
+    msr     spsr_el1, x17
+
+    // 恢复 x30（LR）
+    ldr     x30, [sp, #240]
+
+    // 恢复 x28..x0 （按与保存相反顺序也可以，但用 LDP 从低地址恢复）
+    ldp     x28, x29, [sp, #224]
+    ldp     x26, x27, [sp, #208]
+    ldp     x24, x25, [sp, #192]
+    ldp     x22, x23, [sp, #176]
+    ldp     x20, x21, [sp, #160]
+    ldp     x18, x19, [sp, #144]
+    ldp     x16, x17, [sp, #128]     // x17 此处被覆盖（已无用）
+    ldp     x14, x15, [sp, #112]
+    ldp     x12, x13, [sp, #96]
+    ldp     x10, x11, [sp, #80]
+    ldp     x8,  x9,  [sp, #64]
+    ldp     x6,  x7,  [sp, #48]
+    ldp     x4,  x5,  [sp, #32]
+    ldp     x2,  x3,  [sp, #16]
+    ldp     x0,  x1,  [sp, #0]
+
+    // 恢复栈指针
+    add     sp, sp, #FRAME_SIZE
 .endm
 
 .macro ventry label
