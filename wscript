@@ -52,6 +52,7 @@ def build(bld):
         'include',
         'include/kernel',
         'include/lib/libc',
+        'include/mm',
     ]
     
     bld.env.append_value('INCLUDES', include_dirs)
@@ -76,6 +77,7 @@ def build(bld):
         'kernel',
         'driver',
         'lib',
+        'mm',
     ]
 
     libname_set = set()

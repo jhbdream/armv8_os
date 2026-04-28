@@ -1,6 +1,7 @@
 #ifndef _LINUX_LIST_H
 #define _LINUX_LIST_H
 
+#include <stddef.h>
 #include <eeos/container_of.h>
 
 struct list_head {
