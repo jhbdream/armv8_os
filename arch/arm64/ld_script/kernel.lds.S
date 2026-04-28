@@ -2,6 +2,12 @@ OUTPUT_FORMAT("elf64-littleaarch64")
 OUTPUT_ARCH("aarch64")
 ENTRY(_startup)
 
+PHDRS
+{
+    text    PT_LOAD    FLAGS(5);    /* R-X */
+    data    PT_LOAD    FLAGS(6);    /* RW- */
+}
+
 SECTIONS
 {
     . = 0xFFFF000000080000;
@@ -12,22 +18,22 @@ SECTIONS
         __idmap_text_start = .;
         KEEP(*(startup))
         __idmap_text_end = .;
-    }
+    } :text
 
     .init :
     {
         KEEP (*(SORT_NONE(.init)))
-    }
+    } :text
 
     .text :
     {
         *(.text*)
-    }
+    } :text
 
     .fini :
     {
         KEEP (*(SORT_NONE(.fini)))
-    }
+    } :text
 
     .rodata :
     {
@@ -44,31 +50,31 @@ SECTIONS
 		__console_device_begin = .;
 		KEEP (*(__console));
 		__console_device_end = .;
-	}
+	} :text
 
     .eh_frame :
     {
         KEEP (*(.eh_frame))
-    }
+    } :text
 
     .ARM.extab :
     {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
-    }
+    } :text
 
     .ARM.exidx :
     {
         __exidx_start = .;
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
         __exidx_end = .;
-    }
+    } :text
 
     .preinit_array :
     {
         PROVIDE_HIDDEN (__preinit_array_start = .);
         KEEP (*(.preinit_array))
         PROVIDE_HIDDEN (__preinit_array_end = .);
-    }
+    } :data
 
     .init_array :
     {
@@ -76,7 +82,7 @@ SECTIONS
         KEEP (*(SORT(.init_array.*)))
         KEEP (*(.init_array ))
         PROVIDE_HIDDEN (__init_array_end = .);
-    }
+    } :data
 
     .fini_array :
     {
@@ -84,29 +90,16 @@ SECTIONS
         KEEP (*(SORT(.fini_array.*)))
         KEEP (*(.fini_array ))
         PROVIDE_HIDDEN (__fini_array_end = .);
-    }
+    } :data
 
     .ctors :
     {
-        /* gcc uses crtbegin.o to find the start of
-           the constructors, so we make sure it is
-           first.  Because this is a wildcard, it
-           doesn't matter if the user does not
-           actually link against crtbegin.o; the
-           linker won't look for a file to match a
-           wildcard.  The wildcard also means that it
-           doesn't matter which directory crtbegin.o
-           is in.  */
         KEEP (*crtbegin.o(.ctors))
         KEEP (*crtbegin?.o(.ctors))
-        /* We don't want to include the .ctor section from
-           the crtend.o file until after the sorted ctors.
-           The .ctor section from the crtend file contains the
-           end of ctors marker and it must be last */
         KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o ) .ctors))
         KEEP (*(SORT(.ctors.*)))
         KEEP (*(.ctors))
-    }
+    } :data
 
     .dtors :
     {
@@ -115,19 +108,19 @@ SECTIONS
         KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o ) .dtors))
         KEEP (*(SORT(.dtors.*)))
         KEEP (*(.dtors))
-    }
+    } :data
 
     .jcr :
     {
         KEEP (*(.jcr))
-    }
+    } :data
 
     .data :
     {
         __data_start = . ;
         *(.data .data.* .gnu.linkonce.d.*)
         SORT(CONSTRUCTORS)
-    }
+    } :data
 
     .bss :
     {
@@ -137,7 +130,7 @@ SECTIONS
         *(COMMON)
         . = ALIGN(64);
         __bss_end__ = .;
-    }
+    } :data
 
     .idmap_pg_dir (NOLOAD):
     {
@@ -145,7 +138,7 @@ SECTIONS
         __idmap_pg_start = .;
         . = . + (4096 * 4);
         __idmap_pg_end = .;
-    }
+    } :data
 
     .init_pg_dir (NOLOAD):
     {
@@ -153,7 +146,7 @@ SECTIONS
         __init_pg_dir_start = .;
         . = . + (4096 * 3) + (4096 * 8);
         __init_pg_dir_end = .;
-    }
+    } :data
 
     . = ALIGN(4096);
     swapper_pg_dir = .;
@@ -164,7 +157,7 @@ SECTIONS
         __end__ = .;
         PROVIDE(end = .);
         . = . + 0x1000;
-    }
+    } :data
 
     .el1_stack (NOLOAD):
     {
@@ -173,7 +166,7 @@ SECTIONS
         . = ALIGN(64);
         __el1_stack = .;
         __stack_top = .;
-    }
+    } :data
 
     /*
      * The startup code uses the end of this region to calculate
