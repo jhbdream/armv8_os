@@ -8,13 +8,30 @@ def options(opt):
     opt.load('compiler_c')
 
 def configure(conf):
-    conf.find_program('aarch64-elf-gcc', var='CC')
-    conf.find_program('aarch64-elf-g++', var='CXX')
-    conf.find_program('aarch64-elf-ar',  var='AR')
-    conf.find_program('aarch64-elf-gcc', var='AS')
+    # 自动检测交叉编译工具链：优先 aarch64-elf- (macOS Homebrew)，回退 aarch64-none-linux-gnu- (Linux)
+    toolchain_prefix = None
+    for prefix in ['aarch64-elf-', 'aarch64-none-linux-gnu-']:
+        try:
+            conf.find_program(prefix + 'gcc', var='CC')
+            conf.find_program(prefix + 'g++', var='CXX')
+            conf.find_program(prefix + 'ar',  var='AR')
+            conf.find_program(prefix + 'gcc', var='AS')
+            toolchain_prefix = prefix
+            conf.env.TOOLCHAIN_PREFIX = prefix
+            break
+        except:
+            continue
+
+    if toolchain_prefix is None:
+        conf.fatal('未找到可用的交叉编译工具链 (aarch64-elf- 或 aarch64-none-linux-gnu-)')
 
     conf.load('compiler_c')
     conf.load('gas')
+
+    try:
+        conf.load('clang_compilation_database')
+    except:
+        pass
 
 
 
@@ -73,8 +90,10 @@ def build(bld):
 
     bld.add_group()
 
-    bld(rule='aarch64-elf-objcopy -O binary ${SRC} ${TGT}', source='app', target='app.bin')
-    bld(rule='aarch64-elf-objdump -d ${SRC} > ${TGT}', source='app', target='app.dis')
+    objcopy = bld.env.TOOLCHAIN_PREFIX + 'objcopy'
+    objdump = bld.env.TOOLCHAIN_PREFIX + 'objdump'
+    bld(rule=objcopy + ' -O binary ${SRC} ${TGT}', source='app', target='app.bin')
+    bld(rule=objdump + ' -d ${SRC} > ${TGT}', source='app', target='app.dis')
 
 # 递归对子目录进行编译处理
 def build_dir_recursive(bld, dir_path, libname_set):
