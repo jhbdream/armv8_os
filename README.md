@@ -37,6 +37,40 @@
 - 运行qemu仿真 `make qemu`
 
 
+### waf 编译 (支持 macOS / Linux)
+
+waf 编译脚本自动检测交叉编译工具链，兼容 macOS (Homebrew) 和 Linux 环境。
+
+**环境准备：**
+
+```bash
+# macOS
+brew install aarch64-elf-gcc aarch64-elf-binutils qemu
+
+# Linux (Ubuntu/Debian)
+sudo apt install gcc-aarch64-linux-gnu qemu-system-aarch64
+```
+
+**编译与运行：**
+
+```bash
+./waf configure       # 配置工程，自动检测工具链
+./waf build           # 编译，输出 build/app.bin
+./waf qemu            # 编译后在 QEMU 中运行
+./waf qemu_debug      # 以调试模式运行 (QEMU 挂起等待 GDB 连接 :1234)
+```
+
+**GDB 调试：**
+
+```bash
+# 终端1：启动 QEMU 调试模式
+./waf qemu_debug
+
+# 终端2：连接 GDB
+aarch64-elf-gdb build/app -x gdb/gdb.init
+```
+
+
 
 ## 3. 工程说明
 
