@@ -14,6 +14,23 @@ except ImportError:
     def _load_source(name, path):
         return imp.load_source(name, path)
 
+TOP_DIRS = [
+    'arch/arm64',
+    'init',
+    'kernel',
+    'driver',
+    'lib',
+    'mm',
+]
+
+INCLUDE_DIRS = [
+    'arch/arm64/include',
+    'include',
+    'include/kernel',
+    'include/lib/libc',
+    'include/mm',
+]
+
 def options(opt):
     opt.load('compiler_c')
 
@@ -47,15 +64,7 @@ def configure(conf):
 
 def build(bld):
 
-    include_dirs = [
-        'arch/arm64/include',
-        'include',
-        'include/kernel',
-        'include/lib/libc',
-        'include/mm',
-    ]
-    
-    bld.env.append_value('INCLUDES', include_dirs)
+    bld.env.append_value('INCLUDES', INCLUDE_DIRS)
     
     cflags = [
         '-march=armv8-a',
@@ -70,20 +79,10 @@ def build(bld):
 
     bld.env.append_value('CFLAGS', cflags)
 
-    # 参与编译的子目录
-    top_dirs = [
-        'arch/arm64',
-        'init',
-        'kernel',
-        'driver',
-        'lib',
-        'mm',
-    ]
-
     libname_set = set()
     libs = []
 
-    for d in top_dirs:
+    for d in TOP_DIRS:
         dir_libs = build_dir_recursive(bld, d, libname_set)
         if not dir_libs:
             bld.fatal(f"[{d}] 没有找到可构建的源文件")
@@ -107,6 +106,56 @@ def build(bld):
     objdump = bld.env.TOOLCHAIN_PREFIX + 'objdump'
     bld(rule=objcopy + ' -O binary ${SRC} ${TGT}', source='app', target='app.bin')
     bld(rule=objdump + ' -d ${SRC} > ${TGT}', source='app', target='app.dis')
+
+    bld.add_post_fun(_gen_compile_commands)
+
+
+def _gen_compile_commands(bld):
+    """在 build 完成后生成 compile_commands.json"""
+    import json
+
+    src_root  = bld.path.abspath()
+    build_dir = bld.path.get_bld().abspath()
+    cc        = bld.env.get_flat('CC')
+    cflags    = bld.env.get_flat('CFLAGS')
+
+    inc_flags = ' '.join(f'-I{src_root}/{d}' for d in INCLUDE_DIRS)
+    commands  = []
+
+    for d in TOP_DIRS:
+        _collect_sources(bld, d, commands, cc, cflags, inc_flags, src_root, build_dir)
+
+    with open(os.path.join(src_root, 'compile_commands.json'), 'w') as f:
+        json.dump(commands, f, indent=2)
+
+
+def _collect_sources(bld, dir_path, commands, cc, cflags_all, include_flags, src_root, build_dir):
+    cfg = _load_source('wscript', os.path.join(dir_path, 'wscript')).get_build_config(bld)
+    srcs = cfg.get('build_src', [])
+    subs = cfg.get('build_dir', [])
+    extra_cflags  = cfg.get('cflags', [])
+    extra_includes = cfg.get('includes', [])
+    extra_defines  = cfg.get('defines', [])
+
+    for f in srcs:
+        src = os.path.join(dir_path, f)
+        obj = os.path.join(build_dir, dir_path, f + '.o')
+        flags = ' '.join(extra_cflags)
+        incs  = ' '.join(f'-I{src_root}/{d}' for d in extra_includes)
+        defs  = ' '.join(f'-D{d}' for d in extra_defines)
+
+        command = f'{cc} {cflags_all} {include_flags} {flags} {incs} {defs} -c {src} -o {obj}'
+
+        commands.append({
+            'directory': src_root,
+            'file': os.path.join(src_root, src),
+            'arguments': command.split(),
+            'output': obj,
+        })
+
+    for sub in subs:
+        _collect_sources(bld, os.path.join(dir_path, sub), commands, cc, cflags_all,
+                         include_flags, src_root, build_dir)
 
 # 递归对子目录进行编译处理
 def build_dir_recursive(bld, dir_path, libname_set):
@@ -184,4 +233,18 @@ def qemu_debug(ctx):
         ctx.fatal(f"Kernel file not found: {kernel}")
 
     ctx.exec_command(_qemu_cmd(kernel, debug=True), stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
+
+
+def compile_commands(ctx):
+    """生成 compile_commands.json 供 clangd 代码跳转使用"""
+    import json
+
+    src_root  = ctx.path.abspath()
+    compdb    = os.path.join(src_root, 'compile_commands.json')
+
+    if not os.path.exists(compdb):
+        ctx.fatal('compile_commands.json not found. Run ./waf build first.')
+
+    with open(compdb) as f:
+        print(f'compile_commands.json: {len(json.load(f))} entries (generated during build)')
 
