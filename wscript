@@ -8,15 +8,15 @@ def options(opt):
     opt.load('compiler_c')
 
 def configure(conf):
-    conf.find_program('aarch64-none-linux-gnu-gcc', var='CC')
-    conf.find_program('aarch64-none-linux-gnu-g++', var='CXX')
-    conf.find_program('aarch64-none-linux-gnu-ar',  var='AR')
-    conf.find_program('aarch64-none-linux-gnu-gcc', var='AS')
+    conf.find_program('aarch64-elf-gcc', var='CC')
+    conf.find_program('aarch64-elf-g++', var='CXX')
+    conf.find_program('aarch64-elf-ar',  var='AR')
+    conf.find_program('aarch64-elf-gcc', var='AS')
 
     conf.load('compiler_c')
     conf.load('gas')
 
-    conf.load('clang_compilation_database')
+
 
 def build(bld):
 
@@ -73,8 +73,8 @@ def build(bld):
 
     bld.add_group()
 
-    bld(rule='aarch64-none-linux-gnu-objcopy -O binary ${SRC} ${TGT}', source='app', target='app.bin')
-    bld(rule='aarch64-none-linux-gnu-objdump -d ${SRC} > ${TGT}', source='app', target='app.dis')
+    bld(rule='aarch64-elf-objcopy -O binary ${SRC} ${TGT}', source='app', target='app.bin')
+    bld(rule='aarch64-elf-objdump -d ${SRC} > ${TGT}', source='app', target='app.dis')
 
 # 递归对子目录进行编译处理
 def build_dir_recursive(bld, dir_path, libname_set):
