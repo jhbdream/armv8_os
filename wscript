@@ -2,7 +2,17 @@
 # encoding: utf-8
 
 import os
-import imp
+import sys
+
+# imp 在 Python 3.12 移除，用 importlib 替代，保留回退兼容旧版本
+try:
+    from importlib.machinery import SourceFileLoader
+    def _load_source(name, path):
+        return SourceFileLoader(name, path).load_module()
+except ImportError:
+    import imp
+    def _load_source(name, path):
+        return imp.load_source(name, path)
 
 def options(opt):
     opt.load('compiler_c')
@@ -72,9 +82,10 @@ def build(bld):
     libs = []
 
     for d in top_dirs:
-        libs += build_dir_recursive(bld, d, libname_set)
-        if not libs:
+        dir_libs = build_dir_recursive(bld, d, libname_set)
+        if not dir_libs:
             bld.fatal(f"[{d}] 没有找到可构建的源文件")
+        libs += dir_libs
 
     bld.add_group()
 
@@ -105,7 +116,7 @@ def build_dir_recursive(bld, dir_path, libname_set):
         bld.fatal("[{0}] 缺少构建配置文件：{1}".format(dir_path, build_conf_file))
 
     try:
-        mod = imp.load_source('wscript', build_conf_file)
+        mod = _load_source('wscript', build_conf_file)
     except Exception as e:
         bld.fatal("[{0}] 加载构建配置失败: {1}".format(dir_path, str(e)))
 
@@ -141,13 +152,7 @@ def build_dir_recursive(bld, dir_path, libname_set):
 
     return ([lib_name] if src_list else []) + sub_libs
 
-def qemu(ctx):
-    import os, sys
-
-    kernel = 'build/app.bin'  # 可以改成 build/eeos.bin 或通过参数传入
-    if not os.path.exists(kernel):
-        ctx.fatal(f"Kernel file not found: {kernel}")
-
+def _qemu_cmd(kernel='build/app.bin', debug=False):
     cmd = (
         'qemu-system-aarch64 '
         '-machine virt,gic-version=3 '
@@ -156,7 +161,25 @@ def qemu(ctx):
         '-m 2048 '
         '-nographic '
         '-serial mon:stdio '
-        '-kernel build/app.bin'
     )
-    ctx.exec_command(cmd, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
+    if debug:
+        cmd += '-s -S '
+    cmd += f'-kernel {kernel}'
+    return cmd
+
+
+def qemu(ctx):
+    kernel = 'build/app.bin'
+    if not os.path.exists(kernel):
+        ctx.fatal(f"Kernel file not found: {kernel}")
+
+    ctx.exec_command(_qemu_cmd(kernel), stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
+
+
+def qemu_debug(ctx):
+    kernel = 'build/app.bin'
+    if not os.path.exists(kernel):
+        ctx.fatal(f"Kernel file not found: {kernel}")
+
+    ctx.exec_command(_qemu_cmd(kernel, debug=True), stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
 
